@@ -260,7 +260,7 @@ const modules = [
     ],
     resources: [["Git Docs", "https://git-scm.com/docs"]],
     labTitle: "GIT Lab 2: Projects",
-    startLabel: "Start project work lab",
+    startLabel: "Start Lesson",
     folder: projectLab.folder,
     folderDisplay: projectLab.folderDisplay,
     repoPaths: [projectLab.readmeFile, projectLab.decisionFile, projectLab.workstreamsFile],
@@ -398,12 +398,13 @@ const codexLab = {
   time: "Download",
   labTitle: "Official OpenAI setup",
   description:
-    "Codex is separate from this Git + ADO orientation. Use the official OpenAI setup page to install or open Codex when learners are ready.",
+    "Codex is separate from the Git labs. This lesson covers setup, prompting, safe repo inspection, and reviewable analyst handoff artifacts.",
   outcomes: [
     "Install or open Codex",
     "Sign in with the right account",
     "Choose a repository folder",
-    "Start a coding task"
+    "Start a coding task",
+    "Build reviewable repo notes"
   ],
   sections: [
     {
@@ -444,7 +445,54 @@ const codexLab = {
         "If the CLI has trouble on Windows, use the official setup page and follow the current Windows or WSL guidance.",
         "Use git status before and after a Codex session so changes stay visible and reviewable."
       ],
+      readyChecklist: [
+        "I can confirm Node, npm, Git, and Codex are available.",
+        "I know to launch Codex from the repo root, not a random folder.",
+        "I can explain why git status belongs before and after a Codex session."
+      ],
       updateCommand: "codex --upgrade"
+    },
+    {
+      type: "workflow",
+      title: "Codex Onboarding Checklist",
+      kicker: "Starter plan",
+      intro:
+        "Use this as the non-time-based starter path for a new learner. The goal is not speed; it is a repeatable operating rhythm.",
+      task: "Work through the minimum setup and safety checks before asking Codex to change repo files.",
+      reference: "Access -> repo root -> read-only scan -> branch -> prompt -> review",
+      cards: [
+        {
+          label: "Access and setup",
+          command: "codex login",
+          detail: "Confirm the CLI opens and the learner knows which approved account or key workflow to use."
+        },
+        {
+          label: "Workspace location",
+          command: `cd ${ORACLE_REPO_ROOT}`,
+          detail: "Start from the repo root so Codex sees the same files Git and VS Code see."
+        },
+        {
+          label: "Read-only orientation",
+          command: "Get-Location; rg --files; git status",
+          detail: "Confirm folder, file map, and Git state before using Codex judgment."
+        },
+        {
+          label: "First safe prompt",
+          prompt:
+            "Inspect this repo before editing. Identify the main folders, likely entry points, validation commands, risks, and open questions. Give me a short plan before changing files."
+        },
+        {
+          label: "Review checkpoint",
+          command: "git diff --stat",
+          detail: "Inspect the changed-file surface before accepting work into a commit or PR."
+        }
+      ],
+      readyChecklist: [
+        "I can launch Codex from the repo root.",
+        "I can run read-only orientation commands before edits.",
+        "I can ask for inspection and a plan before implementation."
+      ],
+      formula: "Access -> orient -> branch -> prompt -> review -> validate"
     },
     {
       type: "prompting",
@@ -456,6 +504,11 @@ const codexLab = {
         ["Authority", "Give permission to inspect files, use judgment, challenge weak assumptions, and ask before risky changes."],
         ["Context", "Provide the ADO ticket, repo area, known constraints, related files, and any validation expectations."],
         ["Task", "Define the output: orientation, plan, patch, SQL, PR notes, validation checklist, or review findings."]
+      ],
+      readyChecklist: [
+        "I can write a prompt that states the business purpose.",
+        "I can give Codex permission to inspect and challenge assumptions.",
+        "I can define a narrow output instead of asking for a vague improvement."
       ],
       formula: "Purpose + Authority + Context + Task = better Codex output"
     },
@@ -472,7 +525,12 @@ const codexLab = {
         "What assumptions should be captured for review?"
       ],
       prompt:
-        "I need to work on this ADO ticket in the Oracle repo.\n\nBefore suggesting code changes, help me orient.\n\nPlease:\n1. Restate the request in plain language.\n2. List the requirements you can infer from the ticket.\n3. List the questions or assumptions I should confirm.\n4. Suggest where to look in the Oracle repo for similar patterns.\n5. Recommend a safe branch name.\n6. Propose what a good PR summary and validation note should include.\n\nTicket:\n[paste ticket text here]"
+        "I need to work on this ADO ticket in the Oracle repo.\n\nBefore suggesting code changes, help me orient.\n\nPlease:\n1. Restate the request in plain language.\n2. List the requirements you can infer from the ticket.\n3. List the questions or assumptions I should confirm.\n4. Suggest where to look in the Oracle repo for similar patterns.\n5. Recommend a safe branch name.\n6. Propose what a good PR summary and validation note should include.\n\nTicket:\n[paste ticket text here]",
+      readyChecklist: [
+        "I can ask Codex to restate the ticket before code changes.",
+        "I can separate inferred requirements from questions to confirm.",
+        "I can ask for repo search targets, branch name, PR summary, and validation notes."
+      ]
     },
     {
       type: "safety",
@@ -481,12 +539,257 @@ const codexLab = {
       intro: "Low Git knowledge is okay. The goal is visible, reviewable work.",
       beforeEditing: ["Confirm you are not on main", "Create or use a task branch", "Keep changes small and reviewable"],
       longerWork: ["Open a draft PR", "Say what changed", "Say what is still open", "Say what needs review"],
+      readyChecklist: [
+        "I can explain why main should stay protected.",
+        "I can keep Codex changes on a task branch.",
+        "I can name what changed, what is open, and what needs review."
+      ],
       footer: "If the work will take longer than one day, or the logic is still moving, open a draft PR early."
+    },
+    {
+      type: "workflow",
+      title: "Terminal Survival Before Codex",
+      kicker: "Safe shell loop",
+      intro:
+        "Codex starts from the folder where the terminal is running. Use read-only commands first so the learner knows the workspace before asking for edits.",
+      task: "Practice the read-only orientation loop before any Codex session.",
+      reference: "Get-Location -> Get-ChildItem -Force -> rg --files -> git status",
+      cards: [
+        {
+          label: "Confirm folder",
+          command: "Get-Location",
+          detail: "Shows the current folder so learners know which repo Codex will inspect."
+        },
+        {
+          label: "List nearby files",
+          command: "Get-ChildItem -Force",
+          detail: "Reveals project files and hidden Git metadata without changing anything."
+        },
+        {
+          label: "Map source files",
+          command: "rg --files",
+          detail: "Quickly lists repo files and helps learners find likely app, SQL, docs, or config areas."
+        },
+        {
+          label: "Check Git state",
+          command: "git status",
+          detail: "Shows whether the repo is clean before Codex begins reasoning about changes."
+        }
+      ],
+      readyChecklist: [
+        "I can confirm the current folder before starting Codex.",
+        "I can list nearby files without changing anything.",
+        "I can use rg --files and git status as read-only orientation commands."
+      ],
+      formula: "Read first. Edit later."
+    },
+    {
+      type: "workflow",
+      title: "First Codex Sessions",
+      kicker: "Inspect, plan, edit, verify",
+      intro:
+        "The safest first Codex session is not a broad rewrite. It asks Codex to inspect, explain the plan, keep the diff narrow, and name validation.",
+      task: "Use a plan-first prompt before requesting implementation.",
+      reference: "Inspect this repo and give me a short plan before editing.",
+      cards: [
+        {
+          label: "Inspect first",
+          prompt:
+            "Inspect this repo before editing. Identify the main folders, likely entry points, validation commands, risks, and open questions."
+        },
+        {
+          label: "Plan first",
+          prompt:
+            "Give me a short plan before editing. Keep the change narrow, preserve behavior, and list the validation command you will run."
+        },
+        {
+          label: "Constrain scope",
+          prompt:
+            "Change only the files required for this task. Do not refactor unrelated code or reformat unrelated files."
+        },
+        {
+          label: "Verify",
+          prompt:
+            "After the change, summarize the files changed, validation run, and any remaining risks or assumptions."
+        }
+      ],
+      readyChecklist: [
+        "I can ask Codex to inspect before editing.",
+        "I can request a short plan and narrow file scope.",
+        "I can ask for validation and remaining risks after the change."
+      ],
+      formula: "Inspect -> plan -> narrow edit -> validate -> review diff"
+    },
+    {
+      type: "workflow",
+      title: "Analyst Workflows With Codex",
+      kicker: "SQL, data, docs",
+      intro:
+        "Codex is useful for analytics work when the prompt forces concrete review artifacts: lineage, data quality, documentation, briefing outlines, and risk notes.",
+      task: "Match the prompt to the artifact the reviewer actually needs.",
+      reference: "SQL_LINEAGE.md, DATA_QUALITY_REPORT.md, REPO_NOTES.md",
+      cards: [
+        {
+          label: "SQL lineage",
+          prompt:
+            "Review the SQL files. Identify source tables, output grain, joins, filters, assumptions, data-quality risks, and open questions."
+        },
+        {
+          label: "SQL review",
+          prompt:
+            "Review this SQL like a cautious analytics engineer. Separate readability issues from behavior or grain risks. Do not refactor yet."
+        },
+        {
+          label: "CSV quality",
+          prompt:
+            "Profile this CSV and produce a markdown data-quality report with row count, columns, missing values, suspicious categories, type issues, and next checks."
+        },
+        {
+          label: "Docs and briefing",
+          prompt:
+            "Turn these technical notes into a concise stakeholder outline with current state, risks, recommendation, next steps, and speaker notes."
+        }
+      ],
+      readyChecklist: [
+        "I can ask for SQL lineage without asking for a refactor.",
+        "I can separate SQL readability issues from behavior risks.",
+        "I can request a data-quality report that distinguishes findings from next checks."
+      ],
+      formula: "One artifact at a time keeps the work reviewable."
+    },
+    {
+      type: "workflow",
+      title: "Automation With codex exec",
+      kicker: "Repeatable, reviewable output",
+      intro:
+        "Use codex exec for stable, repeatable tasks with a clear output file. Keep judgment-heavy or risky work interactive.",
+      task: "Decide whether a task belongs in interactive Codex or a repeatable exec command.",
+      reference: "codex exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
+      cards: [
+        {
+          label: "Good fit",
+          command: "codex exec \"Summarize this repo in markdown\" > REPO_NOTES.md",
+          detail: "Works well when the prompt, output file, and review step are stable."
+        },
+        {
+          label: "Review output",
+          command: "Get-Content .\\REPO_NOTES.md",
+          detail: "Always inspect generated output before sharing, committing, or relying on it."
+        },
+        {
+          label: "Manual checkpoint",
+          prompt:
+            "Tell me what still needs human review, what assumptions you made, and what validation is missing."
+        },
+        {
+          label: "Avoid automation",
+          detail:
+            "Keep interactive control when the task needs sensitive judgment, unclear scope, broad file edits, or changing requirements."
+        }
+      ],
+      readyChecklist: [
+        "I can identify tasks that are stable enough for codex exec.",
+        "I can write output to a reviewable file.",
+        "I can name the manual checkpoint that remains after automation."
+      ],
+      formula: "Repeatable output is useful. Unsigned-off automation is still risk."
     }
   ],
   setupUrl: "https://openai.com/codex/get-started/",
   cliCommand: "npm install -g @openai/codex"
 };
+
+const capstoneLab = {
+  id: "repo-review-kit",
+  title: "GIT Lab 3: Repo Review Kit",
+  level: "Capstone",
+  time: "Self-paced",
+  labTitle: "Analyst repo review kit",
+  description:
+    "A capstone workflow for turning Codex-assisted repo inspection into durable files that support review, handoff, and PR readiness.",
+  section: {
+    type: "workflow",
+    title: "Analyst Repo Review Kit",
+    kicker: "GIT Lab 3",
+    intro:
+      "Use Git discipline and Codex prompts together: inspect the repo, create one reviewable artifact at a time, then review the diff before committing.",
+    task: "Simulate a small repo-review package that could support a PR or handoff.",
+    reference: "REPO_NOTES.md -> SQL_LINEAGE.md -> DATA_QUALITY_REPORT.md -> CODEX_REVIEW.md",
+    cards: [
+      {
+        label: "Milestone 1: Repo notes",
+        prompt:
+          "Inspect this repo before editing. Identify purpose, key folders, run commands, data or SQL assets, assumptions, risks, and open questions. Propose a REPO_NOTES.md outline first."
+      },
+      {
+        label: "Milestone 2: SQL lineage",
+        prompt:
+          "Inspect the SQL files and draft SQL_LINEAGE.md with source tables, output grain, joins, filters, groupings, assumptions, risks, and open questions."
+      },
+      {
+        label: "Milestone 3: Data quality",
+        prompt:
+          "Inspect available data files or define expected checks. Draft DATA_QUALITY_REPORT.md with columns, missing values, duplicate-key risks, date/category issues, limitations, and follow-ups."
+      },
+      {
+        label: "Milestone 4: Final review",
+        prompt:
+          "Review the changed files without editing. Draft CODEX_REVIEW.md with changed files, unsupported claims, missing validation, risky assumptions, and final cleanup recommendations."
+      }
+    ],
+    readyChecklist: [
+      "I can split a larger Codex request into reviewable milestones.",
+      "I can create one durable artifact at a time.",
+      "I can ask Codex to review generated artifacts before committing."
+    ],
+    formula: "Capstone rule: ground first, write second, review last."
+  },
+  deliverables: [
+    "REPO_NOTES.md",
+    "SQL_LINEAGE.md",
+    "DATA_QUALITY_REPORT.md",
+    "CODEX_REVIEW.md"
+  ]
+};
+
+const codexPromptLibrary = [
+  {
+    group: "Start safely",
+    prompts: [
+      {
+        label: "Inspect before editing",
+        text:
+          "Inspect this repo before editing. Identify the main folders, likely entry points, validation commands, risks, and open questions. Give me a short plan before changing files."
+      },
+      {
+        label: "Constrain the diff",
+        text:
+          "Change only the files required for this task. Do not refactor unrelated code or reformat unrelated files. Summarize every file you changed."
+      }
+    ]
+  },
+  {
+    group: "ADO orientation",
+    prompts: [
+      {
+        label: "Ticket orientation",
+        text:
+          "I need to work on this ADO ticket in the Oracle repo. Before suggesting code changes, restate the request, infer requirements, list questions, suggest files to inspect, recommend a branch name, and propose PR validation notes.\n\nTicket:\n[paste ticket text here]"
+      },
+      {
+        label: "PR summary",
+        text:
+          "Draft a PR summary with: business purpose, files changed, validation performed, assumptions, open questions, and reviewer focus areas."
+      }
+    ]
+  },
+  {
+    group: "Analyst review kit",
+    prompts: [
+      ...capstoneLab.section.cards.map((card) => ({ label: card.label, text: card.prompt }))
+    ]
+  }
+];
 
 const vscodeLab = {
   id: "vscode-lab",
@@ -494,6 +797,7 @@ const vscodeLab = {
   level: "Beginner",
   time: "15 min",
   labTitle: "Editor orientation",
+  setupUrl: "https://code.visualstudio.com/download",
   description:
     "A brief VS Code orientation for learners who need to understand the workspace, Explorer, terminal, and Source Control before touching repo files.",
   sections: [
@@ -839,6 +1143,240 @@ const roundThreeQuizzes = [
   }
 ];
 
+const codexChoiceQuizzes = [
+  {
+    question: "What should you do before letting Codex edit files?",
+    options: ["Check the current folder and Git status", "Run the first command Codex suggests", "Paste secrets for context", "Start by committing everything"],
+    answer: "Check the current folder and Git status",
+    feedback: "Codex works from local context. Confirm folder and repo state before edits."
+  },
+  {
+    question: "Which command shows the current folder in PowerShell?",
+    options: ["Get-Location", "git branch", "npm install", "codex exec"],
+    answer: "Get-Location",
+    feedback: "Get-Location answers the first safety question: where am I?"
+  },
+  {
+    question: "What does rg --files do?",
+    options: ["Lists files quickly", "Deletes ignored files", "Commits staged files", "Starts Codex"],
+    answer: "Lists files quickly",
+    feedback: "ripgrep is the fast file finder for mapping a repo before deeper inspection."
+  },
+  {
+    question: "What is the safest first Codex prompt in a new repo?",
+    options: ["Inspect this repo and give me a short plan before editing.", "Rewrite the whole app.", "Commit all local files.", "Ignore validation and move fast."],
+    answer: "Inspect this repo and give me a short plan before editing.",
+    feedback: "A plan-first prompt keeps the first interaction low-risk and reviewable."
+  },
+  {
+    question: "Why should Codex changes stay small?",
+    options: ["Small diffs are easier to review and recover", "Large diffs always run faster", "Git cannot track small changes", "ADO requires one file only"],
+    answer: "Small diffs are easier to review and recover",
+    feedback: "Small, scoped changes are easier to validate and easier to unwind."
+  },
+  {
+    question: "Which prompt is best for SQL lineage?",
+    options: ["Identify source tables, output grain, joins, filters, assumptions, and risks.", "Make the SQL prettier without reading it.", "Delete duplicate code automatically.", "Summarize the repo logo colors."],
+    answer: "Identify source tables, output grain, joins, filters, assumptions, and risks.",
+    feedback: "Lineage work should capture grain, sources, logic, assumptions, and review questions."
+  },
+  {
+    question: "Before refactoring SQL, what should Codex explain?",
+    options: ["Current behavior, row grain, filters, and joins", "Only indentation style", "GitHub usernames", "PowerPoint theme colors"],
+    answer: "Current behavior, row grain, filters, and joins",
+    feedback: "A safe SQL refactor starts by proving the existing behavior is understood."
+  },
+  {
+    question: "What should a CSV data-quality report separate?",
+    options: ["Observed issues, possible causes, and next actions", "Code comments and commit hashes", "Main and feature branches only", "PowerShell and Bash history"],
+    answer: "Observed issues, possible causes, and next actions",
+    feedback: "Good data-quality notes distinguish what is known from what still needs validation."
+  },
+  {
+    question: "What should happen before committing Codex-generated markdown?",
+    options: ["Review the diff and unsupported claims", "Trust it because markdown is harmless", "Delete the source files", "Skip validation if it looks polished"],
+    answer: "Review the diff and unsupported claims",
+    feedback: "Generated docs can still contain unsupported assumptions. Review them before committing."
+  },
+  {
+    question: "What is codex exec best suited for?",
+    options: ["Repeatable tasks with stable output", "Unclear exploratory work with changing scope", "Sensitive judgment with no review", "Deleting old branches"],
+    answer: "Repeatable tasks with stable output",
+    feedback: "codex exec is strongest when the prompt, output, and validation step are predictable."
+  },
+  {
+    question: "When should work stay interactive instead of codex exec?",
+    options: ["When scope is unclear or risk is high", "When the output is a fixed markdown report", "When the command is read-only", "When the prompt is already tested"],
+    answer: "When scope is unclear or risk is high",
+    feedback: "Interactive sessions let the user steer judgment-heavy or changing work."
+  },
+  {
+    question: "What does git diff --stat help you inspect?",
+    options: ["The change surface by file", "The current directory", "Installed npm packages", "The remote website design"],
+    answer: "The change surface by file",
+    feedback: "git diff --stat is the quick overview before reviewing full content changes."
+  },
+  {
+    question: "What should a final Codex review prompt ask for?",
+    options: ["Correctness risks, regressions, missing validation, and file evidence", "A larger rewrite", "A password reset", "Only praise for the implementation"],
+    answer: "Correctness risks, regressions, missing validation, and file evidence",
+    feedback: "A review prompt should lead with findings and cite the files that support them."
+  },
+  {
+    question: "Why split a larger Codex workflow into milestones?",
+    options: ["Each output can be grounded and reviewed before the next step", "It makes Codex ignore repo context", "It removes the need for Git", "It guarantees there are no assumptions"],
+    answer: "Each output can be grounded and reviewed before the next step",
+    feedback: "Milestones reduce scope drift and make artifacts easier to validate."
+  },
+  {
+    question: "Which artifact set best matches the capstone repo review kit?",
+    options: ["REPO_NOTES.md, SQL_LINEAGE.md, DATA_QUALITY_REPORT.md, CODEX_REVIEW.md", "Only a commit hash", "A private chat summary", "A screenshot with no notes"],
+    answer: "REPO_NOTES.md, SQL_LINEAGE.md, DATA_QUALITY_REPORT.md, CODEX_REVIEW.md",
+    feedback: "The capstone turns a Codex session into durable notes that can support a PR, review, or handoff."
+  }
+];
+
+const codexRoundTwoQuizzes = [
+  {
+    question: "Fill in the PowerShell command that shows the current folder.",
+    answer: "Get-Location",
+    placeholder: "Get-...",
+    feedback: "Get-Location confirms the folder Codex will use for context."
+  },
+  {
+    question: "Fill in the PowerShell command that lists nearby files, including hidden items.",
+    answer: "Get-ChildItem -Force",
+    placeholder: "Get-ChildItem ...",
+    feedback: "Get-ChildItem -Force is a safe read-only orientation command."
+  },
+  {
+    question: "Fill in the command that lists repo files quickly.",
+    answer: "rg --files",
+    placeholder: "rg ...",
+    feedback: "rg --files maps the repo faster than manually expanding folders."
+  },
+  {
+    question: "Fill in the command that finds SQL files.",
+    answer: "rg --files -g \"*.sql\"",
+    placeholder: "rg --files -g ...",
+    feedback: "This maps SQL scope before asking Codex to reason about lineage."
+  },
+  {
+    question: "Fill in the command that checks the Git working tree.",
+    answer: "git status",
+    placeholder: "git ...",
+    feedback: "git status is the default preflight before and after Codex work."
+  },
+  {
+    question: "Fill in the command that summarizes changed files before a full diff review.",
+    answer: "git diff --stat",
+    placeholder: "git diff ...",
+    feedback: "git diff --stat gives a compact change-surface view."
+  },
+  {
+    question: "Fill in the command that launches interactive Codex from the current folder.",
+    answer: "codex",
+    placeholder: "codex...",
+    feedback: "Run codex from the repo root so local context is correct."
+  },
+  {
+    question: "Fill in the command that signs in to Codex CLI.",
+    answer: "codex login",
+    placeholder: "codex ...",
+    feedback: "codex login starts the CLI authentication flow."
+  },
+  {
+    question: "Fill in the install command for the Codex CLI.",
+    answer: "npm install -g @openai/codex",
+    placeholder: "npm install ...",
+    feedback: "Install once per workstation, then launch Codex from the target repo."
+  },
+  {
+    question: "Fill in the command pattern for a one-shot Codex run.",
+    answer: "codex exec",
+    placeholder: "codex ...",
+    feedback: "codex exec is the one-shot mode for stable, repeatable tasks."
+  }
+];
+
+const codexRoundThreeQuizzes = [
+  {
+    question: "You are in a new repo and need a safe first Codex session. Type the first inspection prompt.",
+    acceptedAnswers: [
+      "Inspect this repo and give me a short plan before editing.",
+      "Inspect this repo before editing and give me a short plan."
+    ],
+    answerLabel: "Inspect this repo and give me a short plan before editing.",
+    placeholder: "Type the prompt",
+    feedback: "A plan-first prompt reduces broad rewrites and forces local context."
+  },
+  {
+    question: "Type the PowerShell command that confirms where Codex will start.",
+    acceptedAnswers: ["Get-Location", "pwd"],
+    answerLabel: "Get-Location",
+    placeholder: "Current folder command",
+    feedback: "Confirm the active folder before launching Codex."
+  },
+  {
+    question: "Type the command that finds all SQL files in the repo.",
+    acceptedAnswers: ["rg --files -g \"*.sql\"", "rg --files -g '*.sql'"],
+    answerLabel: "rg --files -g \"*.sql\"",
+    placeholder: "Find SQL files",
+    feedback: "Finding SQL files is the first step in a lineage or review workflow."
+  },
+  {
+    question: "Type the command that scans for common SQL clauses across the repo.",
+    acceptedAnswers: ["rg -n \"from|join|group by|where\" .", "rg -n 'from|join|group by|where' ."],
+    answerLabel: "rg -n \"from|join|group by|where\" .",
+    placeholder: "Scan SQL clauses",
+    feedback: "Clause scans help spot sources, joins, filters, and aggregation."
+  },
+  {
+    question: "Before keeping Codex changes, type the command that summarizes changed files.",
+    acceptedAnswers: ["git diff --stat"],
+    answerLabel: "git diff --stat",
+    placeholder: "Diff summary command",
+    feedback: "Use the stat view before reviewing the full diff."
+  },
+  {
+    question: "Type the command that inspects actual content changes.",
+    acceptedAnswers: ["git diff"],
+    answerLabel: "git diff",
+    placeholder: "Full diff command",
+    feedback: "The full diff is the reality check before keeping generated changes."
+  },
+  {
+    question: "Type a one-shot command that writes a repo review to CODEX_REVIEW.md.",
+    acceptedAnswers: [
+      "codex exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
+      "codex exec 'Review this repo for docs gaps and SQL risks' > CODEX_REVIEW.md"
+    ],
+    answerLabel: "codex exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
+    placeholder: "codex exec ... > CODEX_REVIEW.md",
+    feedback: "One-shot output should still be reviewed manually before commit or sharing."
+  },
+  {
+    question: "Type the prompt fragment that tells Codex to preserve SQL behavior during cleanup.",
+    acceptedAnswers: [
+      "Refactor for readability only. Preserve behavior, filters, grain, and output schema.",
+      "Refactor this SQL for readability only. Preserve output schema, row grain, join behavior, and filters."
+    ],
+    answerLabel: "Refactor for readability only. Preserve behavior, filters, grain, and output schema.",
+    placeholder: "Type the guardrail",
+    feedback: "SQL cleanup must preserve row grain, filters, joins, and output schema unless explicitly changed."
+  },
+  {
+    question: "Type the final capstone review prompt before committing generated artifacts.",
+    acceptedAnswers: [
+      "Review the changed files without editing. Flag unsupported claims, missing validation, risky assumptions, and final cleanup before commit.",
+      "Review the changed files without editing. Draft CODEX_REVIEW.md with changed files, unsupported claims, missing validation, risky assumptions, and final cleanup recommendations."
+    ],
+    answerLabel: "Review the changed files without editing. Flag unsupported claims, missing validation, risky assumptions, and final cleanup before commit.",
+    placeholder: "Final review prompt",
+    feedback: "The final pass should review the artifacts without creating another uncontrolled edit."
+  }
+];
+
 const conflictScenarios = [
   {
     id: "ccs-source-view",
@@ -1154,6 +1692,7 @@ function createTrainingState(moduleId = "git-basics") {
     explorerExpandedFiles: [],
     flowCollapsedFiles: [],
     taskFlags: createTaskFlags(),
+    readyChecks: {},
     quizAnswers: {},
     quizSession: createQuizSession("git-basics"),
     terminal: [
@@ -1174,6 +1713,17 @@ function createCodexState() {
     activeModuleId: codexLab.id,
     guidedStep: 0,
     codexSection: 0,
+    quizSession: createQuizSession(codexLab.id),
+    terminal: []
+  };
+}
+
+function createCapstoneState() {
+  return {
+    ...createTrainingState("git-basics"),
+    viewMode: "capstone",
+    activeModuleId: capstoneLab.id,
+    guidedStep: 0,
     terminal: []
   };
 }
@@ -1265,12 +1815,13 @@ function createAdvancedState() {
     editCounter: 1,
     lessonIndex: 0,
     expandedLessonIndex: null,
-    repoExplorerOpen: false,
+    repoExplorerOpen: true,
     explorerCollapsedFolders: [],
     explorerExpandedFolders: [],
     explorerExpandedFiles: [],
     flowCollapsedFiles: [],
     taskFlags: createTaskFlags(),
+    readyChecks: {},
     quizAnswers: {},
     quizSession: createQuizSession("git-basics"),
     terminal: [
@@ -1363,6 +1914,14 @@ function bindEvents() {
       event.preventDefault();
       event.stopPropagation();
       suppressNextFlowClick = false;
+      return;
+    }
+
+    const copyButton = event.target.closest("[data-copy-text]");
+    if (copyButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      copyTextToClipboard(copyButton);
       return;
     }
 
@@ -1875,6 +2434,13 @@ function handleAction(button) {
     return;
   }
 
+  if (action === "open-capstone-lab") {
+    state = createCapstoneState();
+    saveState();
+    render();
+    return;
+  }
+
   if (action === "open-vscode-lab") {
     state = createVSCodeState();
     saveState();
@@ -1892,13 +2458,15 @@ function handleAction(button) {
   if (action === "reset") {
     state = isCodexMode()
       ? createCodexState()
-      : isVSCodeMode()
-        ? createVSCodeState()
-        : isPracticeMode()
-          ? createAdvancedState()
-          : state.inLesson
-            ? createTrainingState()
-            : createInitialState();
+      : isCapstoneMode()
+        ? createCapstoneState()
+        : isVSCodeMode()
+          ? createVSCodeState()
+          : isPracticeMode()
+            ? createAdvancedState()
+            : state.inLesson
+              ? createTrainingState()
+              : createInitialState();
     saveState();
     render();
     return;
@@ -1939,6 +2507,13 @@ function handleAction(button) {
 
   if (action === "toggle-flow-file") {
     toggleFlowFile(button);
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "toggle-ready-check") {
+    toggleReadyCheck(button.dataset.readyKey);
     saveState();
     render();
     return;
@@ -2832,13 +3407,16 @@ function render() {
   const labView = document.getElementById("labView");
   const practiceMode = isPracticeMode();
   const codexMode = isCodexMode();
+  const capstoneMode = isCapstoneMode();
   const vscodeMode = isVSCodeMode();
   portalView.hidden = Boolean(state.inLesson);
-  statusStrip.hidden = !state.inLesson || practiceMode || codexMode || vscodeMode;
+  statusStrip.hidden = !state.inLesson || practiceMode || codexMode || capstoneMode || vscodeMode;
   labView.hidden = !state.inLesson;
   labView.classList.toggle("practice-workspace", practiceMode);
   labView.classList.toggle("codex-workspace", codexMode);
+  labView.classList.toggle("capstone-workspace", capstoneMode);
   labView.classList.toggle("vscode-workspace", vscodeMode);
+  updateTopbarContextActions(practiceMode);
 
   if (!state.inLesson) {
     return;
@@ -2846,6 +3424,11 @@ function render() {
 
   if (codexMode) {
     renderCodexWorkspace();
+    return;
+  }
+
+  if (capstoneMode) {
+    renderCapstoneWorkspace();
     return;
   }
 
@@ -2867,6 +3450,17 @@ function render() {
   renderGuidedCommands();
   renderTerminal();
   renderQuiz();
+}
+
+function updateTopbarContextActions(practiceMode) {
+  const conflictButton = document.querySelector('[data-action="start-conflict"]');
+  const conflictRow = conflictButton?.closest(".topbar-action-secondary");
+  if (conflictButton) {
+    conflictButton.hidden = !practiceMode;
+  }
+  if (conflictRow) {
+    conflictRow.hidden = !practiceMode;
+  }
 }
 
 function loadTheme() {
@@ -2914,19 +3508,21 @@ function renderPortal() {
   const projectModule = modules.find((module) => module.id === "project-work");
   document.getElementById("portalView").innerHTML = `
     <div class="course-stack">
+      ${renderCodexCourseCard()}
+      ${renderVSCodeCourseCard()}
       ${renderCourseCard(gitModule)}
       ${projectModule ? renderCourseCard(projectModule) : ""}
-      ${renderVSCodeCourseCard()}
-      ${renderCodexCourseCard()}
+      ${renderCapstoneCourseCard()}
     </div>
     <aside class="course-side">
       <section class="course-section">
         <h3>Learning paths</h3>
         <ol class="lab-steps">
+          <li><strong>${escapeHtml(codexLab.title)}</strong><span>Separate Codex lesson and official setup link.</span></li>
+          <li><strong>${escapeHtml(vscodeLab.title)}</strong><span>Brief editor orientation: Explorer, search, terminal, and Source Control.</span></li>
           <li><strong>${escapeHtml(gitModule.title)}</strong><span>Interactive Git mechanics, ADO context, branches, commits, and merge readiness.</span></li>
           <li><strong>${escapeHtml(projectModule?.title || "GIT Lab 2: Projects")}</strong><span>Project capsule methodology: README, decision-index, workstreams, then branch-based execution.</span></li>
-          <li><strong>${escapeHtml(vscodeLab.title)}</strong><span>Brief editor orientation: Explorer, search, terminal, and Source Control.</span></li>
-          <li><strong>${escapeHtml(codexLab.title)}</strong><span>Separate Codex lesson and official setup link.</span></li>
+          <li><strong>${escapeHtml(capstoneLab.title)}</strong><span>Codex-assisted repo review kit with durable notes, lineage, quality checks, and final diff review.</span></li>
         </ol>
       </section>
       <section class="course-section">
@@ -2951,6 +3547,12 @@ function renderPortal() {
           <li><strong>Use case 1:</strong> everyday work starts from an ADO ticket and happens on a focused branch.</li>
           <li><strong>Use case 2:</strong> longer project work starts with a README and decision-index on main, then branches into workstreams.</li>
           <li><strong>When needed:</strong> add <code>workstreams.md</code> for collaborators or parallel tracks.</li>
+        </ul>
+      </section>
+      <section class="course-section">
+        <h3>Repo review kit</h3>
+        <ul class="context-list">
+          ${capstoneLab.deliverables.map((item) => `<li><code>${escapeHtml(item)}</code></li>`).join("")}
         </ul>
       </section>
       <section class="course-section">
@@ -3004,7 +3606,7 @@ function renderCourseCard(module) {
       <div class="portal-actions">
         <button class="icon-button primary-button" type="button" data-action="start-lesson" data-module-id="${escapeAttribute(module.id)}">
           <span aria-hidden="true">S</span>
-          <span>${escapeHtml(module.startLabel || "Start Git + ADO lesson")}</span>
+          <span>${escapeHtml(module.startLabel || "Start Lesson")}</span>
         </button>
         ${
           module.id === "git-basics"
@@ -3014,6 +3616,27 @@ function renderCourseCard(module) {
               </button>`
             : ""
         }
+      </div>
+    </article>
+  `;
+}
+
+function renderCapstoneCourseCard() {
+  return `
+    <article class="course-card capstone-course-card">
+      <span class="section-kicker">Capstone lab</span>
+      <h2>${escapeHtml(capstoneLab.title)}</h2>
+      <p>${escapeHtml(capstoneLab.description)}</p>
+      <div class="course-meta">
+        <span class="pill blue">${escapeHtml(capstoneLab.level)}</span>
+        <span class="pill green">${escapeHtml(capstoneLab.time)}</span>
+        <span class="pill gray">${escapeHtml(capstoneLab.labTitle)}</span>
+      </div>
+      <div class="portal-actions">
+        <button class="icon-button primary-button" type="button" data-action="open-capstone-lab">
+          <span aria-hidden="true">3</span>
+          <span>Open repo review kit</span>
+        </button>
       </div>
     </article>
   `;
@@ -3035,6 +3658,10 @@ function renderVSCodeCourseCard() {
           <span aria-hidden="true">V</span>
           <span>Open VS Code lab</span>
         </button>
+        <a class="icon-button secondary" href="${escapeAttribute(vscodeLab.setupUrl)}" target="_blank" rel="noreferrer">
+          <span aria-hidden="true">D</span>
+          <span>Get VS Code</span>
+        </a>
       </div>
     </article>
   `;
@@ -3463,17 +4090,82 @@ function renderCodexWorkspace() {
     <div class="terminal-line success">Use Codex after the learner understands the Git + ADO branch workflow.</div>
   `;
 
-  document.getElementById("quizScore").textContent = "Codex notes";
-  document.querySelector(".quiz-panel .section-kicker").textContent = "Codex notes";
+  renderQuiz();
+  prependCodexPromptLibraryToQuizPanel();
+
+  const directoryPanel = document.getElementById("repoDirectoryPanel");
+  if (directoryPanel) {
+    directoryPanel.innerHTML = "";
+  }
+}
+
+function renderCapstoneWorkspace() {
+  const section = capstoneLab.section;
+  document.getElementById("lessonProgress").textContent = `${capstoneLab.deliverables.length} deliverables`;
+  document.getElementById("lessonList").innerHTML = capstoneLab.deliverables
+    .map(
+      (item, index) => `
+        <article class="lesson-button complete" aria-label="Deliverable ${index + 1}">
+          <span>Deliverable ${index + 1}</span>
+          <strong>${escapeHtml(item)}</strong>
+          <em class="lesson-command-count">${index === 0 ? "repo map" : index === 1 ? "lineage" : index === 2 ? "quality" : "review"}</em>
+        </article>
+      `
+    )
+    .join("");
+  document.getElementById("lessonDetail").innerHTML = `
+    <span class="section-kicker">GIT Lab 3</span>
+    <h2>${escapeHtml(section.title)}</h2>
+    <p>${escapeHtml(section.intro)}</p>
+    <div class="lesson-task">
+      <strong>${escapeHtml(section.kicker)}</strong>
+      <span>${escapeHtml(section.task)}</span>
+      <code>${escapeHtml(section.reference)}</code>
+    </div>
+    <section class="lesson-glossary" aria-label="Capstone workflow">
+      <div class="lesson-glossary-header">
+        <span class="section-kicker">Lab shape</span>
+        <strong>Reviewable artifact chain</strong>
+      </div>
+      <ol class="capstone-side-list">
+        <li>Inspect the repo before writing.</li>
+        <li>Create one file per milestone.</li>
+        <li>Review the generated files before staging.</li>
+        <li>Use Git to commit only the validated artifact set.</li>
+      </ol>
+    </section>
+  `;
+
+  document.querySelector(".repo-flow").className = "repo-flow";
+  document.getElementById("workingZone").innerHTML = "";
+  document.getElementById("stagingZone").innerHTML = "";
+  document.getElementById("repositoryZone").innerHTML = "";
+  document.getElementById("guidedTitle").textContent = capstoneLab.title;
+  document.getElementById("guidedProgress").textContent = "Capstone";
+  document.querySelector(".guided-panel .section-kicker").textContent = "Repo review kit";
+  document.getElementById("processMap").innerHTML = renderCodexWorkflowSection(section);
+  document.getElementById("guidedCommands").innerHTML = "";
+
+  const form = document.getElementById("commandForm");
+  if (form) {
+    form.hidden = true;
+  }
+  document.querySelector(".terminal-panel .section-kicker").textContent = "Git checkpoint";
+  document.querySelector(".terminal-panel h2").textContent = "Commands to recognize";
+  document.querySelector(".terminal-note").innerHTML = "Use these after the artifacts are reviewed.";
+  document.getElementById("terminalHistory").innerHTML = `
+    <div class="terminal-line note">This capstone is a simulated workflow. The copy buttons put prompts on your clipboard.</div>
+    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git status</div>
+    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git diff --stat</div>
+    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git add REPO_NOTES.md SQL_LINEAGE.md DATA_QUALITY_REPORT.md CODEX_REVIEW.md</div>
+    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git commit -m "Add repo review kit"</div>
+  `;
+
+  document.getElementById("quizScore").textContent = "Capstone reference";
+  document.querySelector(".quiz-panel .section-kicker").textContent = "Prompt library";
   document.getElementById("quizList").innerHTML = `
-    <article class="quiz-card codex-check-card">
-      <strong>When to use Codex</strong>
-      <p>Use Codex to orient, inspect similar files, propose safe branches, draft PR notes, and validate changes.</p>
-    </article>
-    <article class="quiz-card codex-check-card">
-      <strong>What not to skip</strong>
-      <p>Do not skip branch safety, review, assumptions, or validation just because Codex helped produce the change.</p>
-    </article>
+    ${renderCodexPromptLibraryPanel(true)}
+    ${renderCapstoneDeliverablesPanel()}
   `;
 
   const directoryPanel = document.getElementById("repoDirectoryPanel");
@@ -3492,10 +4184,16 @@ function codexLessonTaskText(section) {
   if (section.type === "orientation") {
     return "Use Codex to clarify the request before asking it to edit files.";
   }
+  if (section.type === "workflow") {
+    return section.task || "Practice a repeatable Codex workflow with a review checkpoint.";
+  }
   return "Keep Git branch safety, review, and validation visible.";
 }
 
 function codexLessonReference(section) {
+  if (section.reference) {
+    return section.reference;
+  }
   if (section.type === "prompting") {
     return "Purpose + Authority + Context + Task";
   }
@@ -3707,14 +4405,14 @@ function renderCodexLessonContent(sectionIndex = null) {
     if (section.type === "safety") {
       return renderCodexSafetySection(section);
     }
+    if (section.type === "workflow") {
+      return renderCodexWorkflowSection(section);
+    }
   }
 
   return `
     <div class="codex-lesson-content">
-      ${renderCodexInstallSection(install)}
-      ${renderCodexPromptingSection(prompting)}
-      ${renderCodexOrientationSection(orientation)}
-      ${renderCodexSafetySection(safety)}
+      ${codexLab.sections.map((section) => renderCodexLessonContent(codexLab.sections.indexOf(section))).join("")}
     </div>
   `;
 }
@@ -3749,6 +4447,7 @@ function renderCodexInstallSection(install) {
         <ul class="codex-note-list">
           ${install.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
         </ul>
+        ${renderCodexReadyChecklist(install)}
       </section>
     </div>
   `;
@@ -3777,6 +4476,7 @@ function renderCodexPromptingSection(prompting) {
             .join("")}
         </div>
         <div class="codex-formula">${escapeHtml(prompting.formula)}</div>
+        ${renderCodexReadyChecklist(prompting)}
       </section>
     </div>
   `;
@@ -3794,7 +4494,8 @@ function renderCodexOrientationSection(orientation) {
             ${orientation.questions.map((question) => `<li>${escapeHtml(question)}</li>`).join("")}
           </ul>
         </div>
-        <pre class="codex-prompt-example"><code>${escapeHtml(orientation.prompt)}</code></pre>
+        ${renderCopyablePrompt(orientation.prompt)}
+        ${renderCodexReadyChecklist(orientation)}
       </section>
     </div>
   `;
@@ -3820,9 +4521,220 @@ function renderCodexSafetySection(safety) {
           </ul>
         </div>
         <div class="codex-formula wide">${escapeHtml(safety.footer)}</div>
+        ${renderCodexReadyChecklist(safety)}
       </section>
     </div>
   `;
+}
+
+function renderCodexWorkflowSection(section) {
+  return `
+    <div class="codex-lesson-content">
+      <section class="codex-lesson-section">
+        <span class="section-kicker">${escapeHtml(section.kicker)}</span>
+        <h3>${escapeHtml(section.title)}</h3>
+        <p>${escapeHtml(section.intro)}</p>
+        <div class="codex-install-grid">
+          ${section.cards
+            .map(
+              (card, index) => `
+                <article class="codex-install-step codex-workflow-card">
+                  <span>${index + 1}</span>
+                  <div>
+                    <h4>${escapeHtml(card.label)}</h4>
+                    ${card.command ? `<code>${escapeHtml(card.command)}</code>` : ""}
+                    ${card.prompt ? renderCopyablePrompt(card.prompt) : ""}
+                    ${card.detail ? `<p>${escapeHtml(card.detail)}</p>` : ""}
+                  </div>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
+        ${section.formula ? `<div class="codex-formula">${escapeHtml(section.formula)}</div>` : ""}
+        ${renderCodexReadyChecklist(section)}
+      </section>
+    </div>
+  `;
+}
+
+function renderCodexReadyChecklist(section) {
+  if (!Array.isArray(section.readyChecklist) || !section.readyChecklist.length) {
+    return "";
+  }
+
+  const completeCount = section.readyChecklist.filter((_, index) => isReadyCheckComplete(codexReadyCheckKey(section, index))).length;
+  return `
+    <div class="codex-ready-list">
+      <div class="codex-ready-header">
+        <h4>Ready to move on</h4>
+        <span>${completeCount} of ${section.readyChecklist.length}</span>
+      </div>
+      ${section.readyChecklist
+        .map((item, index) => {
+          const key = codexReadyCheckKey(section, index);
+          const done = isReadyCheckComplete(key);
+          return `
+            <button class="codex-ready-item ${done ? "done" : ""}" type="button" data-action="toggle-ready-check" data-ready-key="${escapeAttribute(key)}" aria-pressed="${done}">
+              <span class="codex-ready-box">${done ? "OK" : ""}</span>
+              <span>${escapeHtml(item)}</span>
+            </button>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function prependCodexPromptLibraryToQuizPanel() {
+  const quizList = document.getElementById("quizList");
+  if (!quizList) {
+    return;
+  }
+  quizList.innerHTML = `${renderCodexPromptLibraryPanel()}${quizList.innerHTML}`;
+}
+
+function renderCodexPromptLibraryPanel(open = false) {
+  return `
+    <details class="codex-reference-panel" ${open ? "open" : ""}>
+      <summary>
+        <span>
+          <strong>Prompt library</strong>
+          <em>Copy-ready Codex prompts</em>
+        </span>
+      </summary>
+      <div class="codex-reference-body">
+        ${codexPromptLibrary
+          .map(
+            (group, index) => `
+              <details class="codex-reference-group" ${index === 0 ? "open" : ""}>
+                <summary>${escapeHtml(group.group)}</summary>
+                <div class="codex-reference-items">
+                  ${group.prompts.map(renderPromptLibraryItem).join("")}
+                </div>
+              </details>
+            `
+          )
+          .join("")}
+      </div>
+    </details>
+  `;
+}
+
+function renderPromptLibraryItem(item) {
+  return `
+    <article class="codex-reference-item">
+      <div>
+        <strong>${escapeHtml(item.label)}</strong>
+        ${renderCopyButton(item.text, "Copy prompt")}
+      </div>
+      <pre><code>${escapeHtml(item.text)}</code></pre>
+    </article>
+  `;
+}
+
+function renderCapstoneDeliverablesPanel() {
+  return `
+    <section class="capstone-deliverables" aria-label="Capstone deliverables">
+      <h3>What the lab produces</h3>
+      ${capstoneLab.deliverables
+        .map(
+          (item) => `
+            <article>
+              <strong>${escapeHtml(item)}</strong>
+              <span>${escapeHtml(capstoneDeliverableMeaning(item))}</span>
+            </article>
+          `
+        )
+        .join("")}
+    </section>
+  `;
+}
+
+function capstoneDeliverableMeaning(name) {
+  if (name === "REPO_NOTES.md") {
+    return "Purpose, folders, commands, assumptions, risks, and open questions.";
+  }
+  if (name === "SQL_LINEAGE.md") {
+    return "Sources, grain, joins, filters, grouping, and logic risks.";
+  }
+  if (name === "DATA_QUALITY_REPORT.md") {
+    return "Missing values, duplicate risks, categories, dates, and follow-ups.";
+  }
+  return "Final file review, missing validation, risky assumptions, and cleanup before commit.";
+}
+
+function renderCopyablePrompt(text) {
+  return `
+    <div class="copyable-prompt">
+      ${renderCopyButton(text)}
+      <pre class="codex-prompt-example"><code>${escapeHtml(text)}</code></pre>
+    </div>
+  `;
+}
+
+function renderCopyButton(text, label = "Copy") {
+  return `<button class="copy-prompt-button" type="button" data-copy-text="${escapeAttribute(text)}">${escapeHtml(label)}</button>`;
+}
+
+async function copyTextToClipboard(button) {
+  const text = button.dataset.copyText || "";
+  const originalLabel = button.dataset.copyLabel || button.textContent || "Copy";
+  button.dataset.copyLabel = originalLabel;
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      copyTextFallback(text);
+    }
+    button.textContent = "Copied";
+  } catch (error) {
+    button.textContent = "Copy failed";
+  }
+
+  window.setTimeout(() => {
+    button.textContent = originalLabel;
+  }, 1400);
+}
+
+function copyTextFallback(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
+function codexReadyCheckKey(section, itemIndex) {
+  return `codex:${slugify(section.title)}:${itemIndex}`;
+}
+
+function ensureReadyChecks() {
+  if (!state.readyChecks || typeof state.readyChecks !== "object" || Array.isArray(state.readyChecks)) {
+    state.readyChecks = {};
+  }
+  return state.readyChecks;
+}
+
+function isReadyCheckComplete(key) {
+  return Boolean(ensureReadyChecks()[key]);
+}
+
+function toggleReadyCheck(key) {
+  if (!key) {
+    return;
+  }
+  const checks = ensureReadyChecks();
+  if (checks[key]) {
+    delete checks[key];
+  } else {
+    checks[key] = true;
+  }
 }
 
 function renderPracticeGraph() {
@@ -3950,13 +4862,13 @@ function renderDynamicBranchGraph() {
   }
 
   const maxLane = Math.max(0, ...commits.map((commit) => commit.lane || 0), ...Object.values(state.branchLanes || {}));
-  const graphStartX = 220;
-  const graphGap = 220;
-  const laneLineStart = 190;
-  const laneGap = 106;
+  const graphStartX = 140;
+  const graphGap = 180;
+  const laneLineStart = 72;
+  const laneGap = 96;
   const laneTop = 88;
-  const width = Math.max(860, graphStartX + (commits.length - 1) * graphGap + 240);
-  const height = Math.max(260, laneTop + maxLane * laneGap + 126);
+  const width = Math.max(760, graphStartX + (commits.length - 1) * graphGap + 180);
+  const height = Math.max(220, laneTop + maxLane * laneGap + 88);
   const positions = new Map(
     commits.map((commit, index) => [
       commit.id,
@@ -3973,8 +4885,9 @@ function renderDynamicBranchGraph() {
     const y = laneY(lane);
     const label = laneLabel(lane);
     return `
-      <text x="24" y="${y + 5}" class="repo-graph-lane-label"><title>${escapeSvg(label)}</title>${escapeSvg(truncateLabel(label, 22))}</text>
-      <line x1="${laneLineStart}" y1="${y}" x2="${width - 70}" y2="${y}" class="repo-graph-lane"></line>
+      <line x1="${laneLineStart}" y1="${y}" x2="${width - 70}" y2="${y}" class="repo-graph-lane">
+        <title>${escapeSvg(label)}</title>
+      </line>
     `;
   }).join("");
 
@@ -4016,26 +4929,19 @@ function renderDynamicBranchGraph() {
   const nodes = commits
     .map((commit) => {
       const position = positions.get(commit.id);
-      const messageLines = wrapGraphLabel(commit.message, 24, 2);
+      const labels = branchLabelsForCommit(commit.id);
       return `
         <g class="repo-graph-node">
-          <circle cx="${position.x}" cy="${position.y}" r="22" class="${commit.id === headId() ? "repo-graph-commit head" : "repo-graph-commit"}"></circle>
-          <text x="${position.x}" y="${position.y + 4}" text-anchor="middle" class="repo-graph-id"><title>${escapeSvg(commit.id)}</title>${escapeSvg(commit.id)}</text>
-          <text x="${position.x}" y="${position.y + 42}" text-anchor="middle" class="repo-graph-message">
-            <title>${escapeSvg(commit.message)}</title>
-            ${messageLines
-              .map((line, index) => `<tspan x="${position.x}" dy="${index === 0 ? 0 : 14}">${escapeSvg(line)}</tspan>`)
-              .join("")}
-          </text>
+          <circle cx="${position.x}" cy="${position.y}" r="18" class="${commit.id === headId() ? "repo-graph-commit head" : "repo-graph-commit"}">
+            <title>${escapeSvg(`${commit.id}: ${commit.message}${labels.length ? ` (${labels.join(", ")})` : ""}`)}</title>
+          </circle>
         </g>
       `;
     })
     .join("");
-  const pointerStrip = renderGraphPointers();
 
   return `
     <div class="repo-graph-card">
-      ${pointerStrip}
       <svg class="repo-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Dynamic Git branch graph">
         <title>${escapeSvg(`Current branch ${state.currentBranch}, HEAD ${currentHeadLabel()}`)}</title>
         ${laneLines}
@@ -4045,86 +4951,6 @@ function renderDynamicBranchGraph() {
       </svg>
     </div>
   `;
-}
-
-function renderGraphPointers() {
-  const pointers = [];
-  if (hasHeadCommit()) {
-    pointers.push({
-      label: `HEAD -> ${state.currentBranch}`,
-      detail: `HEAD follows ${state.currentBranch} at ${headId()}`,
-      tone: "head"
-    });
-  }
-
-  Object.entries(state.branches || {})
-    .filter(([, commitId]) => commitId)
-    .forEach(([branch, commitId]) => {
-      pointers.push({
-        label: `${branch} -> ${commitId}`,
-        detail: `${branch} points to ${commitId}`,
-        tone: branch === state.currentBranch ? "active" : "branch"
-      });
-    });
-
-  Object.entries(state.remoteBranches || {})
-    .filter(([, commitId]) => commitId)
-    .forEach(([branch, commitId]) => {
-      pointers.push({
-        label: `${branch} -> ${commitId}`,
-        detail: `${branch} points to ${commitId}`,
-        tone: "remote"
-      });
-    });
-
-  if (!pointers.length) {
-    return "";
-  }
-
-  return `
-    <div class="repo-graph-pointer-strip" aria-label="Git pointers">
-      ${pointers
-        .map(
-          (pointer) =>
-            `<span class="repo-graph-pointer ${pointer.tone}"${titleAttribute(pointer.detail)}>${escapeHtml(pointer.label)}</span>`
-        )
-        .join("")}
-    </div>
-  `;
-}
-
-function wrapGraphLabel(value, maxChars, maxLines) {
-  const words = String(value || "").trim().split(/\s+/).filter(Boolean);
-  if (!words.length) {
-    return [""];
-  }
-
-  const lines = [];
-  let current = "";
-  words.forEach((word) => {
-    const next = current ? `${current} ${word}` : word;
-    if (next.length <= maxChars) {
-      current = next;
-      return;
-    }
-
-    if (current) {
-      lines.push(current);
-    }
-    current = word.length > maxChars ? truncateLabel(word, maxChars) : word;
-  });
-
-  if (current) {
-    lines.push(current);
-  }
-
-  if (lines.length <= maxLines) {
-    return lines;
-  }
-
-  const clipped = lines.slice(0, maxLines);
-  clipped[maxLines - 1] = truncateLabel(clipped[maxLines - 1], Math.max(4, maxChars - 1));
-  return clipped;
 }
 
 function laneLabel(lane) {
@@ -4819,6 +5645,16 @@ function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting) {
 
 function getQuizBank(moduleId = state?.activeModuleId || "git-basics", round = state?.quizSession?.round || 1) {
   const quizRound = clampQuizRound(round);
+  if (moduleId === codexLab.id) {
+    const codexRoundItems =
+      quizRound === 1
+        ? codexChoiceQuizzes
+        : quizRound === 2
+          ? codexRoundTwoQuizzes.map((quiz) => ({ type: "fill", ...quiz }))
+          : codexRoundThreeQuizzes.map((quiz) => ({ type: "freeform", ...quiz }));
+    return normalizeQuizItems(codexRoundItems, quizRound);
+  }
+
   const active = modules.find((module) => module.id === moduleId) || modules[0];
   const primaryItems = active.quiz || [];
   const roundItems =
@@ -4829,8 +5665,11 @@ function getQuizBank(moduleId = state?.activeModuleId || "git-basics", round = s
       : quizRound === 2
         ? roundTwoQuizzes.map((quiz) => ({ type: "fill", ...quiz }))
         : roundThreeQuizzes.map((quiz) => ({ type: "freeform", ...quiz }));
-  const seenQuestions = new Set();
+  return normalizeQuizItems(roundItems, quizRound);
+}
 
+function normalizeQuizItems(roundItems, quizRound) {
+  const seenQuestions = new Set();
   return roundItems
     .map((quiz, index) => {
       const questionKey = slugify(quiz.question);
@@ -5214,6 +6053,10 @@ function isCodexMode() {
   return Boolean(state?.inLesson && state.viewMode === "codex");
 }
 
+function isCapstoneMode() {
+  return Boolean(state?.inLesson && state.viewMode === "capstone");
+}
+
 function isVSCodeMode() {
   return Boolean(state?.inLesson && state.viewMode === "vscode");
 }
@@ -5387,7 +6230,7 @@ function loadState() {
         parsed.activeModuleId = parsed.activeModuleId || "git-basics";
         parsed.guidedStep = parsed.guidedStep || 0;
         parsed.inLesson = Boolean(parsed.inLesson);
-        parsed.viewMode = ["practice", "codex", "vscode"].includes(parsed.viewMode) ? parsed.viewMode : "guided";
+        parsed.viewMode = ["practice", "codex", "capstone", "vscode"].includes(parsed.viewMode) ? parsed.viewMode : "guided";
         parsed.codexSection = clampIndex(parsed.codexSection, codexLab.sections.length);
         parsed.vscodeSection = clampIndex(parsed.vscodeSection, vscodeLab.sections.length);
         parsed.repoExplorerOpen = Boolean(parsed.repoExplorerOpen);
@@ -5395,6 +6238,10 @@ function loadState() {
         parsed.explorerExpandedFolders = Array.isArray(parsed.explorerExpandedFolders) ? parsed.explorerExpandedFolders : [];
         parsed.explorerExpandedFiles = Array.isArray(parsed.explorerExpandedFiles) ? parsed.explorerExpandedFiles : [];
         parsed.flowCollapsedFiles = Array.isArray(parsed.flowCollapsedFiles) ? parsed.flowCollapsedFiles : [];
+        parsed.readyChecks =
+          parsed.readyChecks && typeof parsed.readyChecks === "object" && !Array.isArray(parsed.readyChecks)
+            ? parsed.readyChecks
+            : {};
         parsed.expandedLessonIndex = Number.isInteger(parsed.expandedLessonIndex) ? parsed.expandedLessonIndex : null;
         if (parsed.expandedLessonIndex < -1 || parsed.expandedLessonIndex >= getLessonsForModule(parsed.activeModuleId).length) {
           parsed.expandedLessonIndex = null;

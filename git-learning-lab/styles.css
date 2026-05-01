@@ -362,9 +362,17 @@ button:active {
     var(--surface);
 }
 
+[data-theme="dark"] .capstone-course-card,
 [data-theme="dark"] .codex-course-card {
   background:
     linear-gradient(135deg, rgba(111, 147, 255, 0.16), rgba(13, 27, 47, 0) 54%),
+    var(--surface);
+}
+
+.capstone-course-card {
+  border-top-color: var(--amber);
+  background:
+    linear-gradient(135deg, rgba(255, 201, 92, 0.18), rgba(255, 255, 255, 0) 54%),
     var(--surface);
 }
 
@@ -579,6 +587,10 @@ button:active {
   grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
 }
 
+.main-grid.capstone-workspace {
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(260px, 340px);
+}
+
 .practice-workspace .lesson-panel,
 .practice-workspace .quiz-panel {
   display: none;
@@ -586,16 +598,21 @@ button:active {
 
 .practice-workspace .lab-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr) minmax(280px, 420px);
   grid-template-areas:
-    "graph files"
-    "terminal terminal"
-    "explorer explorer";
+    "graph graph files"
+    "explorer terminal terminal";
   align-items: stretch;
 }
 
 .practice-workspace .repo-directory-panel {
   grid-area: explorer;
+  align-self: stretch;
+}
+
+.practice-workspace .repo-explorer-window.open {
+  max-height: clamp(260px, 38vh, 460px);
+  overflow: auto;
 }
 
 .practice-workspace .guided-panel {
@@ -622,6 +639,8 @@ button:active {
   display: none;
 }
 
+.capstone-workspace .repo-directory-panel,
+.capstone-workspace .repo-flow,
 .vscode-workspace .repo-directory-panel,
 .vscode-workspace .repo-flow {
   display: none;
@@ -1710,7 +1729,6 @@ button.repo-tree-file {
 .repo-graph-card {
   overflow-x: auto;
   display: grid;
-  gap: 10px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1729,7 +1747,7 @@ button.repo-tree-file {
   display: block;
   min-width: min(720px, 100%);
   width: 100%;
-  min-height: 300px;
+  min-height: 230px;
 }
 
 .repo-graph-lane {
@@ -1775,82 +1793,6 @@ button.repo-tree-file {
 .repo-graph-commit.head {
   stroke: var(--amber);
   filter: drop-shadow(0 0 7px rgba(255, 179, 11, 0.45));
-}
-
-.repo-graph-id {
-  fill: var(--ink);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.repo-graph-message {
-  fill: var(--muted);
-  font-size: 10.5px;
-  font-weight: 800;
-}
-
-.repo-graph-pointer-strip {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.repo-graph-pointer {
-  max-width: min(100%, 340px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  padding: 5px 10px;
-  color: var(--navy);
-  background: rgba(195, 244, 230, 0.86);
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
-.repo-graph-pointer.head,
-.repo-graph-pointer.active {
-  color: #ffffff;
-  background: var(--blue);
-}
-
-.repo-graph-pointer.branch {
-  background: rgba(195, 244, 230, 0.86);
-  border-color: rgba(20, 198, 20, 0.22);
-}
-
-.repo-graph-pointer.remote {
-  color: var(--navy);
-  background: rgba(226, 232, 240, 0.9);
-  border-color: rgba(15, 23, 42, 0.08);
-}
-
-[data-theme="dark"] .repo-graph-pointer.remote {
-  color: #ffffff;
-  background: rgba(148, 163, 184, 0.22);
-  border-color: rgba(226, 232, 240, 0.14);
-}
-
-.repo-graph-label {
-  fill: rgba(195, 244, 230, 0.82);
-  stroke: rgba(20, 198, 20, 0.32);
-}
-
-.repo-graph-label.head {
-  fill: var(--blue);
-  stroke: var(--blue);
-}
-
-.repo-graph-label-text {
-  fill: var(--navy);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.repo-graph-label.head + .repo-graph-label-text {
-  fill: #ffffff;
 }
 
 .repo-tree {
@@ -2156,6 +2098,103 @@ button.repo-tree-file {
   grid-column: 1 / -1;
 }
 
+.codex-ready-list {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.codex-ready-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.codex-ready-header h4,
+.codex-ready-header span {
+  margin: 0;
+}
+
+.codex-ready-header span {
+  color: var(--muted);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.codex-ready-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--panel);
+  text-align: left;
+  cursor: pointer;
+}
+
+.codex-ready-item.done {
+  border-color: rgba(15, 174, 102, 0.55);
+  background: rgba(195, 244, 230, 0.34);
+}
+
+[data-theme="dark"] .codex-ready-item.done {
+  border-color: rgba(112, 231, 196, 0.5);
+  background: rgba(112, 231, 196, 0.1);
+}
+
+.codex-ready-box {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--blue);
+  background: var(--surface);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.codex-ready-item.done .codex-ready-box {
+  border-color: rgba(15, 174, 102, 0.68);
+  color: #053c2a;
+  background: var(--mint);
+}
+
+.copyable-prompt {
+  position: relative;
+  min-width: 0;
+}
+
+.copy-prompt-button {
+  justify-self: start;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgba(111, 147, 255, 0.45);
+  border-radius: 7px;
+  color: var(--navy);
+  background: var(--mint);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.copyable-prompt > .copy-prompt-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
 .codex-prompt-example {
   margin: 0;
   min-height: 100%;
@@ -2167,6 +2206,10 @@ button.repo-tree-file {
   white-space: pre-wrap;
 }
 
+.copyable-prompt .codex-prompt-example {
+  padding-top: 44px;
+}
+
 [data-theme="dark"] .codex-prompt-example {
   border: 1px solid #355378;
   color: #eaf1ff;
@@ -2176,6 +2219,129 @@ button.repo-tree-file {
 .codex-prompt-example code {
   font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   white-space: pre-wrap;
+}
+
+.codex-reference-panel,
+.capstone-deliverables {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.codex-reference-panel > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.codex-reference-panel > summary::-webkit-details-marker,
+.codex-reference-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.codex-reference-panel > summary::after {
+  content: "Open";
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--mint);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.codex-reference-panel[open] > summary::after {
+  content: "Close";
+}
+
+.codex-reference-panel strong,
+.capstone-deliverables strong {
+  color: var(--ink);
+}
+
+.codex-reference-panel em {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.78rem;
+}
+
+.codex-reference-body,
+.codex-reference-items,
+.capstone-deliverables {
+  display: grid;
+  gap: 10px;
+}
+
+.codex-reference-group {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.codex-reference-group > summary {
+  cursor: pointer;
+  color: var(--navy);
+  font-weight: 900;
+}
+
+.codex-reference-item,
+.capstone-deliverables article {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.codex-reference-item > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.codex-reference-item pre {
+  max-height: 180px;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: var(--text);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.76rem;
+}
+
+.capstone-deliverables {
+  margin-bottom: 0;
+}
+
+.capstone-deliverables h3 {
+  margin: 0;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+}
+
+.capstone-deliverables span,
+.capstone-side-list li {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.capstone-side-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
 }
 
 .codex-safety-panel {
@@ -2923,6 +3089,7 @@ button.repo-tree-file {
 @media (max-width: 1500px) {
   .main-grid,
   .main-grid.codex-workspace,
+  .main-grid.capstone-workspace,
   .main-grid.vscode-workspace {
     grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
   }
@@ -2955,12 +3122,11 @@ button.repo-tree-file {
   }
 
   .practice-workspace .lab-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
     grid-template-areas:
-      "graph"
-      "files"
-      "terminal"
-      "explorer";
+      "graph graph"
+      "files files"
+      "explorer terminal";
   }
 }
 
@@ -2989,11 +3155,21 @@ button.repo-tree-file {
 
   .main-grid,
   .main-grid.codex-workspace,
+  .main-grid.capstone-workspace,
   .main-grid.vscode-workspace,
   .repo-flow,
   #quizList,
   .prompt-grid {
     grid-template-columns: 1fr;
+  }
+
+  .practice-workspace .lab-panel {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "graph"
+      "files"
+      "explorer"
+      "terminal";
   }
 
   .course-side {
