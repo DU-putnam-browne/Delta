@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Git Learning Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-title">
+          <img src="assets/delta-utilities-logo.png" alt="Delta Utilities" />
+          <div>
+            <p class="eyebrow">Oracle Analyst Enablement</p>
+            <h1>Practice the Oracle ticket to branch to PR workflow</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="topbar-action-row">
+            <button class="icon-button secondary" type="button" data-action="back-portal" title="Return to the course overview">
+              <span aria-hidden="true">H</span>
+              <span>Home</span>
+            </button>
+            <button class="theme-toggle" id="themeToggle" type="button" data-action="toggle-theme" aria-pressed="false" title="Switch to dark mode">
+              <span class="theme-switch" aria-hidden="true">
+                <span class="theme-switch-thumb"></span>
+              </span>
+              <span id="themeLabel">Dark</span>
+            </button>
+            <button class="icon-button secondary" type="button" data-action="reset" title="Reset the lab">
+              <span aria-hidden="true">R</span>
+              <span>Reset</span>
+            </button>
+          </div>
+          <div class="topbar-action-row topbar-action-secondary">
+            <button class="icon-button" type="button" data-action="start-conflict" title="Load a randomized file conflict drill">
+              <span aria-hidden="true">!</span>
+              <span>Load conflict drill</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="portal-view" id="portalView" aria-label="Course overview"></section>
+
+      <section class="status-strip" id="statusStrip" aria-live="polite"></section>
+
+      <div class="main-grid" id="labView">
+        <aside class="lesson-panel" aria-label="Lessons">
+          <div class="panel-heading">
+            <span class="section-kicker">Learning path</span>
+            <strong id="lessonProgress">0 of 6 complete</strong>
+          </div>
+          <nav class="lesson-list" id="lessonList"></nav>
+          <div class="lesson-detail" id="lessonDetail"></div>
+        </aside>
+
+        <main class="lab-panel">
+          <section class="repo-flow" aria-label="Git data flow">
+            <div class="repo-flow-explainer">
+              <span class="section-kicker">Git snapshot flow</span>
+              <p><strong>Edit files</strong>, choose what belongs in the next checkpoint with <code>git add</code>, then save that checkpoint with <code>git commit</code>.</p>
+            </div>
+            <div class="flow-zone" id="workingZone"></div>
+            <div class="flow-arrow" aria-hidden="true">git add</div>
+            <div class="flow-zone" id="stagingZone"></div>
+            <div class="flow-arrow" aria-hidden="true">git commit</div>
+            <div class="flow-zone" id="repositoryZone"></div>
+          </section>
+
+          <section class="guided-panel" aria-label="Guided lab commands">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Guided lab</span>
+                <h2 id="guidedTitle">Create your first repo</h2>
+              </div>
+              <strong id="guidedProgress">Step 1 of 7</strong>
+            </div>
+            <div class="process-map" id="processMap" aria-label="Current command process location"></div>
+            <div class="guided-current-command" id="guidedCommands"></div>
+          </section>
+
+          <section class="terminal-panel" aria-label="Command practice">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">PowerShell terminal</span>
+                <h2>Type commands into the prompt</h2>
+              </div>
+              <span class="terminal-note">Type <code>help</code> for supported commands</span>
+            </div>
+            <div class="terminal-output" id="terminalOutput" aria-live="polite">
+              <div id="terminalHistory"></div>
+              <form class="command-form" id="commandForm">
+                <label class="sr-only" for="commandInput">Git command</label>
+                <span aria-hidden="true" id="promptLabel">&gt;</span>
+                <input id="commandInput" name="command" autocomplete="off" spellcheck="false" placeholder='Try: git status' />
+                <button type="submit">Run command</button>
+              </form>
+            </div>
+          </section>
+
+          <section class="repo-directory-panel" id="repoDirectoryPanel" aria-label="Main repository directory"></section>
+        </main>
+
+        <aside class="quiz-panel" aria-label="Knowledge checks">
+          <div class="panel-heading">
+            <span class="section-kicker">Knowledge checks</span>
+            <strong id="quizScore" class="quiz-score" aria-live="polite">Correct 0 | Missed 0</strong>
+          </div>
+          <div id="quizList"></div>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>
