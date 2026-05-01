@@ -46,6 +46,7 @@
 
 body {
   margin: 0;
+  overflow-x: hidden;
   color: var(--ink);
   background:
     linear-gradient(180deg, rgba(195, 244, 230, 0.72), rgba(255, 255, 255, 0.65) 320px, transparent 520px),
@@ -575,6 +576,11 @@ button:active {
   align-items: start;
 }
 
+.main-grid > *,
+.lab-panel > * {
+  min-width: 0;
+}
+
 .main-grid.practice-workspace {
   grid-template-columns: 1fr;
 }
@@ -628,7 +634,8 @@ button:active {
 }
 
 .practice-workspace .guided-current-command {
-  display: none;
+  display: block;
+  margin-top: 12px;
 }
 
 .git-workspace .repo-flow {
@@ -1801,6 +1808,7 @@ button.repo-tree-file {
   fill: var(--muted);
   font-size: 12px;
   font-weight: 900;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
 }
 
 .repo-graph-edge {
@@ -1824,6 +1832,16 @@ button.repo-tree-file {
   stroke-dasharray: 8 7;
 }
 
+.repo-graph-edge.fast-forward {
+  stroke: var(--amber);
+  stroke-width: 4;
+  stroke-dasharray: 7 8;
+}
+
+.repo-graph-arrow {
+  fill: var(--amber);
+}
+
 .repo-graph-commit {
   fill: var(--surface);
   stroke: var(--blue);
@@ -1833,6 +1851,454 @@ button.repo-tree-file {
 .repo-graph-commit.head {
   stroke: var(--amber);
   filter: drop-shadow(0 0 7px rgba(255, 179, 11, 0.45));
+}
+
+.repo-graph-commit-id {
+  fill: var(--ink);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  font-weight: 900;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.repo-graph-pointer rect {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.repo-graph-pointer text {
+  fill: var(--navy);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  font-weight: 900;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.repo-graph-pointer.head rect {
+  fill: var(--blue);
+  stroke: var(--blue);
+}
+
+.repo-graph-pointer.head text {
+  fill: #ffffff;
+}
+
+.repo-graph-pointer.branch rect {
+  fill: var(--mint);
+}
+
+.repo-graph-pointer.remote rect {
+  fill: var(--gray);
+}
+
+.repo-graph-node {
+  cursor: pointer;
+}
+
+.repo-graph-node.selected .repo-graph-commit {
+  stroke: var(--mint);
+  stroke-width: 6;
+  filter: drop-shadow(0 0 8px rgba(112, 231, 196, 0.44));
+}
+
+.practice-mission-panel,
+.practice-readiness-panel {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.practice-mission-header,
+.practice-readiness-score,
+.practice-replay-header,
+.vscode-mission-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.practice-mission-header h3,
+.practice-readiness-score strong,
+.vscode-mission-header h3 {
+  margin: 2px 0 0;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  line-height: 1.15;
+}
+
+.practice-mission-header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.practice-mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+}
+
+.practice-mission-card {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+  text-align: left;
+}
+
+.practice-mission-card.active {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(0, 66, 255, 0.12);
+}
+
+.practice-mission-card.complete {
+  border-color: rgba(20, 198, 20, 0.55);
+}
+
+.practice-mission-card span {
+  color: var(--blue);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.practice-mission-card strong,
+.practice-mission-card em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.practice-mission-card strong {
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.practice-mission-card em {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-style: normal;
+  line-height: 1.3;
+}
+
+.practice-difficulty-row,
+.practice-badge-row,
+.readiness-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.practice-difficulty-row {
+  align-items: center;
+}
+
+.practice-difficulty {
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--surface);
+  font-weight: 800;
+}
+
+.practice-difficulty.active {
+  color: #ffffff;
+  border-color: var(--blue);
+  background: var(--blue);
+}
+
+.practice-difficulty-row code,
+.vscode-mission-header code {
+  overflow-wrap: anywhere;
+  padding: 5px 8px;
+  border-radius: 7px;
+  color: var(--navy);
+  background: var(--mint);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.practice-readiness-score strong {
+  display: block;
+  font-size: 2.1rem;
+}
+
+.practice-readiness-score small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.readiness-checks {
+  justify-content: flex-end;
+}
+
+.readiness-checks span,
+.practice-badge,
+.challenge-no-hint {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface);
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.readiness-checks span.complete,
+.practice-badge.earned {
+  color: var(--navy);
+  border-color: rgba(112, 231, 196, 0.55);
+  background: var(--mint);
+}
+
+.practice-replay {
+  display: grid;
+  gap: 8px;
+}
+
+.practice-replay.empty p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.practice-replay-track {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.practice-replay-step {
+  display: grid;
+  grid-template-columns: auto minmax(80px, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-width: 150px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+  text-align: left;
+}
+
+.practice-replay-step.error {
+  border-color: rgba(244, 135, 113, 0.72);
+}
+
+.practice-replay-step span {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--gray);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.practice-replay-step code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graph-selection-card {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.graph-selection-card strong {
+  color: var(--navy);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+.graph-selection-card p,
+.graph-selection-card em {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.graph-selection-card em {
+  overflow-wrap: anywhere;
+  font-style: normal;
+}
+
+.challenge-panel {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.challenge-header,
+.challenge-card-copy,
+.challenge-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.challenge-header {
+  justify-content: space-between;
+}
+
+.challenge-header h3,
+.challenge-card h4 {
+  margin: 2px 0 0;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  line-height: 1.15;
+}
+
+.challenge-stats,
+.challenge-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.challenge-stats span {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.challenge-token {
+  display: grid;
+  grid-template-columns: minmax(42px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+  text-align: left;
+}
+
+.challenge-token span,
+.challenge-steps span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 24px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--gray);
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.challenge-token strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.challenge-token.active {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(0, 66, 255, 0.12);
+}
+
+.challenge-token.complete span,
+.challenge-steps li.complete span {
+  background: var(--mint);
+}
+
+.challenge-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.challenge-card.active {
+  border-color: rgba(255, 179, 11, 0.72);
+}
+
+.challenge-card.complete {
+  border-color: rgba(20, 198, 20, 0.58);
+}
+
+.challenge-card p,
+.challenge-hint span {
+  margin: 3px 0 0;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.challenge-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.challenge-steps li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.challenge-steps strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+}
+
+.challenge-hint {
+  display: grid;
+  gap: 3px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 179, 11, 0.55);
+  border-radius: var(--radius);
+  background: rgba(255, 179, 11, 0.12);
+}
+
+.challenge-actions {
+  flex-wrap: wrap;
+}
+
+.text-button.subtle {
+  color: var(--muted);
 }
 
 .repo-tree {
@@ -2819,6 +3285,60 @@ button.repo-tree-file {
   white-space: normal;
 }
 
+.vscode-mission-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.vscode-mission-list {
+  display: grid;
+  gap: 8px;
+}
+
+.vscode-mission-list article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.vscode-mission-list article.complete {
+  border-color: rgba(112, 231, 196, 0.55);
+}
+
+.vscode-mission-list span {
+  display: inline-grid;
+  min-width: 34px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--gray);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.vscode-mission-list article.complete span {
+  background: var(--mint);
+}
+
+.vscode-mission-list strong {
+  color: var(--ink);
+}
+
+.vscode-mission-list p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
 .branch-builder {
   display: grid;
   gap: 10px;
@@ -3147,7 +3667,11 @@ button.repo-tree-file {
 }
 
 .command-form span {
+  max-width: min(42%, 360px);
+  overflow: hidden;
   color: #7aa2ff;
+  pointer-events: none;
+  text-overflow: ellipsis;
   white-space: nowrap;
   font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 0.82rem;
@@ -3168,6 +3692,19 @@ button.repo-tree-file {
 
 .command-form input::placeholder {
   color: rgba(255, 255, 255, 0.45);
+}
+
+.command-form input.wizard-typing {
+  color: #b7fbe7;
+  text-shadow: 0 0 10px rgba(112, 231, 196, 0.42);
+}
+
+.terminal-panel.wizard-running .command-form span {
+  color: var(--mint);
+}
+
+.terminal-panel.wizard-running .terminal-output {
+  box-shadow: inset 0 0 0 1px rgba(112, 231, 196, 0.26), inset 0 0 28px rgba(112, 231, 196, 0.08);
 }
 
 .command-form button {
@@ -3565,6 +4102,24 @@ button.repo-tree-file {
     display: grid;
   }
 
+  .practice-mission-header,
+  .practice-readiness-score,
+  .practice-replay-header,
+  .vscode-mission-header,
+  .challenge-header,
+  .challenge-card-copy {
+    display: grid;
+    align-items: start;
+  }
+
+  .readiness-checks {
+    justify-content: flex-start;
+  }
+
+  .challenge-token {
+    min-width: min(190px, 100%);
+  }
+
   .process-summary {
     grid-template-columns: 1fr;
   }
@@ -3620,6 +4175,17 @@ button.repo-tree-file {
 
   .file-main {
     display: grid;
+  }
+
+  .practice-mission-grid,
+  .challenge-track,
+  .practice-replay-track {
+    display: grid;
+  }
+
+  .practice-mission-card,
+  .practice-replay-step {
+    width: 100%;
   }
 
   .terminal-output {

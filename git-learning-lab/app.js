@@ -1211,6 +1211,160 @@ const powershellReferenceCommands = [
   }
 ];
 
+const practiceChallenges = [
+  {
+    id: "baseline-scout",
+    title: "Baseline Scout",
+    level: "Warm-up",
+    prompt: "Map the repository before touching files.",
+    success: "Baseline inspected. The learner knows branch, status, and recent history before editing.",
+    hint: "Run git status, git branch, and git log --oneline.",
+    steps: [
+      { id: "status", label: "Check working tree", type: "command", commands: ["git status"] },
+      { id: "branch", label: "Confirm current branch", type: "command", commands: ["git branch"] },
+      { id: "history", label: "Read compact history", type: "command", commands: ["git log --oneline"] }
+    ]
+  },
+  {
+    id: "branch-builder",
+    title: "Branch Builder",
+    level: "Core",
+    prompt: "Create a safe task branch from main.",
+    success: "Task branch created. HEAD is no longer on main.",
+    hint: "Use git switch -c followed by a branch name.",
+    steps: [
+      { id: "branch-created", label: "Create a new branch", type: "state", condition: "branch-created" },
+      { id: "head-moved", label: "Move HEAD to the branch", type: "state", condition: "off-main" }
+    ]
+  },
+  {
+    id: "reviewable-change",
+    title: "Reviewable Change",
+    level: "Core",
+    prompt: "Make one file change, inspect it, stage it, and save it as a branch commit.",
+    success: "Reviewable branch commit created.",
+    hint: `Try edit ${oracleLab.featureFile}, git diff, git add, and git commit -m "...".`,
+    steps: [
+      { id: "edit", label: "Edit the SQL asset", type: "command", commands: [`edit ${oracleLab.featureFile}`] },
+      { id: "diff", label: "Inspect the diff", type: "command", commands: ["git diff", "git diff --stat"] },
+      { id: "stage", label: "Stage the intended file", type: "command", commands: [`git add ${oracleLab.featureFile}`, "git add ."] },
+      { id: "commit", label: "Commit on the branch", type: "state", condition: "branch-committed" }
+    ]
+  },
+  {
+    id: "merge-ready",
+    title: "Merge Ready",
+    level: "Finish",
+    prompt: "Return to main, merge the branch, and verify the story.",
+    success: "main includes the branch work and the history is visible.",
+    hint: "Switch to main, merge the feature branch, then run git log --oneline.",
+    steps: [
+      { id: "main", label: "Return to main", type: "state", condition: "on-main-with-branch" },
+      { id: "merge", label: "Merge branch work", type: "state", condition: "merged" },
+      { id: "log", label: "Verify commit history", type: "command", commands: ["git log --oneline"] }
+    ]
+  }
+];
+
+const practiceMissions = [
+  {
+    id: "orientation-path",
+    title: "Ticket-to-PR Path",
+    level: "Guided",
+    prompt: "Run the normal Oracle ticket workflow from baseline inspection through merge readiness.",
+    setup: "standard",
+    success: "The learner completed the full branch workflow and can explain the repo story.",
+    target: "Inspect, branch, edit, commit, merge, and verify history."
+  },
+  {
+    id: "wrong-branch-recovery",
+    title: "Wrong Branch Recovery",
+    level: "Recovery",
+    prompt: "You are still on main. Create a task branch before editing so main stays clean.",
+    setup: "standard",
+    success: "The learner moved work onto a task branch before saving a reviewable commit.",
+    target: `Run git switch -c ${oracleLab.branchName}, then make and commit the SQL change.`
+  },
+  {
+    id: "unstaged-recovery",
+    title: "Unstaged Change",
+    level: "Recovery",
+    prompt: "A SQL file was edited on a task branch but nothing is staged yet.",
+    setup: "unstaged",
+    success: "The learner inspected, staged, and committed an open file change.",
+    target: "Use git status, git diff, git add, and git commit."
+  },
+  {
+    id: "dirty-switch-recovery",
+    title: "Dirty Switch Block",
+    level: "Recovery",
+    prompt: "An open edit blocks branch switching. Save or clean the work before moving branches.",
+    setup: "dirty-switch",
+    success: "The learner understood why Git blocked the switch and created a commit before moving.",
+    target: "Try switching, then recover by staging and committing the open change."
+  },
+  {
+    id: "conflict-recovery",
+    title: "Conflict Recovery",
+    level: "Recovery",
+    prompt: "A main/feature merge changes the same file differently. Resolve it intentionally.",
+    setup: "conflict",
+    success: "The learner resolved a conflict, staged the file, and committed the merge resolution.",
+    target: "Merge the loaded branch, resolve the conflicted file, stage it, and commit."
+  }
+];
+
+const practiceDifficultyModes = [
+  {
+    id: "guided",
+    label: "Guided",
+    desc: "Hints and objective text stay visible."
+  },
+  {
+    id: "standard",
+    label: "Standard",
+    desc: "Hints are available after you ask."
+  },
+  {
+    id: "no-hints",
+    label: "No hints",
+    desc: "Hint buttons are hidden for a higher-score run."
+  }
+];
+
+const practiceBadgeDefinitions = [
+  {
+    id: "repo-scout",
+    label: "Repo Scout",
+    desc: "Ran status, branch, and log before changing files."
+  },
+  {
+    id: "branch-builder",
+    label: "Branch Builder",
+    desc: "Created a task branch away from main."
+  },
+  {
+    id: "reviewable-commit",
+    label: "Reviewable Change",
+    desc: "Saved the branch work as a commit."
+  },
+  {
+    id: "merge-ready",
+    label: "Merge Ready",
+    desc: "Merged branch work back to main."
+  },
+  {
+    id: "conflict-resolver",
+    label: "Conflict Resolver",
+    desc: "Resolved and committed a merge conflict."
+  },
+  {
+    id: "no-hints-run",
+    label: "No-Hints Run",
+    desc: "Completed a challenge while hints were disabled."
+  }
+];
+
 const quizzes = [
   {
     question: "Which area does git add move changes into?",
@@ -1885,6 +2039,12 @@ let state;
 let flowPointerDrag = null;
 let flowNativeDragActive = false;
 let suppressNextFlowClick = false;
+let wizardPlayback = null;
+let wizardPlaybackTimer = null;
+let practiceReplayActive = false;
+const GIT_WIZARD_COMMAND = "git wizard mode";
+const CODEX_WIZARD_COMMAND = "codex wizard mode";
+const VSCODE_WIZARD_COMMAND = "code --wizard mode";
 
 document.addEventListener("DOMContentLoaded", () => {
   applyTheme(loadTheme());
@@ -1913,6 +2073,7 @@ function createTrainingState(moduleId = "git-basics") {
     commits: [],
     branches: { main: null },
     remoteBranches: {},
+    mergeEvents: [],
     currentBranch: "main",
     branchLanes: { main: 0 },
     indexFiles: {},
@@ -1927,6 +2088,12 @@ function createTrainingState(moduleId = "git-basics") {
     explorerExpandedFolders: [],
     explorerExpandedFiles: [],
     flowCollapsedFiles: [],
+    selectedCommitId: null,
+    selectedFilePath: null,
+    commandReplay: [],
+    practiceMission: "orientation-path",
+    practiceDifficulty: "guided",
+    learnerProgress: createLearnerProgressState(),
     taskFlags: createTaskFlags(),
     readyChecks: {},
     quizAnswers: {},
@@ -2015,7 +2182,32 @@ function createVSCodeCliState() {
     staged: false,
     committed: false,
     conflictOpen: false,
-    conflictResolved: false
+    conflictResolved: false,
+    missionLog: []
+  };
+}
+
+function createLearnerProgressState() {
+  return {
+    badges: [],
+    completedMissions: [],
+    bestReadiness: 0,
+    lastReadiness: 0,
+    noHintCompletions: 0
+  };
+}
+
+function createChallengeModeState() {
+  return {
+    activeId: practiceChallenges[0]?.id || "",
+    started: false,
+    commandLog: [],
+    completedIds: [],
+    score: 0,
+    streak: 0,
+    misses: 0,
+    hintOpen: false,
+    lastCompletedId: null
   };
 }
 
@@ -2079,6 +2271,7 @@ function createAdvancedState() {
     ],
     branches: { main: "c000" },
     remoteBranches: { "origin/main": "c000" },
+    mergeEvents: [],
     currentBranch: "main",
     branchLanes: { main: 0 },
     indexFiles: clone(baseFiles),
@@ -2093,10 +2286,17 @@ function createAdvancedState() {
     explorerExpandedFolders: [],
     explorerExpandedFiles: [],
     flowCollapsedFiles: [],
+    selectedCommitId: "c000",
+    selectedFilePath: null,
+    commandReplay: [],
+    practiceMission: "orientation-path",
+    practiceDifficulty: "guided",
+    learnerProgress: createLearnerProgressState(),
     taskFlags: createTaskFlags(),
     readyChecks: {},
     quizAnswers: {},
     quizSession: createQuizSession("git-basics"),
+    challengeMode: createChallengeModeState(),
     terminal: [
       {
         type: "note",
@@ -2161,6 +2361,7 @@ function createConflictState(scenario = pickConflictScenario()) {
     ],
     branches: { main: "c001", [scenario.branch]: "c002" },
     remoteBranches: { "origin/main": "c000" },
+    mergeEvents: [],
     currentBranch: "main",
     branchLanes: { main: 0, [scenario.branch]: 1 },
     indexFiles: clone(mainFiles),
@@ -2457,6 +2658,7 @@ function toggleExplorerFile(button) {
   const scope = button.dataset.scope || "work";
   const key = explorerKey(scope, path);
   ensureExplorerState();
+  state.selectedFilePath = path;
   if (state.explorerExpandedFiles.includes(key)) {
     state.explorerExpandedFiles = state.explorerExpandedFiles.filter((item) => item !== key);
     return;
@@ -2638,6 +2840,8 @@ function visualGitAdd(file, location) {
   appendTerminal("prompt", `${getPrompt()} ${command}`);
   const result = commandAdd([file]);
   appendTerminal(result.type, result.text);
+  recordPracticeChallengeCommand(command, result);
+  recordPracticeCommandEvent(command, result);
 
   if (result.type !== "error") {
     advanceGuidedStepForVisualCommand(command);
@@ -2672,6 +2876,8 @@ function visualGitCommit(file, location) {
 
   const result = commandCommit(tokenize(command).slice(2));
   appendTerminal(result.type, result.text);
+  recordPracticeChallengeCommand(command, result);
+  recordPracticeCommandEvent(command, result);
 
   if (result.type !== "error") {
     advanceGuidedStepForVisualCommand(command);
@@ -2714,6 +2920,9 @@ function clearFlowDropHighlights() {
 
 function handleAction(button) {
   const action = button.dataset.action;
+  if (wizardPlayback && action !== "run-command" && action !== "toggle-theme") {
+    cancelWizardPlayback();
+  }
 
   if (action === "start-lesson") {
     state = createTrainingState(button.dataset.moduleId || "git-basics");
@@ -2781,6 +2990,84 @@ function handleAction(button) {
 
   if (action === "start-conflict") {
     state = createConflictState();
+    state.practiceMission = "conflict-recovery";
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-challenge-start") {
+    startPracticeChallenge(button.dataset.challengeId);
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-challenge-select") {
+    selectPracticeChallenge(button.dataset.challengeId);
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-challenge-next") {
+    startNextPracticeChallenge();
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-challenge-hint") {
+    togglePracticeChallengeHint();
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-challenge-reset") {
+    resetPracticeChallenges();
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-mission-start") {
+    state = createPracticeMissionState(button.dataset.missionId);
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-mission-random") {
+    state = createPracticeMissionState(randomPracticeMissionId());
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-difficulty") {
+    setPracticeDifficulty(button.dataset.difficulty);
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-replay-jump") {
+    replayPracticeToCommand(Number(button.dataset.replayIndex));
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-replay-all") {
+    replayPracticeToCommand(ensureCommandReplay().length - 1);
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "practice-select-commit") {
+    selectPracticeCommit(button.dataset.commitId);
     saveState();
     render();
     return;
@@ -2883,6 +3170,15 @@ function runCommand(rawCommand) {
     return;
   }
 
+  if (isWizardModeCommand(command)) {
+    runWizardMode(command);
+    return;
+  }
+
+  if (wizardPlayback) {
+    cancelWizardPlayback("Wizard mode stopped because a manual command was entered.");
+  }
+
   if (command.toLowerCase() === "clear") {
     state.terminal = [];
     saveState();
@@ -2933,11 +3229,1054 @@ function runCommand(rawCommand) {
 
   const result = executeCommand(command);
   appendTerminal(result.type, result.text);
+  recordPracticeChallengeCommand(command, result);
+  recordPracticeCommandEvent(command, result);
   if (!isPracticeMode()) {
     maybeAdvanceLesson();
   }
   saveState();
   render();
+}
+
+function isWizardModeCommand(command) {
+  const normalized = normalizeCommand(command);
+  return [GIT_WIZARD_COMMAND, CODEX_WIZARD_COMMAND, VSCODE_WIZARD_COMMAND].includes(normalized);
+}
+
+function runWizardMode(command) {
+  const normalized = normalizeCommand(command);
+  const expectedWizardCommand = getExpectedWizardCommand();
+  const prompt = isCodexMode() ? getCodexPrompt() : getPrompt();
+  appendTerminal("prompt", `${prompt} ${command}`);
+
+  if (normalized !== expectedWizardCommand) {
+    appendTerminal("note", getWizardUsageMessage());
+    saveState();
+    render();
+    return;
+  }
+
+  if (isCodexMode()) {
+    runCodexWizardMode();
+  } else if (isVSCodeMode()) {
+    runVSCodeWizardMode();
+  } else if (isPracticeMode()) {
+    runPracticeWizardMode();
+  } else if (state.inLesson) {
+    runGuidedGitWizardMode();
+  } else {
+    appendTerminal("note", "Open a lesson or simulator first, then try wizard mode.");
+  }
+
+  saveState();
+  render();
+}
+
+function getExpectedWizardCommand() {
+  if (isCodexMode()) {
+    return CODEX_WIZARD_COMMAND;
+  }
+  if (isVSCodeMode()) {
+    return VSCODE_WIZARD_COMMAND;
+  }
+  return GIT_WIZARD_COMMAND;
+}
+
+function getWizardUsageMessage() {
+  if (isCodexMode()) {
+    return `Codex uses ${CODEX_WIZARD_COMMAND}. Git labs use ${GIT_WIZARD_COMMAND}. VS Code Lab uses ${VSCODE_WIZARD_COMMAND}.`;
+  }
+  if (isVSCodeMode()) {
+    return `VS Code Lab uses ${VSCODE_WIZARD_COMMAND}. Git labs use ${GIT_WIZARD_COMMAND}. Codex uses ${CODEX_WIZARD_COMMAND}.`;
+  }
+  return `This simulator uses ${GIT_WIZARD_COMMAND}. VS Code Lab uses ${VSCODE_WIZARD_COMMAND}. Codex uses ${CODEX_WIZARD_COMMAND}.`;
+}
+
+function runGuidedGitWizardMode() {
+  const active = getActiveModule();
+  if (state.guidedStep >= active.commands.length) {
+    appendTerminal("success", "Git wizard mode: this module is already complete.");
+    return;
+  }
+
+  const start = state.guidedStep;
+  const lessonTitle = getActiveLessons()[getCurrentLessonIndex()]?.title || `Step ${start + 1}`;
+  const steps = [];
+  for (let index = start; index < active.commands.length; index += 1) {
+    const item = active.commands[index];
+    steps.push({
+      command: item.cmd,
+      run: () => {
+        appendTerminal("prompt", `${getPrompt()} ${item.cmd}`);
+        const result = executeCommand(item.cmd);
+        if (result.type === "error") {
+          appendTerminal("error", `Wizard stopped at step ${index + 1}: ${result.text}`);
+          state.guidedStep = index;
+          return false;
+        }
+        appendTerminal("success", `Wizard ran - ${item.desc}`);
+        if (result.text) {
+          appendTerminal(result.type, result.text);
+        }
+        state.guidedStep = index + 1;
+        maybeAdvanceLesson();
+        return true;
+      }
+    });
+  }
+
+  startWizardPlayback({
+    label: `Git wizard mode: ghost typing ${active.title} from ${lessonTitle} through lab completion.`,
+    steps,
+    onComplete: () => {
+      appendTerminal("note", "Git wizard mode: full lab complete.");
+    }
+  });
+}
+
+function runPracticeWizardMode() {
+  const wizard = ensurePracticeWizardState();
+  const sections = getPracticeWizardSections(wizard.branchName);
+  if (wizard.section >= sections.length) {
+    appendTerminal("success", "Git wizard mode: the practice demo path is already complete.");
+    return;
+  }
+
+  startPracticeChallengeTrackerForWizard();
+  const startSection = wizard.section;
+  const steps = [];
+  sections.slice(startSection).forEach((section, offset) => {
+    const sectionIndex = startSection + offset;
+    section.commands.forEach((command, commandIndex) => {
+      const isLastInSection = commandIndex === section.commands.length - 1;
+      steps.push({
+        command,
+        run: () => {
+          appendTerminal("prompt", `${getPrompt()} ${command}`);
+          const result = executeCommand(command);
+          appendTerminal(result.type, result.text);
+          recordPracticeChallengeCommand(command, result);
+          recordPracticeCommandEvent(command, result);
+          if (result.type === "error") {
+            appendTerminal("error", "Wizard stopped so the learner can correct the simulator state.");
+            return false;
+          }
+          if (isLastInSection) {
+            wizard.section = sectionIndex + 1;
+          }
+          return true;
+        }
+      });
+    });
+  });
+
+  startWizardPlayback({
+    label: `Git wizard mode: ghost typing the full practice lab from ${sections[startSection].title}.`,
+    steps,
+    onComplete: () => {
+      appendTerminal("note", "Git wizard mode: practice demo complete.");
+    }
+  });
+}
+
+function startPracticeChallengeTrackerForWizard() {
+  const mode = ensureChallengeModeState();
+  if (mode.started || getPracticeChallengeList().every((challenge) => mode.completedIds.includes(challenge.id))) {
+    return;
+  }
+
+  const next = getPracticeChallengeList().find((challenge) => !mode.completedIds.includes(challenge.id));
+  if (!next) {
+    return;
+  }
+
+  mode.activeId = next.id;
+  mode.started = true;
+  mode.commandLog = [];
+  mode.hintOpen = false;
+  appendTerminal("note", `Challenge tracker following wizard mode: ${next.title}.`);
+}
+
+function ensurePracticeWizardState() {
+  if (!state.practiceWizard || typeof state.practiceWizard !== "object") {
+    state.practiceWizard = {
+      section: 0,
+      branchName: `feature/wizard-practice-${Math.max(1, state.nextCommit || 1)}`
+    };
+  }
+  return state.practiceWizard;
+}
+
+function getPracticeWizardSections(branchName) {
+  return [
+    {
+      title: "Inspect baseline",
+      commands: ["git status", "git branch", "git log --oneline"]
+    },
+    {
+      title: "Create a branch",
+      commands: [`git switch -c ${branchName}`]
+    },
+    {
+      title: "Edit and inspect",
+      commands: [`edit ${oracleLab.featureFile}`, "git status", "git diff"]
+    },
+    {
+      title: "Stage and commit",
+      commands: [`git add ${oracleLab.featureFile}`, `git commit -m "${oracleLab.featureCommitMessage}"`, "git log --oneline"]
+    },
+    {
+      title: "Merge to main",
+      commands: ["git switch main", `git merge ${branchName}`, "git log --oneline"]
+    }
+  ];
+}
+
+function normalizeChallengeModeObject(value) {
+  const available = getPracticeChallengeList();
+  const mode =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? { ...createChallengeModeState(), ...value }
+      : createChallengeModeState();
+  mode.commandLog = Array.isArray(mode.commandLog) ? mode.commandLog : [];
+  mode.completedIds = Array.isArray(mode.completedIds) ? mode.completedIds : [];
+  mode.score = Number.isFinite(mode.score) ? mode.score : 0;
+  mode.streak = Number.isFinite(mode.streak) ? mode.streak : 0;
+  mode.misses = Number.isFinite(mode.misses) ? mode.misses : 0;
+  mode.started = Boolean(mode.started);
+  mode.hintOpen = Boolean(mode.hintOpen);
+
+  if (!available.some((challenge) => challenge.id === mode.activeId)) {
+    mode.activeId = available[0]?.id || "";
+    mode.started = false;
+    mode.commandLog = [];
+  }
+
+  mode.completedIds = mode.completedIds.filter((id, index, ids) => {
+      return ids.indexOf(id) === index && available.some((challenge) => challenge.id === id);
+  });
+
+  return mode;
+}
+
+function ensureChallengeModeState() {
+  const normalized = normalizeChallengeModeObject(state.challengeMode);
+  if (state.challengeMode && typeof state.challengeMode === "object" && !Array.isArray(state.challengeMode)) {
+    Object.assign(state.challengeMode, normalized);
+  } else {
+    state.challengeMode = normalized;
+  }
+  return state.challengeMode;
+}
+
+function getPracticeChallengeList() {
+  return practiceChallenges;
+}
+
+function getPracticeMissionList() {
+  return practiceMissions;
+}
+
+function getActivePracticeMission() {
+  const missions = getPracticeMissionList();
+  return missions.find((mission) => mission.id === state.practiceMission) || missions[0];
+}
+
+function randomPracticeMissionId() {
+  const missions = getPracticeMissionList();
+  if (!missions.length) {
+    return "orientation-path";
+  }
+  const candidates = missions.filter((mission) => mission.id !== state.practiceMission);
+  const pool = candidates.length ? candidates : missions;
+  return pool[Math.floor(Math.random() * pool.length)].id;
+}
+
+function createPracticeMissionState(missionId = "orientation-path") {
+  const previousProgress = normalizeLearnerProgress(state?.learnerProgress);
+  const previousDifficulty = normalizePracticeDifficulty(state?.practiceDifficulty);
+  const previousExplorer = {
+    repoExplorerOpen: state?.repoExplorerOpen,
+    repoExplorerTouched: state?.repoExplorerTouched,
+    explorerCollapsedFolders: state?.explorerCollapsedFolders,
+    explorerExpandedFolders: state?.explorerExpandedFolders,
+    explorerExpandedFiles: state?.explorerExpandedFiles,
+    flowCollapsedFiles: state?.flowCollapsedFiles
+  };
+  const mission = getPracticeMissionList().find((item) => item.id === missionId) || getPracticeMissionList()[0];
+  let nextState = mission?.setup === "conflict" ? createConflictState(pickConflictScenario()) : createAdvancedState();
+
+  nextState.practiceMission = mission?.id || "orientation-path";
+  nextState.practiceDifficulty = previousDifficulty;
+  nextState.learnerProgress = previousProgress;
+  nextState.commandReplay = [];
+  nextState.challengeMode = createChallengeModeState();
+  nextState.selectedCommitId = nextState.branches?.[nextState.currentBranch] || nextState.commits?.[0]?.id || null;
+  nextState.selectedFilePath = null;
+  nextState.repoExplorerOpen = Boolean(previousExplorer.repoExplorerOpen ?? true);
+  nextState.repoExplorerTouched = Boolean(previousExplorer.repoExplorerTouched);
+  nextState.explorerCollapsedFolders = Array.isArray(previousExplorer.explorerCollapsedFolders)
+    ? [...previousExplorer.explorerCollapsedFolders]
+    : [];
+  nextState.explorerExpandedFolders = Array.isArray(previousExplorer.explorerExpandedFolders)
+    ? [...previousExplorer.explorerExpandedFolders]
+    : [];
+  nextState.explorerExpandedFiles = Array.isArray(previousExplorer.explorerExpandedFiles)
+    ? [...previousExplorer.explorerExpandedFiles]
+    : [];
+  nextState.flowCollapsedFiles = Array.isArray(previousExplorer.flowCollapsedFiles)
+    ? [...previousExplorer.flowCollapsedFiles]
+    : [];
+
+  applyPracticeMissionSetup(nextState, mission);
+  nextState.terminal = [
+    {
+      type: "note",
+      text: `Mission loaded: ${mission.title}. ${mission.prompt}`
+    },
+    {
+      type: "note",
+      text: mission.target
+    }
+  ];
+
+  return nextState;
+}
+
+function applyPracticeMissionSetup(nextState, mission) {
+  if (!mission) {
+    return;
+  }
+
+  if (mission.setup === "unstaged" || mission.setup === "dirty-switch") {
+    const branch = mission.setup === "dirty-switch" ? "feature/recovery-dirty-switch" : "feature/recovery-stage";
+    const baseHead = nextState.branches.main || nextState.commits[0]?.id || null;
+    const lane = nextPracticeLaneForState(nextState);
+    nextState.branches[branch] = baseHead;
+    nextState.branchLanes[branch] = lane;
+    nextState.currentBranch = branch;
+    nextState.indexFiles = clone(getFilesForCommitInState(nextState, baseHead));
+    nextState.workingFiles = clone(nextState.indexFiles);
+    nextState.workingFiles[oracleLab.featureFile] =
+      `${nextState.workingFiles[oracleLab.featureFile] || "-- Emergency orders ZIP report\n"}\n-- Recovery drill edit: validate prior-week ZIP grouping.\n`;
+    nextState.taskFlags.branchCreated = true;
+    nextState.selectedFilePath = oracleLab.featureFile;
+  }
+
+  if (mission.setup === "conflict") {
+    nextState.practiceMission = mission.id;
+    nextState.lessonIndex = 4;
+  }
+}
+
+function nextPracticeLaneForState(nextState) {
+  return Math.max(0, ...Object.values(nextState.branchLanes || {})) + 1;
+}
+
+function getFilesForCommitInState(nextState, commitId) {
+  return clone(nextState.commits?.find((commit) => commit.id === commitId)?.files || {});
+}
+
+function normalizePracticeDifficulty(value) {
+  return practiceDifficultyModes.some((mode) => mode.id === value) ? value : "guided";
+}
+
+function setPracticeDifficulty(value) {
+  state.practiceDifficulty = normalizePracticeDifficulty(value);
+}
+
+function normalizeLearnerProgress(value) {
+  const progress =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? { ...createLearnerProgressState(), ...value }
+      : createLearnerProgressState();
+  progress.badges = Array.isArray(progress.badges) ? uniqueSorted(progress.badges) : [];
+  progress.completedMissions = Array.isArray(progress.completedMissions) ? uniqueSorted(progress.completedMissions) : [];
+  progress.bestReadiness = Number.isFinite(progress.bestReadiness) ? progress.bestReadiness : 0;
+  progress.lastReadiness = Number.isFinite(progress.lastReadiness) ? progress.lastReadiness : 0;
+  progress.noHintCompletions = Number.isFinite(progress.noHintCompletions) ? progress.noHintCompletions : 0;
+  return progress;
+}
+
+function ensureLearnerProgress() {
+  state.learnerProgress = normalizeLearnerProgress(state.learnerProgress);
+  return state.learnerProgress;
+}
+
+function ensureCommandReplay() {
+  state.commandReplay = Array.isArray(state.commandReplay) ? state.commandReplay : [];
+  return state.commandReplay;
+}
+
+function recordPracticeCommandEvent(command, result) {
+  if (!isPracticeMode() || practiceReplayActive) {
+    return;
+  }
+
+  const replay = ensureCommandReplay();
+  const status = state.initialized ? getStatus() : { clean: false, staged: [], unstaged: [], untracked: [] };
+  replay.push({
+    command: String(command || "").trim(),
+    resultType: result?.type || "note",
+    branch: state.currentBranch || "main",
+    head: currentHeadLabel(),
+    clean: Boolean(status.clean),
+    open: status.unstaged.length + status.untracked.length,
+    staged: status.staged.length
+  });
+
+  if (replay.length > 40) {
+    state.commandReplay = replay.slice(-40);
+  }
+
+  updatePracticeAwards(command, result);
+  maybeCompletePracticeMission();
+}
+
+function updatePracticeAwards(command, result) {
+  const progress = ensureLearnerProgress();
+  const normalized = normalizeCommand(command);
+  const replay = ensureCommandReplay().map((entry) => normalizeCommand(entry.command));
+
+  if (["git status", "git branch", "git log --oneline"].every((cmd) => replay.some((item) => commandMatches(item, cmd)))) {
+    addBadge("repo-scout");
+  }
+  if (state.taskFlags?.branchCreated || Object.keys(state.branches || {}).some((branch) => branch !== "main")) {
+    addBadge("branch-builder");
+  }
+  if (state.taskFlags?.branchCommitted) {
+    addBadge("reviewable-commit");
+  }
+  if (state.taskFlags?.merged) {
+    addBadge("merge-ready");
+  }
+  if (state.taskFlags?.conflictResolved || normalized.startsWith("resolve ")) {
+    addBadge("conflict-resolver");
+  }
+  const readiness = calculatePRReadiness();
+  progress.lastReadiness = readiness.score;
+  progress.bestReadiness = Math.max(progress.bestReadiness || 0, readiness.score);
+}
+
+function addBadge(id) {
+  const progress = ensureLearnerProgress();
+  if (!progress.badges.includes(id)) {
+    progress.badges.push(id);
+  }
+}
+
+function maybeCompletePracticeMission() {
+  const mission = getActivePracticeMission();
+  if (!mission) {
+    return;
+  }
+  const progress = ensureLearnerProgress();
+  if (progress.completedMissions.includes(mission.id)) {
+    return;
+  }
+
+  const replay = ensureCommandReplay().map((entry) => normalizeCommand(entry.command));
+  const ran = (expected) => replay.some((entry) => commandMatches(entry, expected));
+  const missionComplete =
+    mission.id === "orientation-path"
+      ? state.taskFlags?.merged && ran("git log --oneline")
+      : mission.id === "wrong-branch-recovery"
+        ? state.taskFlags?.branchCreated && state.taskFlags?.branchCommitted
+        : mission.id === "unstaged-recovery"
+          ? state.taskFlags?.branchCommitted
+          : mission.id === "dirty-switch-recovery"
+            ? state.taskFlags?.branchCommitted && (state.currentBranch === "main" || ran("git switch main"))
+            : mission.id === "conflict-recovery"
+              ? state.taskFlags?.conflictResolved && state.taskFlags?.committed
+              : false;
+
+  if (!missionComplete) {
+    return;
+  }
+
+  progress.completedMissions.push(mission.id);
+  appendTerminal("success", `Mission complete: ${mission.title}.`);
+  appendTerminal("note", mission.success);
+}
+
+function calculatePRReadiness() {
+  const replay = ensureCommandReplay().map((entry) => normalizeCommand(entry.command));
+  const ran = (expected) => replay.some((entry) => commandMatches(entry, expected));
+  const status = state.initialized ? getStatus() : { clean: false, staged: [], unstaged: [], untracked: [] };
+  const checks = [
+    { id: "inspect", label: "Baseline inspected", points: 15, complete: ran("git status") && ran("git branch") },
+    { id: "branch", label: "Task branch created", points: 20, complete: Boolean(state.taskFlags?.branchCreated) || Object.keys(state.branches || {}).some((branch) => branch !== "main") },
+    { id: "diff", label: "Change reviewed", points: 15, complete: ran("git diff") || ran("git diff --stat") },
+    { id: "commit", label: "Reviewable commit saved", points: 20, complete: Boolean(state.taskFlags?.branchCommitted || state.taskFlags?.committed) },
+    { id: "clean", label: "Working tree clean", points: 15, complete: Boolean(status.clean) && !state.pendingMerge },
+    { id: "history", label: "History verified", points: 10, complete: ran("git log --oneline") },
+    { id: "merge", label: "Merge story complete", points: 5, complete: Boolean(state.taskFlags?.merged) }
+  ];
+  const score = Math.min(100, checks.reduce((total, check) => total + (check.complete ? check.points : 0), 0));
+  return { score, checks };
+}
+
+function replayPracticeToCommand(index) {
+  const replay = ensureCommandReplay();
+  if (!replay.length || index < 0) {
+    appendTerminal("note", "No practice commands have been captured yet.");
+    return;
+  }
+
+  const missionId = state.practiceMission || "orientation-path";
+  const difficulty = normalizePracticeDifficulty(state.practiceDifficulty);
+  const progress = normalizeLearnerProgress(state.learnerProgress);
+  const commands = replay.slice(0, Math.min(index, replay.length - 1) + 1).map((entry) => entry.command);
+  const nextState = createPracticeMissionState(missionId);
+  nextState.practiceDifficulty = difficulty;
+  nextState.learnerProgress = progress;
+  nextState.commandReplay = [];
+  nextState.terminal = [
+    {
+      type: "note",
+      text: `Replaying ${commands.length} captured command${commands.length === 1 ? "" : "s"} from the current mission.`
+    }
+  ];
+
+  state = nextState;
+  practiceReplayActive = true;
+  for (const command of commands) {
+    appendTerminal("prompt", `${getPrompt()} ${command}`);
+    const result = executeCommand(command);
+    appendTerminal(result.type, result.text);
+    state.commandReplay.push({
+      command,
+      resultType: result?.type || "note",
+      branch: state.currentBranch || "main",
+      head: currentHeadLabel(),
+      clean: state.initialized ? getStatus().clean : false,
+      replayed: true
+    });
+    if (result.type === "error") {
+      appendTerminal("error", "Replay stopped at the first command that no longer matches the rebuilt state.");
+      break;
+    }
+  }
+  practiceReplayActive = false;
+  updatePracticeAwards(commands[commands.length - 1] || "", { type: "success" });
+}
+
+function selectPracticeCommit(commitId) {
+  if (!commitId || !state.commits?.some((commit) => commit.id === commitId)) {
+    return;
+  }
+  state.selectedCommitId = commitId;
+  const files = changedFilesForCommit(commitId);
+  state.selectedFilePath = files[0] || state.selectedFilePath || null;
+  files.forEach((path) => expandExplorerFoldersForPath(path));
+}
+
+function expandExplorerFoldersForPath(path) {
+  const parts = String(path || "").split(/[\\/]/).filter(Boolean);
+  let current = "";
+  parts.slice(0, -1).forEach((part) => {
+    current = [current, part].filter(Boolean).join("/");
+    setExplorerFolderExpanded("work", current, true);
+  });
+}
+
+function changedFilesForCommit(commitId) {
+  const commit = getCommitSafe(commitId);
+  if (!commit) {
+    return [];
+  }
+  const baseFiles = commit.parents?.[0] ? getCommitSafe(commit.parents[0])?.files || {} : {};
+  return uniqueSorted(
+    [...Object.keys(baseFiles), ...Object.keys(commit.files || {})].filter((name) => baseFiles[name] !== commit.files[name])
+  );
+}
+
+function getCommitSafe(commitId) {
+  return state.commits?.find((commit) => commit.id === commitId) || null;
+}
+
+function getActivePracticeChallenge() {
+  const mode = ensureChallengeModeState();
+  return getPracticeChallengeList().find((challenge) => challenge.id === mode.activeId) || getPracticeChallengeList()[0];
+}
+
+function startPracticeChallenge(challengeId) {
+  if (!isPracticeMode()) {
+    return;
+  }
+
+  const mode = ensureChallengeModeState();
+  const challenge = getPracticeChallengeList().find((item) => item.id === challengeId) || getActivePracticeChallenge();
+  if (!challenge) {
+    return;
+  }
+
+  mode.activeId = challenge.id;
+  mode.started = true;
+  mode.commandLog = [];
+  mode.hintOpen = false;
+  mode.lastCompletedId = null;
+  appendTerminal("note", `Challenge mode started: ${challenge.title}.`);
+  maybeCompletePracticeChallenge();
+}
+
+function selectPracticeChallenge(challengeId) {
+  const challenge = getPracticeChallengeList().find((item) => item.id === challengeId);
+  if (!challenge) {
+    return;
+  }
+
+  const mode = ensureChallengeModeState();
+  mode.activeId = challenge.id;
+  mode.started = false;
+  mode.commandLog = [];
+  mode.hintOpen = false;
+  mode.lastCompletedId = null;
+}
+
+function startNextPracticeChallenge() {
+  const mode = ensureChallengeModeState();
+  const challenges = getPracticeChallengeList();
+  const currentIndex = Math.max(0, challenges.findIndex((challenge) => challenge.id === mode.activeId));
+  const next =
+    challenges.slice(currentIndex + 1).find((challenge) => !mode.completedIds.includes(challenge.id)) ||
+    challenges.find((challenge) => !mode.completedIds.includes(challenge.id)) ||
+    challenges[(currentIndex + 1) % challenges.length];
+
+  if (!next) {
+    return;
+  }
+
+  startPracticeChallenge(next.id);
+}
+
+function togglePracticeChallengeHint() {
+  const mode = ensureChallengeModeState();
+  mode.hintOpen = !mode.hintOpen;
+}
+
+function resetPracticeChallenges() {
+  state.challengeMode = createChallengeModeState();
+  appendTerminal("note", "Challenge mode reset. Start a challenge when you are ready.");
+}
+
+function recordPracticeChallengeCommand(command, result) {
+  if (!isPracticeMode()) {
+    return;
+  }
+
+  const mode = ensureChallengeModeState();
+  if (!mode.started) {
+    return;
+  }
+
+  mode.commandLog.push({
+    command: normalizeCommand(command),
+    ok: result?.type !== "error"
+  });
+
+  if (result?.type === "error") {
+    mode.misses += 1;
+    mode.streak = 0;
+  }
+
+  maybeCompletePracticeChallenge();
+}
+
+function maybeCompletePracticeChallenge() {
+  const mode = ensureChallengeModeState();
+  const challenge = getActivePracticeChallenge();
+  if (!mode.started || !challenge || mode.completedIds.includes(challenge.id)) {
+    return;
+  }
+
+  const progress = getPracticeChallengeProgress(challenge);
+  if (!progress.every((step) => step.complete)) {
+    return;
+  }
+
+  const hintPenalty = mode.hintOpen ? 15 : 0;
+  const missPenalty = Math.min(40, mode.misses * 8);
+  const points = Math.max(25, 100 - hintPenalty - missPenalty);
+  mode.completedIds.push(challenge.id);
+  mode.score += points;
+  mode.streak += 1;
+  mode.started = false;
+  mode.hintOpen = false;
+  mode.lastCompletedId = challenge.id;
+  if (state.practiceDifficulty === "no-hints") {
+    addBadge("no-hints-run");
+    const progressState = ensureLearnerProgress();
+    progressState.noHintCompletions += 1;
+  }
+  appendTerminal("success", `Challenge complete: ${challenge.title}. +${points} points.`);
+  appendTerminal("note", challenge.success);
+
+  if (wizardPlayback) {
+    const next = getPracticeChallengeList().find((item) => !mode.completedIds.includes(item.id));
+    if (next) {
+      mode.activeId = next.id;
+      mode.started = true;
+      mode.commandLog = [];
+      mode.hintOpen = false;
+      appendTerminal("note", `Challenge tracker advanced to: ${next.title}.`);
+    }
+  }
+}
+
+function getPracticeChallengeProgress(challenge = getActivePracticeChallenge()) {
+  if (!challenge) {
+    return [];
+  }
+
+  return challenge.steps.map((step) => ({
+    ...step,
+    complete: isPracticeChallengeStepComplete(step)
+  }));
+}
+
+function isPracticeChallengeStepComplete(step) {
+  const mode = ensureChallengeModeState();
+  if (step.type === "command") {
+    return mode.commandLog.some((entry) => {
+      return entry.ok && step.commands.some((command) => commandMatches(entry.command, command));
+    });
+  }
+
+  return practiceChallengeConditionMet(step.condition);
+}
+
+function commandMatches(actual, expected) {
+  const normalizedActual = normalizeCommand(actual);
+  const normalizedExpected = normalizeCommand(expected);
+  if (normalizedActual === normalizedExpected) {
+    return true;
+  }
+
+  if (normalizedExpected === "git diff") {
+    return normalizedActual === "git diff --stat" || normalizedActual === "git diff --staged";
+  }
+
+  return false;
+}
+
+function practiceChallengeConditionMet(condition) {
+  switch (condition) {
+    case "branch-created":
+      return Boolean(state.taskFlags?.branchCreated) || Object.keys(state.branches || {}).some((branch) => branch !== "main");
+    case "off-main":
+      return state.currentBranch !== "main";
+    case "feature-edited":
+      return state.workingFiles?.[oracleLab.featureFile] !== currentHeadFiles()[oracleLab.featureFile];
+    case "feature-staged":
+      return state.indexFiles?.[oracleLab.featureFile] === state.workingFiles?.[oracleLab.featureFile] &&
+        state.indexFiles?.[oracleLab.featureFile] !== currentHeadFiles()[oracleLab.featureFile];
+    case "branch-committed":
+      return Boolean(state.taskFlags?.branchCommitted);
+    case "on-main-with-branch":
+      return state.currentBranch === "main" && Object.keys(state.branches || {}).some((branch) => branch !== "main");
+    case "merged":
+      return Boolean(state.taskFlags?.merged);
+    default:
+      return false;
+  }
+}
+
+function runVSCodeWizardMode() {
+  ensureVSCodeCliState();
+  const sectionIndex = clampIndex(state.vscodeSection || 0, vscodeLab.sections.length);
+  const section = vscodeLab.sections[sectionIndex];
+  const steps = [];
+  for (let index = sectionIndex; index < vscodeLab.sections.length; index += 1) {
+    const commands = getVSCodeWizardCommands(index);
+    commands.forEach((command, commandIndex) => {
+      const isLastInSection = commandIndex === commands.length - 1;
+      steps.push({
+        command,
+        run: () => {
+          appendTerminal("prompt", `${getPrompt()} ${command}`);
+          const result = executeVSCodeCommand(command);
+          appendTerminal(result.type, result.text);
+          recordVSCodeMissionCommand(command, result);
+          const expectedConflict = isExpectedVSCodeWizardConflict(command, result);
+          if (result.type === "error" && !expectedConflict) {
+            appendTerminal("error", "Wizard stopped so the learner can correct the simulator state.");
+            return false;
+          }
+          if (expectedConflict) {
+            appendTerminal("note", "Wizard continuing through the expected conflict resolution practice.");
+          }
+          if (isLastInSection) {
+            state.vscodeSection = clampIndex(index + 1, vscodeLab.sections.length);
+          }
+          return true;
+        }
+      });
+    });
+  }
+
+  startWizardPlayback({
+    label: `VS Code wizard mode: ghost typing the full VS Code lab from ${section.title}.`,
+    steps,
+    onComplete: () => {
+      appendTerminal("note", "VS Code wizard mode: lab complete.");
+    }
+  });
+}
+
+function getVSCodeWizardCommands(sectionIndex) {
+  switch (sectionIndex) {
+    case 0:
+      return [...vscodeLab.extensions.map((extension) => extension.command), "code --list-extensions"];
+    case 1:
+      return [`code ${ORACLE_REPO_ROOT}`, "git status"];
+    case 2:
+      return ['rg --files -g "*.sql"', `code --goto ${oracleLab.featureFile}:1`];
+    case 3:
+      return [`git switch -c ${oracleLab.branchName}`, `edit ${oracleLab.featureFile}`, "git diff", `git add ${oracleLab.featureFile}`, `git commit -m "${oracleLab.featureCommitMessage}"`];
+    case 4:
+      return ["git branch", "git status", "git log --oneline", "gitlens history"];
+    case 5:
+      return ["git merge main", "git diff", "resolve conflict", `git add ${oracleLab.featureFile}`, 'git commit -m "Resolve emergency orders conflict"'];
+    default:
+      return ["git status"];
+  }
+}
+
+function isExpectedVSCodeWizardConflict(command, result) {
+  return (
+    normalizeCommand(command) === "git merge main" &&
+    result?.type === "error" &&
+    Boolean(state.vscodeCli?.conflictOpen)
+  );
+}
+
+function runCodexWizardMode() {
+  ensureCodexCliState();
+  const sectionIndex = clampIndex(state.codexSection || 0, codexLab.sections.length);
+  const section = codexLab.sections[sectionIndex];
+  const steps = [];
+  for (let index = sectionIndex; index < codexLab.sections.length; index += 1) {
+    const commands = getCodexWizardCommands(codexLab.sections[index]).flatMap((item) => splitCodexCommandLine(item));
+    commands.forEach((command, commandIndex) => {
+      const isLastInSection = commandIndex === commands.length - 1;
+      steps.push({
+        command,
+        run: () => {
+          appendTerminal("prompt", `${getCodexPrompt()} ${command}`);
+          const result = executeCodexCommand(command);
+          appendTerminal(result.type, result.text);
+          if (result.type === "error") {
+            appendTerminal("error", "Codex wizard stopped so the learner can correct the setup state.");
+            return false;
+          }
+          if (isLastInSection) {
+            state.codexSection = clampIndex(index + 1, codexLab.sections.length);
+          }
+          return true;
+        }
+      });
+    });
+  }
+
+  if (!steps.length) {
+    appendTerminal("note", "This section has no CLI action. Move to the next section and try again.");
+    state.codexSection = clampIndex(sectionIndex + 1, codexLab.sections.length);
+    return;
+  }
+
+  startWizardPlayback({
+    label: `Codex wizard mode: ghost typing the full Codex lesson from ${section.title}.`,
+    steps,
+    onComplete: () => {
+      appendTerminal("note", "Codex wizard mode: lesson complete.");
+    }
+  });
+}
+
+function getCodexWizardCommands(section) {
+  if (!section) {
+    return [];
+  }
+  if (section.type === "install") {
+    return section.steps.map((step) => step.command);
+  }
+  if (section.type === "workflow") {
+    return section.cards
+      .map((card) => card.command || card.prompt)
+      .filter(Boolean);
+  }
+  if (section.type === "orientation") {
+    return [section.prompt];
+  }
+  if (section.type === "prompting") {
+    return [
+      "Inspect this ADO ticket before editing. Use Purpose, Authority, Context, and Task. Return a short plan and open questions before changing files."
+    ];
+  }
+  if (section.type === "safety") {
+    return ["git status", "git diff --stat", "Before editing, list the branch, changed files, risks, and validation plan."];
+  }
+  return [];
+}
+
+function createSimpleWizardSteps(commands, executor, promptGetter) {
+  return commands.map((command) => ({
+    command,
+    run: () => {
+      appendTerminal("prompt", `${promptGetter()} ${command}`);
+      const result = executor(command);
+      appendTerminal(result.type, result.text);
+      if (result.type === "error") {
+        appendTerminal("error", "Wizard stopped so the learner can correct the simulator state.");
+        return false;
+      }
+      return true;
+    }
+  }));
+}
+
+function startWizardPlayback({ label, steps, onComplete }) {
+  cancelWizardPlayback();
+  wizardPlayback = {
+    index: 0,
+    steps: Array.isArray(steps) ? steps : [],
+    onComplete
+  };
+  appendTerminal("note", `${label} Watch the prompt; each command will be typed and run one at a time.`);
+  saveState();
+  render();
+  scheduleWizardPlayback(650);
+}
+
+function scheduleWizardPlayback(delay = 450) {
+  if (!wizardPlayback) {
+    return;
+  }
+  clearTimeout(wizardPlaybackTimer);
+  wizardPlaybackTimer = window.setTimeout(runNextWizardPlaybackStep, delay);
+}
+
+function runNextWizardPlaybackStep() {
+  const playback = wizardPlayback;
+  if (!playback) {
+    return;
+  }
+
+  if (playback.index >= playback.steps.length) {
+    finishWizardPlayback(playback);
+    return;
+  }
+
+  const step = playback.steps[playback.index];
+  typeWizardCommand(step.command, playback, () => {
+    if (wizardPlayback !== playback) {
+      return;
+    }
+
+    clearWizardInputVisual();
+    const ok = step.run();
+    if (!ok) {
+      wizardPlayback = null;
+      saveState();
+      render();
+      return;
+    }
+
+    playback.index += 1;
+    if (playback.index >= playback.steps.length) {
+      finishWizardPlayback(playback);
+      return;
+    }
+
+    saveState();
+    render();
+    scheduleWizardPlayback(getWizardCommandPause(step.command));
+  });
+}
+
+function finishWizardPlayback(playback) {
+  if (wizardPlayback !== playback) {
+    return;
+  }
+
+  wizardPlayback = null;
+  clearTimeout(wizardPlaybackTimer);
+  wizardPlaybackTimer = null;
+  clearWizardInputVisual();
+  playback.onComplete?.();
+  saveState();
+  render();
+}
+
+function typeWizardCommand(command, playback, done) {
+  const input = document.getElementById("commandInput");
+  if (!input) {
+    done();
+    return;
+  }
+
+  const text = String(command || "");
+  const delay = getWizardTypingDelay(text);
+  let index = 0;
+  input.value = "";
+  input.focus();
+  input.classList.add("wizard-typing");
+  document.querySelector(".terminal-panel")?.classList.add("wizard-running");
+
+  const tick = () => {
+    if (wizardPlayback !== playback) {
+      return;
+    }
+
+    index += 1;
+    input.value = text.slice(0, index);
+    input.setSelectionRange(input.value.length, input.value.length);
+    if (index >= text.length) {
+      wizardPlaybackTimer = window.setTimeout(done, 280);
+      return;
+    }
+
+    wizardPlaybackTimer = window.setTimeout(tick, delay);
+  };
+
+  wizardPlaybackTimer = window.setTimeout(tick, delay);
+}
+
+function getWizardTypingDelay(command) {
+  const length = String(command || "").length;
+  if (length > 240) {
+    return 2;
+  }
+  if (length > 100) {
+    return 5;
+  }
+  return 18;
+}
+
+function getWizardCommandPause(command) {
+  return String(command || "").length > 160 ? 600 : 450;
+}
+
+function cancelWizardPlayback(message = "") {
+  if (wizardPlaybackTimer) {
+    clearTimeout(wizardPlaybackTimer);
+  }
+  wizardPlaybackTimer = null;
+  wizardPlayback = null;
+  clearWizardInputVisual();
+  if (message) {
+    appendTerminal("note", message);
+  }
+}
+
+function clearWizardInputVisual() {
+  const input = document.getElementById("commandInput");
+  if (input) {
+    input.value = "";
+    input.classList.remove("wizard-typing");
+  }
+  document.querySelector(".terminal-panel")?.classList.remove("wizard-running");
 }
 
 function runCodexCommand(command) {
@@ -2958,6 +4297,7 @@ function runVSCodeCommand(command) {
   appendTerminal("prompt", `${getPrompt()} ${command}`);
   const result = executeVSCodeCommand(command);
   appendTerminal(result.type, result.text);
+  recordVSCodeMissionCommand(command, result);
   saveState();
   render();
 }
@@ -2970,6 +4310,7 @@ function ensureVSCodeCliState() {
   state.vscodeCli.installedExtensions = Array.isArray(state.vscodeCli.installedExtensions)
     ? state.vscodeCli.installedExtensions
     : [];
+  state.vscodeCli.missionLog = Array.isArray(state.vscodeCli.missionLog) ? state.vscodeCli.missionLog : [];
 }
 
 function executeVSCodeCommand(command) {
@@ -2994,6 +4335,7 @@ function executeVSCodeCommand(command) {
           "  code --install-extension eamodio.gitlens",
           "  code --install-extension Oracle.sql-developer",
           "  code --list-extensions",
+          `  code --goto ${oracleLab.featureFile}:1`,
           "  rg --files -g \"*.sql\"",
           "  git status",
           `  git switch -c ${oracleLab.branchName}`,
@@ -3002,7 +4344,9 @@ function executeVSCodeCommand(command) {
           `  git add ${oracleLab.featureFile}`,
           "  git commit -m \"Add emergency orders ZIP report\"",
           "  git merge main",
-          "  resolve conflict"
+          "  resolve conflict",
+          "  gitlens history",
+          `  ${VSCODE_WIZARD_COMMAND}`
         ].join("\n")
     };
   }
@@ -3025,6 +4369,17 @@ function executeVSCodeCommand(command) {
           ? state.vscodeCli.installedExtensions.join("\n")
           : "No required extensions installed in this simulator yet."
     };
+  }
+
+  if (lower[0] === "code" && lower[1] === "--goto") {
+    const target = tokens.slice(2).join(" ").trim();
+    if (!target) {
+      return { type: "error", text: `Specify a file, for example: code --goto ${oracleLab.featureFile}:1` };
+    }
+    if (!target.includes(oracleLab.featureFile)) {
+      return { type: "note", text: `Opened ${target}. For this lab, the main target file is ${oracleLab.featureFile}.` };
+    }
+    return { type: "success", text: `Opened ${oracleLab.featureFile} at the requested line. Compare it with neighboring SQL before editing.` };
   }
 
   if (lower[0] === "cd" || lower[0] === "set-location") {
@@ -3068,7 +4423,7 @@ function executeVSCodeCommand(command) {
     return { type: "success", text: `Opened and marked ${oracleLab.featureFile} as edited for this simulator. Run git diff next.` };
   }
 
-  if (normalized === "git diff") {
+  if (normalized === "git diff" || normalized === "git diff --staged") {
     if (state.vscodeCli.conflictOpen) {
       return {
         type: "note",
@@ -3085,6 +4440,9 @@ function executeVSCodeCommand(command) {
     }
     if (!state.vscodeCli.edited) {
       return { type: "note", text: "No file edits yet. Try: edit ccs/sql/meters/ccs_emergency_response_activity_by_zip_prior_week.sql" };
+    }
+    if (normalized === "git diff --staged" && !state.vscodeCli.staged) {
+      return { type: "note", text: "No staged diff yet. Stage the intended file first." };
     }
     return {
       type: "success",
@@ -3127,6 +4485,19 @@ function executeVSCodeCommand(command) {
     };
   }
 
+  if (normalized === "gitlens history" || normalized === "gitlens inspect") {
+    if (!state.vscodeCli.installedExtensions.includes("eamodio.gitlens")) {
+      return { type: "error", text: "GitLens is not installed yet. Install eamodio.gitlens first." };
+    }
+    return {
+      type: "success",
+      text:
+        state.vscodeCli.committed
+          ? "GitLens history: c002 Add emergency orders ZIP report -> c001 Add ticket context -> c000 Oracle repo baseline"
+          : "GitLens history: c001 Add ticket context -> c000 Oracle repo baseline"
+    };
+  }
+
   if (normalized === "git merge main") {
     state.vscodeCli.conflictOpen = true;
     state.vscodeCli.conflictResolved = false;
@@ -3160,6 +4531,105 @@ function installVSCodeExtension(extensionId) {
   }
 
   return { type: "success", text: `${extension.name} installed. ${extension.reason}` };
+}
+
+function recordVSCodeMissionCommand(command, result) {
+  if (!isVSCodeMode()) {
+    return;
+  }
+  ensureVSCodeCliState();
+  state.vscodeCli.missionLog.push({
+    command: normalizeCommand(command),
+    ok: result?.type !== "error"
+  });
+  if (state.vscodeCli.missionLog.length > 40) {
+    state.vscodeCli.missionLog = state.vscodeCli.missionLog.slice(-40);
+  }
+}
+
+function vscodeRan(expected) {
+  ensureVSCodeCliState();
+  return state.vscodeCli.missionLog.some((entry) => entry.ok && commandMatches(entry.command, expected));
+}
+
+function getVSCodeMissionSteps() {
+  ensureVSCodeCliState();
+  const installedRequired = vscodeLab.extensions.every((extension) =>
+    state.vscodeCli.installedExtensions.includes(extension.id)
+  );
+  return [
+    {
+      label: "Required extensions installed",
+      detail: "PowerShell, GitLens, and Oracle SQL Developer are available.",
+      complete: installedRequired
+    },
+    {
+      label: "Repo opened as a folder",
+      detail: "Explorer, terminal, Source Control, and Codex share one workspace.",
+      complete: Boolean(state.vscodeCli.openedWorkspace) && normalizePathForCompare(state.cwd) === normalizePathForCompare(ORACLE_REPO_ROOT)
+    },
+    {
+      label: "Target files discovered",
+      detail: "Use Explorer, Quick Open, or ripgrep before editing.",
+      complete: vscodeRan('rg --files -g "*.sql"') || vscodeRan(`code --goto ${oracleLab.featureFile}:1`)
+    },
+    {
+      label: "Task branch visible",
+      detail: "Status bar and terminal agree on the branch name.",
+      complete: state.vscodeCli.branch !== "main"
+    },
+    {
+      label: "Diff reviewed",
+      detail: "The learner inspected changed lines before staging.",
+      complete: vscodeRan("git diff") || vscodeRan("git diff --staged")
+    },
+    {
+      label: "Source Control staged intentionally",
+      detail: "Only the intended SQL file is ready for commit.",
+      complete: Boolean(state.vscodeCli.staged || state.vscodeCli.committed)
+    },
+    {
+      label: "Commit created",
+      detail: "The change has a reviewable checkpoint.",
+      complete: Boolean(state.vscodeCli.committed)
+    },
+    {
+      label: "Conflict handling practiced",
+      detail: "The learner can recognize and resolve conflict markers.",
+      complete: Boolean(state.vscodeCli.conflictResolved || vscodeRan("resolve conflict"))
+    }
+  ];
+}
+
+function renderVSCodeMissionPanel() {
+  const steps = getVSCodeMissionSteps();
+  const complete = steps.filter((step) => step.complete).length;
+  return `
+    <section class="vscode-mission-panel" aria-label="VS Code workflow missions">
+      <div class="vscode-mission-header">
+        <div>
+          <span class="section-kicker">Editor missions</span>
+          <h3>${complete}/${steps.length} complete</h3>
+        </div>
+        <code>${escapeHtml(VSCODE_WIZARD_COMMAND)}</code>
+      </div>
+      <div class="vscode-mission-list">
+        ${steps
+          .map(
+            (step, index) => `
+              <article class="${step.complete ? "complete" : ""}">
+                <span>${step.complete ? "Done" : index + 1}</span>
+                <div>
+                  <strong>${escapeHtml(step.label)}</strong>
+                  <p>${escapeHtml(step.detail)}</p>
+                </div>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
 }
 
 function commandVSCodeCd(args) {
@@ -3263,7 +4733,8 @@ function executeCodexCommand(command) {
           "  git status",
           "  codex",
           "  codex exec \"Review this repo for docs gaps\"",
-          "  exit"
+          "  exit",
+          `  ${CODEX_WIZARD_COMMAND}`
         ].join("\n")
     };
   }
@@ -3308,9 +4779,29 @@ function executeCodexCommand(command) {
     return { type: "success", text: renderCodexDirectoryListing() };
   }
 
+  if (lower[0] === "get-content") {
+    return {
+      type: "success",
+      text:
+        [
+          "# Repo notes",
+          "- Purpose: Oracle analytics training workspace.",
+          "- Key folders: ccs, docs, fusion, projects, wacs.",
+          "- Review checkpoint: inspect generated notes before committing."
+        ].join("\n")
+    };
+  }
+
   if (lower[0] === "rg" && lower[1] === "--files") {
     const sqlOnly = tokens.includes("-g") && tokens.some((token) => token.replaceAll("'", "").replaceAll('"', "") === "*.sql");
     return { type: "success", text: renderCodexFileSearch(sqlOnly) };
+  }
+
+  if (normalized === "git diff" || normalized === "git diff --stat") {
+    if (!isCodexRepoRoot()) {
+      return { type: "error", text: "fatal: not a git repository. Navigate to C:\\Repositories\\Oracle first." };
+    }
+    return { type: "success", text: "No local file changes in this Codex simulator." };
   }
 
   if (normalized === "git status") {
@@ -3545,6 +5036,7 @@ function executeCommand(command) {
         [
           "Supported commands:",
           "  git status",
+          "  git diff | git diff --stat | git diff --staged",
           "  git add <file> | git add .",
           '  git commit -m "message"',
           "  git branch | git branch <name>",
@@ -3553,6 +5045,7 @@ function executeCommand(command) {
           "  git log --oneline",
           "  git push | git pull",
           "  git restore --staged <file>",
+          `  ${GIT_WIZARD_COMMAND}`,
           "  mkdir <folder>",
           "  cd <folder>",
           "  git init",
@@ -3592,6 +5085,8 @@ function executeCommand(command) {
       return commandInit();
     case "status":
       return commandStatus();
+    case "diff":
+      return commandDiff(tokens.slice(2));
     case "add":
       return commandAdd(tokens.slice(2));
     case "commit":
@@ -3671,6 +5166,7 @@ function commandOutFile(outFile) {
   }
 
   state.workingFiles[outFile.file] = `${outFile.content}\n`;
+  state.selectedFilePath = outFile.file;
   return { type: "success", text: `Created ${outFile.file}` };
 }
 
@@ -3719,6 +5215,51 @@ function commandStatus() {
     type: status.clean ? "success" : "note",
     text: lines.join("\n")
   };
+}
+
+function commandDiff(args = []) {
+  if (!state.initialized) {
+    return { type: "error", text: "fatal: not a git repository. Run git init first." };
+  }
+
+  const staged = args.includes("--staged") || args.includes("--cached");
+  const statOnly = args.includes("--stat");
+  const beforeFiles = staged ? currentHeadFiles() : state.indexFiles;
+  const afterFiles = staged ? state.indexFiles : state.workingFiles;
+  const names = uniqueSorted([...Object.keys(beforeFiles), ...Object.keys(afterFiles)]);
+  const changes = names
+    .map((name) => ({
+      name,
+      before: beforeFiles[name],
+      after: afterFiles[name]
+    }))
+    .filter((entry) => entry.before !== entry.after);
+
+  if (!changes.length) {
+    return { type: "success", text: staged ? "No staged changes to show." : "No unstaged changes to show." };
+  }
+
+  if (statOnly) {
+    return {
+      type: "note",
+      text: changes
+        .map((entry) => `${entry.name} | ${estimateChangedLines(entry.before, entry.after)} +`)
+        .join("\n")
+    };
+  }
+
+  const lines = [];
+  changes.forEach((entry) => {
+    const kind = changeType(entry.before, entry.after);
+    lines.push(`diff --git a/${entry.name} b/${entry.name}`);
+    lines.push(`${kind}: ${entry.name}`);
+    lines.push(`--- ${entry.before === undefined ? "/dev/null" : `a/${entry.name}`}`);
+    lines.push(`+++ ${entry.after === undefined ? "/dev/null" : `b/${entry.name}`}`);
+    lines.push("@@ simulator diff @@");
+    previewDiffLines(entry.after === undefined ? entry.before : entry.after, entry.after === undefined ? "-" : "+").forEach((line) => lines.push(line));
+  });
+
+  return { type: "note", text: lines.join("\n") };
 }
 
 function commandAdd(paths) {
@@ -3780,6 +5321,7 @@ function commandCommit(args) {
   const commit = createCommitFromFiles(message, parents, clone(state.indexFiles));
   state.branches[state.currentBranch] = commit.id;
   state.indexFiles = clone(commit.files);
+  state.selectedCommitId = commit.id;
 
   if (state.pendingMerge) {
     state.workingFiles = clone(commit.files);
@@ -3888,9 +5430,17 @@ function commandMerge(args) {
 
   if (isAncestor(targetHead, sourceHead)) {
     const sourceCommit = getCommit(sourceHead);
+    recordMergeEvent({
+      type: "fast-forward",
+      target: state.currentBranch,
+      source,
+      from: targetHead,
+      to: sourceHead
+    });
     state.branches[state.currentBranch] = sourceHead;
     state.indexFiles = clone(sourceCommit.files);
     state.workingFiles = clone(sourceCommit.files);
+    state.selectedCommitId = sourceHead;
     state.taskFlags.merged = true;
     return {
       type: "success",
@@ -3936,9 +5486,18 @@ function commandMerge(args) {
   const mergedFiles = mergeSnapshots(baseId, targetHead, sourceHead);
   const scenario = findConflictScenario(source);
   const commit = createCommitFromFiles(scenario?.mergeMessage || `Merge branch '${source}'`, [targetHead, sourceHead], mergedFiles);
+  recordMergeEvent({
+    type: "merge-commit",
+    target: state.currentBranch,
+    source,
+    from: targetHead,
+    sourceHead,
+    to: commit.id
+  });
   state.branches[state.currentBranch] = commit.id;
   state.indexFiles = clone(commit.files);
   state.workingFiles = clone(commit.files);
+  state.selectedCommitId = commit.id;
   state.taskFlags.merged = true;
 
   return {
@@ -4046,6 +5605,7 @@ function commandEdit(args) {
   }
 
   editFile(file);
+  state.selectedFilePath = file;
   return { type: "note", text: `Edited ${file}. Use git status to inspect the working tree.` };
 }
 
@@ -4063,6 +5623,7 @@ function commandResolve(args) {
   const targetContent = getCommit(state.conflict.targetHead).files[file] || "";
   const sourceContent = getCommit(state.conflict.sourceHead).files[file] || "";
   state.workingFiles[file] = mergeUniqueLines(targetContent, sourceContent);
+  state.selectedFilePath = file;
   state.conflict.files = state.conflict.files.filter((name) => name !== file);
 
   if (!state.conflict.files.length) {
@@ -4148,6 +5709,21 @@ function createCommitFromFiles(message, parents, files) {
   return commit;
 }
 
+function ensureMergeEvents() {
+  if (!Array.isArray(state.mergeEvents)) {
+    state.mergeEvents = [];
+  }
+  return state.mergeEvents;
+}
+
+function recordMergeEvent(event) {
+  const events = ensureMergeEvents();
+  events.push({
+    order: events.length,
+    ...event
+  });
+}
+
 function getStatus() {
   const headFiles = currentHeadFiles();
   const names = uniqueSorted([
@@ -4195,6 +5771,20 @@ function changeType(before, after) {
     return "deleted";
   }
   return "modified";
+}
+
+function estimateChangedLines(before, after) {
+  const beforeCount = before === undefined ? 0 : String(before).split("\n").filter(Boolean).length;
+  const afterCount = after === undefined ? 0 : String(after).split("\n").filter(Boolean).length;
+  return Math.max(1, Math.abs(afterCount - beforeCount) || afterCount || beforeCount);
+}
+
+function previewDiffLines(content, marker) {
+  const lines = String(content || "")
+    .split("\n")
+    .filter(Boolean)
+    .slice(0, 6);
+  return lines.length ? lines.map((line) => `${marker} ${line}`) : [`${marker} <empty>`];
 }
 
 function expandPaths(paths) {
@@ -4843,11 +6433,22 @@ function renderRepoMapItems(items, depth = 0, parentPath = "") {
       const hasChildren = Boolean(item.children?.length);
       const expanded = hasChildren && isRepoMapExpanded(item, itemPath);
       const children = expanded ? renderRepoMapItems(item.children, depth + 1, itemPath) : "";
-      const selected = getActiveRepoContainerPaths().includes(itemPath) || Boolean(item.path && isActiveLabPath(item.path));
-      const rowTag = hasChildren ? "button" : "div";
+      const selectedCommitFiles = state.selectedCommitId ? changedFilesForCommit(state.selectedCommitId) : [];
+      const graphFileSelected = item.path && selectedCommitFiles.includes(item.path);
+      const selectedFileInside =
+        hasChildren &&
+        (String(state.selectedFilePath || "").startsWith(`${itemPath}/`) ||
+          selectedCommitFiles.some((path) => path.startsWith(`${itemPath}/`)));
+      const selected =
+        getActiveRepoContainerPaths().includes(itemPath) ||
+        Boolean(item.path && isActiveLabPath(item.path)) ||
+        itemPath === state.selectedFilePath ||
+        graphFileSelected ||
+        selectedFileInside;
+      const rowTag = "button";
       const rowAttributes = hasChildren
         ? ` type="button" data-action="toggle-explorer-folder" data-scope="repo" data-path="${escapeAttribute(itemPath)}" aria-expanded="${expanded}"`
-        : "";
+        : ` type="button" data-action="toggle-explorer-file" data-scope="repo" data-path="${escapeAttribute(itemPath)}" aria-expanded="${isExplorerFileExpanded("repo", itemPath)}"`;
       return `
         <${rowTag} class="repo-map-row repo-explorer-item ${escapeAttribute(item.type)} ${escapeAttribute(status.tone)} ${selected ? "selected" : ""} ${item.labTarget ? "lab-target" : ""}" style="--depth: ${depth}"${rowAttributes}${titleAttribute(`${fullPath}\n${status.label}\n${item.note || ""}`)}>
           <span class="repo-explorer-chevron" aria-hidden="true">${hasChildren ? (expanded ? "v" : ">") : ""}</span>
@@ -4992,6 +6593,7 @@ function fileKind(name) {
 
 function renderPracticeWorkspace() {
   renderPracticeGraph();
+  renderPracticeChallengePanel();
   renderPowerShellReferencePanel();
   renderTerminal();
 }
@@ -5270,6 +6872,7 @@ function renderVSCodeWorkspace() {
   document.getElementById("quizScore").textContent = "VS Code checklist";
   document.querySelector(".quiz-panel .section-kicker").textContent = "Quick checks";
   document.getElementById("quizList").innerHTML = `
+    ${renderVSCodeMissionPanel()}
     <article class="quiz-card codex-check-card">
       <strong>Before changing files</strong>
       <p>Confirm the opened folder is the repo root, required extensions are installed, and the branch shown in the status bar is correct.</p>
@@ -6034,6 +7637,231 @@ function renderPracticeGraph() {
   document.querySelector(".guided-panel .section-kicker").textContent = "Repository graph";
 }
 
+function renderPracticeMissionPanel() {
+  const mission = getActivePracticeMission();
+  const progress = ensureLearnerProgress();
+  const difficulty = normalizePracticeDifficulty(state.practiceDifficulty);
+  return `
+    <section class="practice-mission-panel" aria-label="Practice mission selector">
+      <div class="practice-mission-header">
+        <div>
+          <span class="section-kicker">Mission control</span>
+          <h3>${escapeHtml(mission.title)}</h3>
+          <p>${escapeHtml(mission.prompt)}</p>
+        </div>
+        <button class="text-button" type="button" data-action="practice-mission-random">Random mission</button>
+      </div>
+      <div class="practice-mission-grid">
+        ${getPracticeMissionList()
+          .map((item) => {
+            const active = item.id === mission.id;
+            const done = progress.completedMissions.includes(item.id);
+            return `
+              <button class="practice-mission-card ${active ? "active" : ""} ${done ? "complete" : ""}" type="button" data-action="practice-mission-start" data-mission-id="${escapeAttribute(item.id)}"${titleAttribute(`${item.title}\n${item.prompt}\n${item.target}`)}>
+                <span>${escapeHtml(done ? "Done" : item.level)}</span>
+                <strong>${escapeHtml(item.title)}</strong>
+                <em>${escapeHtml(item.target)}</em>
+              </button>
+            `;
+          })
+          .join("")}
+      </div>
+      <div class="practice-difficulty-row" aria-label="Practice support mode">
+        ${practiceDifficultyModes
+          .map(
+            (item) => `
+              <button class="practice-difficulty ${item.id === difficulty ? "active" : ""}" type="button" data-action="practice-difficulty" data-difficulty="${escapeAttribute(item.id)}"${titleAttribute(item.desc)}>
+                ${escapeHtml(item.label)}
+              </button>
+            `
+          )
+          .join("")}
+        <code>${escapeHtml(GIT_WIZARD_COMMAND)}</code>
+      </div>
+    </section>
+  `;
+}
+
+function renderPracticeReadinessPanel() {
+  const readiness = calculatePRReadiness();
+  const progress = ensureLearnerProgress();
+  const selectedCommit = getCommitSafe(state.selectedCommitId);
+  const selectedFiles = state.selectedCommitId ? changedFilesForCommit(state.selectedCommitId) : [];
+  return `
+    <section class="practice-readiness-panel" aria-label="Practice progress">
+      <div class="practice-readiness-score">
+        <div>
+          <span class="section-kicker">PR readiness</span>
+          <strong>${readiness.score}</strong>
+          <small>best ${Math.max(progress.bestReadiness || 0, readiness.score)}</small>
+        </div>
+        <div class="readiness-checks">
+          ${readiness.checks
+            .map((check) => `<span class="${check.complete ? "complete" : ""}">${escapeHtml(check.label)}</span>`)
+            .join("")}
+        </div>
+      </div>
+      ${renderPracticeBadges()}
+      ${renderPracticeReplayTimeline()}
+      ${
+        selectedCommit
+          ? `
+            <div class="graph-selection-card">
+              <span class="section-kicker">Selected commit</span>
+              <strong>${escapeHtml(selectedCommit.id)}</strong>
+              <p>${escapeHtml(selectedCommit.message)}</p>
+              <em>${selectedFiles.length ? selectedFiles.map((file) => truncateLabel(file, 38)).join(", ") : "No file delta detected"}</em>
+            </div>
+          `
+          : ""
+      }
+    </section>
+  `;
+}
+
+function renderPracticeBadges() {
+  const progress = ensureLearnerProgress();
+  return `
+    <div class="practice-badge-row" aria-label="Earned badges">
+      ${practiceBadgeDefinitions
+        .map((badge) => {
+          const earned = progress.badges.includes(badge.id);
+          return `
+            <span class="practice-badge ${earned ? "earned" : ""}"${titleAttribute(`${badge.label}\n${badge.desc}`)}>
+              ${escapeHtml(earned ? badge.label : `Locked: ${badge.label}`)}
+            </span>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function renderPracticeReplayTimeline() {
+  const replay = ensureCommandReplay();
+  if (!replay.length) {
+    return `
+      <div class="practice-replay empty">
+        <span class="section-kicker">Command replay</span>
+        <p>Run commands in the PowerShell IDE and they will appear here as a replayable timeline.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="practice-replay">
+      <div class="practice-replay-header">
+        <span class="section-kicker">Command replay</span>
+        <button class="text-button subtle" type="button" data-action="practice-replay-all">Replay all</button>
+      </div>
+      <div class="practice-replay-track">
+        ${replay
+          .map(
+            (entry, index) => `
+              <button class="practice-replay-step ${entry.resultType === "error" ? "error" : ""}" type="button" data-action="practice-replay-jump" data-replay-index="${index}"${titleAttribute(`${entry.command}\n${entry.branch} @ ${entry.head}\n${entry.clean ? "clean" : "open changes"}`)}>
+                <span>${index + 1}</span>
+                <code>${escapeHtml(truncateLabel(entry.command, 34))}</code>
+              </button>
+            `
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderPracticeChallengePanel() {
+  const target = document.getElementById("guidedCommands");
+  if (!target) {
+    return;
+  }
+
+  const mode = ensureChallengeModeState();
+  const challenges = getPracticeChallengeList();
+  const challenge = getActivePracticeChallenge();
+  const progress = getPracticeChallengeProgress(challenge);
+  const complete = challenge ? mode.completedIds.includes(challenge.id) : false;
+  const allComplete = challenges.every((item) => mode.completedIds.includes(item.id));
+  const completeCount = mode.completedIds.length;
+  const actionLabel = complete ? "Replay" : mode.started ? "Running" : "Start";
+  const allowHints = normalizePracticeDifficulty(state.practiceDifficulty) !== "no-hints";
+
+  target.innerHTML = `
+    ${renderPracticeMissionPanel()}
+    ${renderPracticeReadinessPanel()}
+    <section class="challenge-panel" aria-label="Practice challenge mode">
+      <div class="challenge-header">
+        <div>
+          <span class="section-kicker">Challenge mode</span>
+          <h3>Practice objectives</h3>
+        </div>
+        <div class="challenge-stats" aria-label="Challenge score">
+          <span>${completeCount}/${challenges.length} complete</span>
+          <span>${mode.score} pts</span>
+          <span>${mode.misses} misses</span>
+        </div>
+      </div>
+      <div class="challenge-track">
+        ${challenges
+          .map((item, index) => {
+            const isActive = item.id === mode.activeId;
+            const isDone = mode.completedIds.includes(item.id);
+            const label = isDone ? "Done" : `${index + 1}`;
+            return `
+              <button class="challenge-token ${isActive ? "active" : ""} ${isDone ? "complete" : ""}" type="button" data-action="practice-challenge-select" data-challenge-id="${escapeAttribute(item.id)}"${titleAttribute(`${item.title}\n${item.prompt}`)}>
+                <span>${escapeHtml(label)}</span>
+                <strong>${escapeHtml(item.title)}</strong>
+              </button>
+            `;
+          })
+          .join("")}
+      </div>
+      ${
+        challenge
+          ? `
+            <article class="challenge-card ${complete ? "complete" : mode.started ? "active" : ""}">
+              <div class="challenge-card-copy">
+                <span class="pill ${complete ? "green" : mode.started ? "amber" : "blue"}">${escapeHtml(challenge.level)}</span>
+                <div>
+                  <h4>${escapeHtml(challenge.title)}</h4>
+                  <p>${escapeHtml(challenge.prompt)}</p>
+                </div>
+              </div>
+              <ol class="challenge-steps">
+                ${progress.map((step, index) => renderPracticeChallengeStep(step, index)).join("")}
+              </ol>
+              ${
+                allowHints && mode.hintOpen && !complete
+                  ? `<div class="challenge-hint"><strong>Hint</strong><span>${escapeHtml(challenge.hint)}</span></div>`
+                  : ""
+              }
+              <div class="challenge-actions">
+                <button class="text-button" type="button" data-action="practice-challenge-start" data-challenge-id="${escapeAttribute(challenge.id)}" ${mode.started && !complete ? "disabled" : ""}>${escapeHtml(actionLabel)}</button>
+                ${
+                  allowHints
+                    ? `<button class="text-button" type="button" data-action="practice-challenge-hint" ${complete ? "disabled" : ""}>${mode.hintOpen ? "Hide hint" : "Hint"}</button>`
+                    : `<span class="challenge-no-hint">No-hints mode</span>`
+                }
+                <button class="text-button" type="button" data-action="practice-challenge-next" ${allComplete ? "disabled" : ""}>Next challenge</button>
+                <button class="text-button subtle" type="button" data-action="practice-challenge-reset">Reset score</button>
+              </div>
+            </article>
+          `
+          : `<div class="empty-state">No challenges available.</div>`
+      }
+    </section>
+  `;
+}
+
+function renderPracticeChallengeStep(step, index) {
+  return `
+    <li class="${step.complete ? "complete" : ""}">
+      <span>${step.complete ? "Done" : index + 1}</span>
+      <strong>${escapeHtml(step.label)}</strong>
+    </li>
+  `;
+}
+
 function renderPowerShellReferencePanel() {
   const repoFlow = document.querySelector(".repo-flow");
   const workingZone = document.getElementById("workingZone");
@@ -6149,13 +7977,13 @@ function renderDynamicBranchGraph() {
   }
 
   const maxLane = Math.max(0, ...commits.map((commit) => commit.lane || 0), ...Object.values(state.branchLanes || {}));
-  const graphStartX = 140;
+  const graphStartX = 168;
   const graphGap = 180;
-  const laneLineStart = 72;
+  const laneLineStart = 150;
   const laneGap = 96;
-  const laneTop = 88;
-  const width = Math.max(760, graphStartX + (commits.length - 1) * graphGap + 180);
-  const height = Math.max(220, laneTop + maxLane * laneGap + 88);
+  const laneTop = 104;
+  const width = Math.max(860, graphStartX + (commits.length - 1) * graphGap + 260);
+  const height = Math.max(250, laneTop + maxLane * laneGap + 116);
   const positions = new Map(
     commits.map((commit, index) => [
       commit.id,
@@ -6172,6 +8000,10 @@ function renderDynamicBranchGraph() {
     const y = laneY(lane);
     const label = laneLabel(lane);
     return `
+      <text x="18" y="${y + 5}" class="repo-graph-lane-label">
+        <title>${escapeSvg(label)}</title>
+        ${escapeSvg(truncateLabel(label, 22))}
+      </text>
       <line x1="${laneLineStart}" y1="${y}" x2="${width - 70}" y2="${y}" class="repo-graph-lane">
         <title>${escapeSvg(label)}</title>
       </line>
@@ -6213,31 +8045,128 @@ function renderDynamicBranchGraph() {
     })
     .join("");
 
+  const mergeEventPaths = getGraphMergeEvents()
+    .map((event) => renderGraphMergeEvent(event, positions, laneY, width))
+    .join("");
+
   const nodes = commits
     .map((commit) => {
       const position = positions.get(commit.id);
       const labels = branchLabelsForCommit(commit.id);
+      const selected = commit.id === state.selectedCommitId;
       return `
-        <g class="repo-graph-node">
+        <g class="repo-graph-node ${selected ? "selected" : ""}" data-action="practice-select-commit" data-commit-id="${escapeAttribute(commit.id)}" tabindex="0" role="button">
           <circle cx="${position.x}" cy="${position.y}" r="18" class="${commit.id === headId() ? "repo-graph-commit head" : "repo-graph-commit"}">
             <title>${escapeSvg(`${commit.id}: ${commit.message}${labels.length ? ` (${labels.join(", ")})` : ""}`)}</title>
           </circle>
+          <text x="${position.x}" y="${position.y + 4}" class="repo-graph-commit-id">${escapeSvg(commit.id)}</text>
         </g>
       `;
     })
     .join("");
 
+  const pointerLabels = commits.map((commit) => renderGraphPointerLabels(commit, positions)).join("");
+
   return `
     <div class="repo-graph-card">
       <svg class="repo-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Dynamic Git branch graph">
         <title>${escapeSvg(`Current branch ${state.currentBranch}, HEAD ${currentHeadLabel()}`)}</title>
+        <defs>
+          <marker id="repoGraphArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="repo-graph-arrow"></path>
+          </marker>
+        </defs>
         ${laneLines}
         ${parentPaths}
         ${branchStubs}
+        ${mergeEventPaths}
         ${nodes}
+        ${pointerLabels}
       </svg>
     </div>
   `;
+}
+
+function getGraphMergeEvents() {
+  const events = Array.isArray(state.mergeEvents) ? state.mergeEvents : [];
+  const hasMainFastForward = events.some((event) => event.type === "fast-forward" && event.target === "main");
+  const mainHead = state.branches?.main;
+  const mainCommit = mainHead ? state.commits.find((commit) => commit.id === mainHead) : null;
+  if (
+    !hasMainFastForward &&
+    mainCommit &&
+    mainCommit.lane !== (state.branchLanes?.main || 0) &&
+    mainCommit.branch !== "main"
+  ) {
+    return [
+      ...events,
+      {
+        type: "fast-forward",
+        target: "main",
+        source: mainCommit.branch,
+        from: mainCommit.parents?.[0] || mainHead,
+        to: mainHead,
+        inferred: true
+      }
+    ];
+  }
+  return events;
+}
+
+function renderGraphMergeEvent(event, positions, laneY, width) {
+  if (event.type !== "fast-forward") {
+    return "";
+  }
+
+  const to = positions.get(event.to);
+  if (!to) {
+    return "";
+  }
+
+  const targetLane = state.branchLanes?.[event.target] ?? 0;
+  const targetY = laneY(targetLane);
+  if (Math.abs(to.y - targetY) < 4) {
+    return "";
+  }
+
+  const endX = Math.min(width - 76, to.x + 92);
+  const midX = to.x + 58;
+  return `
+    <path d="M ${to.x + 20} ${to.y} C ${midX} ${to.y}, ${midX} ${targetY}, ${endX} ${targetY}" class="repo-graph-edge fast-forward" marker-end="url(#repoGraphArrow)">
+      <title>${escapeSvg(`${event.target} fast-forwarded from ${event.from} to ${event.to}${event.source ? ` through ${event.source}` : ""}`)}</title>
+    </path>
+  `;
+}
+
+function renderGraphPointerLabels(commit, positions) {
+  const position = positions.get(commit.id);
+  if (!position) {
+    return "";
+  }
+
+  const labels = branchLabelsForCommit(commit.id);
+  if (!labels.length) {
+    return "";
+  }
+
+  return labels
+    .slice(0, 4)
+    .map((label, index) => {
+      const display = truncateLabel(label, label.startsWith("HEAD") ? 24 : 20);
+      const width = Math.max(70, Math.min(168, display.length * 7 + 18));
+      const x = Math.max(12, position.x - width / 2);
+      const y = Math.max(12, position.y - 50 - index * 23);
+      const tone = label.startsWith("HEAD") ? "head" : label.startsWith("origin/") ? "remote" : "branch";
+      return `
+        <g class="repo-graph-pointer ${tone}">
+          <rect x="${x}" y="${y}" width="${width}" height="18" rx="9">
+            <title>${escapeSvg(label)}</title>
+          </rect>
+          <text x="${x + width / 2}" y="${y + 13}">${escapeSvg(display)}</text>
+        </g>
+      `;
+    })
+    .join("");
 }
 
 function laneLabel(lane) {
@@ -6266,6 +8195,7 @@ function renderFileTree(entries) {
 }
 
 function renderFileTreeNode(node, depth, parentPath = "") {
+  const selectedCommitFiles = new Set(state.selectedCommitId ? changedFilesForCommit(state.selectedCommitId) : []);
   const folders = [...node.folders.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([name, child]) => {
@@ -6288,7 +8218,10 @@ function renderFileTreeNode(node, depth, parentPath = "") {
     .sort((a, b) => a.displayName.localeCompare(b.displayName))
     .map((entry) => {
       const status = workingStatus(entry);
-      const selected = isActiveLabPath(entry.name) ? " selected" : "";
+      const selected =
+        isActiveLabPath(entry.name) || entry.name === state.selectedFilePath || selectedCommitFiles.has(entry.name)
+          ? " selected"
+          : "";
       const expanded = isExplorerFileExpanded("work", entry.name);
       const preview = expanded
         ? `
@@ -6810,7 +8743,7 @@ function renderTerminalHeader() {
   if (isPracticeMode()) {
     kicker.textContent = "PowerShell IDE";
     heading.textContent = "Practice against the simulated repository";
-    note.innerHTML = 'Try <code>git status</code>, <code>git branch</code>, or <code>git log --oneline</code>';
+    note.innerHTML = 'Try <code>git status</code>, <code>git branch</code>, <code>git log --oneline</code>, or <code>git wizard mode</code>';
     return;
   }
 
@@ -7672,6 +9605,7 @@ function loadState() {
         parsed.vscodeCli.installedExtensions = Array.isArray(parsed.vscodeCli.installedExtensions)
           ? parsed.vscodeCli.installedExtensions
           : [];
+        parsed.vscodeCli.missionLog = Array.isArray(parsed.vscodeCli.missionLog) ? parsed.vscodeCli.missionLog : [];
         parsed.repoExplorerOpen = Boolean(parsed.repoExplorerOpen);
         parsed.repoExplorerTouched = Boolean(parsed.repoExplorerTouched);
         if (parsed.viewMode === "guided" && !parsed.repoExplorerTouched) {
@@ -7681,10 +9615,23 @@ function loadState() {
         parsed.explorerExpandedFolders = Array.isArray(parsed.explorerExpandedFolders) ? parsed.explorerExpandedFolders : [];
         parsed.explorerExpandedFiles = Array.isArray(parsed.explorerExpandedFiles) ? parsed.explorerExpandedFiles : [];
         parsed.flowCollapsedFiles = Array.isArray(parsed.flowCollapsedFiles) ? parsed.flowCollapsedFiles : [];
+        parsed.mergeEvents = Array.isArray(parsed.mergeEvents) ? parsed.mergeEvents : [];
+        parsed.selectedCommitId =
+          parsed.selectedCommitId && parsed.commits.some((commit) => commit.id === parsed.selectedCommitId)
+            ? parsed.selectedCommitId
+            : parsed.branches?.[parsed.currentBranch] || parsed.commits?.[0]?.id || null;
+        parsed.selectedFilePath = typeof parsed.selectedFilePath === "string" ? parsed.selectedFilePath : null;
+        parsed.commandReplay = Array.isArray(parsed.commandReplay) ? parsed.commandReplay : [];
+        parsed.practiceMission = getPracticeMissionList().some((mission) => mission.id === parsed.practiceMission)
+          ? parsed.practiceMission
+          : "orientation-path";
+        parsed.practiceDifficulty = normalizePracticeDifficulty(parsed.practiceDifficulty);
+        parsed.learnerProgress = normalizeLearnerProgress(parsed.learnerProgress);
         parsed.readyChecks =
           parsed.readyChecks && typeof parsed.readyChecks === "object" && !Array.isArray(parsed.readyChecks)
             ? parsed.readyChecks
             : {};
+        parsed.challengeMode = normalizeChallengeModeObject(parsed.challengeMode);
         parsed.expandedLessonIndex = Number.isInteger(parsed.expandedLessonIndex) ? parsed.expandedLessonIndex : null;
         if (parsed.expandedLessonIndex < -1 || parsed.expandedLessonIndex >= getLessonsForModule(parsed.activeModuleId).length) {
           parsed.expandedLessonIndex = null;
