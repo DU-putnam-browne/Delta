@@ -2174,6 +2174,64 @@ button.repo-tree-file {
   grid-column: 1 / -1;
 }
 
+.codex-compact-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.codex-compact-panel.wide {
+  grid-column: 1 / -1;
+}
+
+.codex-compact-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.codex-compact-header strong {
+  color: var(--ink);
+  font-family: Rubik, Arial, sans-serif;
+}
+
+.codex-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+  gap: 10px;
+}
+
+.codex-mini-card {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.codex-mini-card.warning {
+  border-color: rgba(255, 201, 92, 0.45);
+}
+
+.codex-mini-card strong {
+  color: var(--ink);
+  line-height: 1.15;
+}
+
+.codex-mini-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
 .codex-ready-list {
   display: grid;
   grid-column: 1 / -1;

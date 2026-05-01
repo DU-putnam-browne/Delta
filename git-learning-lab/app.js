@@ -719,6 +719,102 @@ codexLab.sections = [
   ...codexLab.sections.filter((section) => !codexSectionOrderSet.has(section.title))
 ];
 
+const codexSafetyHabits = [
+  {
+    title: "Inspect before editing",
+    detail: "Start with repo location, file map, and Git status before asking Codex to change anything."
+  },
+  {
+    title: "Keep Git visible",
+    detail: "Use git status and git diff as checkpoints before accepting generated work."
+  },
+  {
+    title: "Ask for command explanations",
+    detail: "If a command is unfamiliar, have Codex explain what it reads, writes, or deletes before running it."
+  },
+  {
+    title: "Constrain the diff",
+    detail: "Request the smallest useful change and explicitly reject unrelated refactors or formatting churn."
+  },
+  {
+    title: "Never paste secrets",
+    detail: "Keep tokens, keys, connection strings, and .env values out of prompts and generated notes."
+  },
+  {
+    title: "Interrupt drift quickly",
+    detail: "If Codex broadens the task, stop and restate the exact file scope and validation target."
+  }
+];
+
+const codexCommonMistakes = [
+  {
+    title: "Wrong folder",
+    detail: "Launching Codex from a parent folder can make it inspect the wrong project."
+  },
+  {
+    title: "Vague task",
+    detail: "Asking for a broad improvement usually creates broad, hard-to-review changes."
+  },
+  {
+    title: "No starting status",
+    detail: "Skipping git status makes it hard to tell which changes were already present."
+  },
+  {
+    title: "Mixed commits",
+    detail: "Combining SQL, docs, formatting, and experiments in one commit makes review harder."
+  },
+  {
+    title: "Generated truth",
+    detail: "Treat Codex output as a draft until repo evidence and validation support it."
+  }
+];
+
+const codexMicroChallenges = [
+  {
+    title: "Branch check",
+    prompt: "Run git status and explain whether this is safe for Codex edits."
+  },
+  {
+    title: "Prompt rewrite",
+    prompt: "Rewrite a vague ticket into Purpose, Authority, Context, and Task."
+  },
+  {
+    title: "Diff review",
+    prompt: "Run git diff --stat and name the files that need human review."
+  },
+  {
+    title: "One artifact",
+    prompt: "Ask Codex for one durable markdown artifact, then review it before asking for the next."
+  }
+];
+
+const codexPracticePacks = [
+  {
+    title: "SQL Lineage Mapper",
+    objective: "Trace source tables, output grain, joins, filters, and assumptions across SQL files.",
+    prompt:
+      "Inspect these SQL files and create SQL_LINEAGE.md with source tables, output tables, join keys, row grain, hardcoded filters, assumptions, and likely review questions."
+  },
+  {
+    title: "Data Quality Profiler",
+    objective: "Profile a flat file and separate observed issues from next validation checks.",
+    prompt:
+      "Profile this CSV and create a markdown report with columns, row count, missing values, suspicious categories, likely typing issues, and recommended validations."
+  },
+  {
+    title: "Git Pre-PR Review",
+    objective: "Review a working tree before sharing it with another human.",
+    prompt:
+      "Review the current diff like a cautious PR reviewer. Focus on correctness, regressions, missing tests, documentation gaps, and release risk."
+  },
+  {
+    title: "Prompt Library Builder",
+    objective: "Create reusable prompts grouped by real analyst workflows.",
+    prompt:
+      "Create a practical prompt library grouped by workflow. Each prompt should be specific, include constraints, and explain the best use case."
+  }
+];
+
 const capstoneLab = {
   id: "repo-review-kit",
   title: "GIT Lab 3: Repo Review Kit",
@@ -800,6 +896,56 @@ const codexPromptLibrary = [
         label: "PR summary",
         text:
           "Draft a PR summary with: business purpose, files changed, validation performed, assumptions, open questions, and reviewer focus areas."
+      }
+    ]
+  },
+  {
+    group: "SQL and data review",
+    prompts: [
+      {
+        label: "Cautious SQL review",
+        text:
+          "Review this SQL like a cautious analytics engineer. Call out row grain, join keys, hardcoded filters, null/date assumptions, duplicate-row risks, and missing comments. Do not refactor yet."
+      },
+      {
+        label: "CSV profiling report",
+        text:
+          "Profile this CSV and produce a markdown data quality report with row count, column list, missing-value hot spots, suspicious categories, likely type issues, and recommended next checks. Separate cleaning suggestions from reporting suggestions."
+      },
+      {
+        label: "Excel-friendly output",
+        text:
+          "Review this tabular output for Excel-heavy reviewers. Keep source data intact, add plain-English headers, flag likely validation issues, and produce a matching markdown explanation of what changed."
+      }
+    ]
+  },
+  {
+    group: "Docs and handoff",
+    prompts: [
+      {
+        label: "Improve technical docs",
+        text:
+          "Improve this markdown doc for clarity and future maintenance. Preserve meaning, add exact commands where setup matters, expose assumptions and risks, and keep the output concise and scannable."
+      },
+      {
+        label: "Stakeholder outline",
+        text:
+          "Turn these technical notes into a short slide outline for a non-technical audience. Include executive summary, current state, risks, recommendation, next steps, and speaker notes."
+      }
+    ]
+  },
+  {
+    group: "Automation and risk",
+    prompts: [
+      {
+        label: "Risk-first preflight",
+        text:
+          "Before making any change, tell me the main risks, the commands you plan to run, whether any command is destructive, what assumptions you are making, and how you will keep the diff small and reversible."
+      },
+      {
+        label: "codex exec design",
+        text:
+          "Design a safe codex exec workflow for this repo. Define the exact prompt, output file, validation step, and the parts that should remain manual. Optimize for repeatability, not cleverness."
       }
     ]
   },
@@ -1784,7 +1930,7 @@ function createTrainingState(moduleId = "git-basics") {
     taskFlags: createTaskFlags(),
     readyChecks: {},
     quizAnswers: {},
-    quizSession: createQuizSession("git-basics"),
+    quizSession: createQuizSession(moduleId),
     terminal: [
       {
         type: "note",
@@ -1911,14 +2057,6 @@ function createAdvancedState() {
       "select work_order_id, project_number, status\nfrom wacs_work_orders.open_work_orders;\n"
   };
 
-  const workingFiles = clone(baseFiles);
-  workingFiles[oracleLab.featureFile] =
-    "-- New CCS meters report asset created during the lab.\n" +
-    "select zip_code, count(*) as emergency_order_count\n" +
-    "from ccs_meter.emergency_response_activity\n" +
-    "where completed_date >= dateadd(day, -7, current_date)\n" +
-    "group by zip_code;\n";
-
   return {
     schemaVersion: 5,
     inLesson: true,
@@ -1944,7 +2082,7 @@ function createAdvancedState() {
     currentBranch: "main",
     branchLanes: { main: 0 },
     indexFiles: clone(baseFiles),
-    workingFiles,
+    workingFiles: clone(baseFiles),
     nextCommit: 1,
     editCounter: 1,
     lessonIndex: 0,
@@ -2134,12 +2272,18 @@ function bindEvents() {
     toggleTheme();
   });
 
+  document.getElementById("commandForm").addEventListener("click", (event) => {
+    if (!event.target.closest("button[type='submit']")) {
+      return;
+    }
+
+    event.preventDefault();
+    submitTerminalCommand();
+  });
+
   document.getElementById("commandForm").addEventListener("submit", (event) => {
     event.preventDefault();
-    const input = document.getElementById("commandInput");
-    runCommand(input.value);
-    input.value = "";
-    input.focus();
+    submitTerminalCommand();
   });
 
   document.getElementById("commandInput").addEventListener("keydown", (event) => {
@@ -2148,10 +2292,7 @@ function bindEvents() {
     }
 
     event.preventDefault();
-    const input = event.currentTarget;
-    runCommand(input.value);
-    input.value = "";
-    input.focus();
+    submitTerminalCommand();
   });
 
   document.getElementById("terminalOutput").addEventListener("click", (event) => {
@@ -2161,6 +2302,17 @@ function bindEvents() {
 
     document.getElementById("commandInput").focus();
   });
+}
+
+function submitTerminalCommand() {
+  const input = document.getElementById("commandInput");
+  if (!input) {
+    return;
+  }
+
+  runCommand(input.value);
+  input.value = "";
+  input.focus();
 }
 
 function handleLessonSelection(lessonButton) {
@@ -2174,10 +2326,17 @@ function handleLessonSelection(lessonButton) {
 }
 
 function navigateGuidedLesson(delta) {
+  const activeLessons = getActiveLessons();
   const current = Number.isInteger(state.lessonIndex) ? state.lessonIndex : getCurrentLessonIndex();
-  const next = clampIndex(current + delta, getActiveLessons().length);
-  state.lessonIndex = next;
-  state.expandedLessonIndex = next;
+  const next = clampIndex(current + delta, activeLessons.length);
+  const targetCommandIndex = getLessonStartCommandIndex(next);
+  const direction = delta > 0 ? "Advanced" : "Returned";
+
+  rebuildGuidedStateToCommand(targetCommandIndex, {
+    intro: `${direction} to ${activeLessons[next]?.title || "the selected lesson"}. Prior commands were replayed so the repository matches this point.`,
+    targetLessonIndex: next
+  });
+  typeCommandIntoIde(getActiveModule().commands[targetCommandIndex]?.cmd || "");
 }
 
 function handleCommandChip(button) {
@@ -2198,10 +2357,17 @@ function handleCommandChip(button) {
 }
 
 function rewindToGuidedCommand(commandIndex) {
+  rebuildGuidedStateToCommand(commandIndex, {
+    intro: `Rewound to step ${Math.max(0, commandIndex) + 1}. Prior commands were replayed so the repository matches this point.`
+  });
+}
+
+function rebuildGuidedStateToCommand(commandIndex, options = {}) {
   const active = getActiveModule();
   const targetIndex = Math.max(0, Math.min(commandIndex, active.commands.length));
+  const moduleId = state.activeModuleId || "git-basics";
   const previousUiState = {
-    activeModuleId: state.activeModuleId,
+    activeModuleId: moduleId,
     quizSession: state.quizSession,
     repoExplorerOpen: state.repoExplorerOpen,
     repoExplorerTouched: state.repoExplorerTouched,
@@ -2212,8 +2378,8 @@ function rewindToGuidedCommand(commandIndex) {
   };
 
   state = {
-    ...createTrainingState(),
-    activeModuleId: previousUiState.activeModuleId || "git-basics",
+    ...createTrainingState(moduleId),
+    activeModuleId: moduleId,
     repoExplorerOpen: Boolean(previousUiState.repoExplorerOpen),
     repoExplorerTouched: Boolean(previousUiState.repoExplorerTouched),
     explorerCollapsedFolders: Array.isArray(previousUiState.explorerCollapsedFolders)
@@ -2226,11 +2392,11 @@ function rewindToGuidedCommand(commandIndex) {
       ? [...previousUiState.explorerExpandedFiles]
       : [],
     flowCollapsedFiles: Array.isArray(previousUiState.flowCollapsedFiles) ? [...previousUiState.flowCollapsedFiles] : [],
-    quizSession: previousUiState.quizSession || createQuizSession(previousUiState.activeModuleId || "git-basics"),
+    quizSession: previousUiState.quizSession || createQuizSession(moduleId),
     terminal: [
       {
         type: "note",
-        text: `Rewound to step ${targetIndex + 1}. Prior commands were replayed so the repository matches this point.`
+        text: options.intro || `Moved to step ${targetIndex + 1}. Prior commands were replayed so the repository matches this point.`
       }
     ]
   };
@@ -2250,13 +2416,12 @@ function rewindToGuidedCommand(commandIndex) {
       appendTerminal(result.type, result.text);
     }
     state.guidedStep = index + 1;
-    maybeAdvanceLesson();
   }
 
   state.guidedStep = targetIndex;
-  state.lessonIndex = getCurrentLessonIndex();
+  state.lessonIndex = Number.isInteger(options.targetLessonIndex) ? options.targetLessonIndex : getCurrentLessonIndex();
   state.expandedLessonIndex = state.lessonIndex;
-  appendTerminal("note", `Ready to rerun: ${active.commands[targetIndex]?.cmd || "lesson complete"}`);
+  appendTerminal("note", `Ready to run: ${active.commands[targetIndex]?.cmd || "lesson complete"}`);
   saveState();
   render();
 }
@@ -2609,6 +2774,11 @@ function handleAction(button) {
     return;
   }
 
+  if (action === "run-command") {
+    submitTerminalCommand();
+    return;
+  }
+
   if (action === "start-conflict") {
     state = createConflictState();
     saveState();
@@ -2734,7 +2904,7 @@ function runCommand(rawCommand) {
 
   const activeModule = getActiveModule();
   const expected = activeModule.commands[state.guidedStep];
-  if (state.inLesson && expected && !isGuidedUtilityCommand(command)) {
+  if (state.inLesson && !isPracticeMode() && expected && !isGuidedUtilityCommand(command)) {
     if (normalizeCommand(command) !== normalizeCommand(expected.cmd)) {
       appendTerminal("error", `Wrong command. Expected: ${expected.cmd}`);
       saveState();
@@ -2763,7 +2933,9 @@ function runCommand(rawCommand) {
 
   const result = executeCommand(command);
   appendTerminal(result.type, result.text);
-  maybeAdvanceLesson();
+  if (!isPracticeMode()) {
+    maybeAdvanceLesson();
+  }
   saveState();
   render();
 }
@@ -4547,6 +4719,11 @@ function getExpandedLessonIndex() {
   return getCurrentLessonIndex();
 }
 
+function getLessonStartCommandIndex(lessonIndex) {
+  const group = getActiveLessonCommandGroups()[lessonIndex] || [];
+  return Number.isInteger(group[0]) ? group[0] : 0;
+}
+
 function renderLessonCommandSummary(lessonIndex, expanded) {
   const active = getActiveModule();
   const indexes = getActiveLessonCommandGroups()[lessonIndex] || [];
@@ -4996,6 +5173,7 @@ function renderCapstoneWorkspace() {
   document.getElementById("quizList").innerHTML = `
     ${renderCodexPromptLibraryPanel(true)}
     ${renderCapstoneDeliverablesPanel()}
+    ${renderCodexPracticePacksPanel()}
   `;
 
   const directoryPanel = document.getElementById("repoDirectoryPanel");
@@ -5503,10 +5681,82 @@ function renderCodexSafetySection(safety) {
             ${safety.longerWork.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
           </ul>
         </div>
+        ${renderCodexSafetyHabits()}
+        ${renderCodexCommonMistakes()}
+        ${renderCodexMicroChallenges()}
         <div class="codex-formula wide">${escapeHtml(safety.footer)}</div>
         ${renderCodexReadyChecklist(safety)}
       </section>
     </div>
+  `;
+}
+
+function renderCodexSafetyHabits() {
+  return `
+    <section class="codex-compact-panel wide" aria-label="Codex safety habits">
+      <div class="codex-compact-header">
+        <span class="section-kicker">Safety habits</span>
+        <strong>Default operating rhythm</strong>
+      </div>
+      <div class="codex-compact-grid">
+        ${codexSafetyHabits
+          .map(
+            (habit) => `
+              <article class="codex-mini-card">
+                <strong>${escapeHtml(habit.title)}</strong>
+                <p>${escapeHtml(habit.detail)}</p>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderCodexCommonMistakes() {
+  return `
+    <section class="codex-compact-panel wide" aria-label="Common Codex mistakes">
+      <div class="codex-compact-header">
+        <span class="section-kicker">Common mistakes</span>
+        <strong>Failure modes to catch early</strong>
+      </div>
+      <div class="codex-compact-grid">
+        ${codexCommonMistakes
+          .map(
+            (mistake) => `
+              <article class="codex-mini-card warning">
+                <strong>${escapeHtml(mistake.title)}</strong>
+                <p>${escapeHtml(mistake.detail)}</p>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderCodexMicroChallenges() {
+  return `
+    <section class="codex-compact-panel wide" aria-label="Codex micro challenges">
+      <div class="codex-compact-header">
+        <span class="section-kicker">Micro challenges</span>
+        <strong>Small practice checks, not another lab</strong>
+      </div>
+      <div class="codex-compact-grid">
+        ${codexMicroChallenges
+          .map(
+            (challenge) => `
+              <article class="codex-mini-card">
+                <strong>${escapeHtml(challenge.title)}</strong>
+                <p>${escapeHtml(challenge.prompt)}</p>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
   `;
 }
 
@@ -5637,6 +5887,40 @@ function renderCapstoneDeliverablesPanel() {
         )
         .join("")}
     </section>
+  `;
+}
+
+function renderCodexPracticePacksPanel(open = false) {
+  return `
+    <details class="codex-reference-panel" ${open ? "open" : ""}>
+      <summary>
+        <span>
+          <strong>Optional practice packs</strong>
+          <em>Lightweight sandbox ideas from the Codex training lab</em>
+        </span>
+      </summary>
+      <div class="codex-reference-items">
+        ${codexPracticePacks
+          .map(
+            (pack) => `
+              <article class="codex-reference-item">
+                <div class="codex-reference-item-header">
+                  <strong>${escapeHtml(pack.title)}</strong>
+                  <em>${escapeHtml(pack.objective)}</em>
+                  <div class="codex-reference-actions">
+                    ${renderCopyButton(pack.prompt, "Copy prompt")}
+                    <button class="copy-prompt-button prompt-type-button" type="button" data-command-fill="${escapeAttribute(singleLinePrompt(pack.prompt))}"${titleAttribute(`Type into the mock CLI:\n${singleLinePrompt(pack.prompt)}`)}>
+                      Type prompt
+                    </button>
+                  </div>
+                </div>
+                <pre><code>${escapeHtml(pack.prompt)}</code></pre>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </details>
   `;
 }
 

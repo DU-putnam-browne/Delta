@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Git Learning Lab</title>
     <link rel="stylesheet" href="styles.css" />
-    <script defer src="app.js"></script>
+    <script defer src="app.js?v=20260501-robert-content"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -96,7 +96,7 @@
                 <label class="sr-only" for="commandInput">Git command</label>
                 <span aria-hidden="true" id="promptLabel">&gt;</span>
                 <input id="commandInput" name="command" autocomplete="off" spellcheck="false" placeholder='Try: git status' />
-                <button type="submit">Run command</button>
+                <button type="button" data-action="run-command">Run command</button>
               </form>
             </div>
           </section>
