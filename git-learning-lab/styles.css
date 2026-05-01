@@ -2384,6 +2384,7 @@ button.repo-tree-file {
 .codex-reference-item,
 .capstone-deliverables article {
   display: grid;
+  min-width: 0;
   gap: 8px;
   padding: 10px;
   border: 1px solid var(--line);
@@ -2391,21 +2392,61 @@ button.repo-tree-file {
   background: var(--panel);
 }
 
-.codex-reference-item > div {
+.codex-reference-item-header {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.codex-reference-item-header > strong {
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.codex-reference-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  justify-content: space-between;
+}
+
+.codex-reference-actions .copy-prompt-button,
+.codex-reference-actions .prompt-type-button {
+  position: static;
+  min-height: 30px;
+  width: auto;
+  max-width: 100%;
+  padding: 5px 10px;
+  line-height: 1.15;
+  text-align: center;
 }
 
 .codex-reference-item pre {
   max-height: 180px;
+  max-width: 100%;
   margin: 0;
   overflow: auto;
+  padding: 8px;
+  border: 1px solid rgba(111, 147, 255, 0.2);
+  border-radius: 7px;
   white-space: pre-wrap;
+  overflow-wrap: break-word;
   color: var(--text);
+  background: rgba(255, 255, 255, 0.52);
   font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.codex-reference-item pre code {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+[data-theme="dark"] .codex-reference-item pre {
+  border-color: #355378;
+  color: #eaf1ff;
+  background: #0d1b2f;
 }
 
 .capstone-deliverables {
@@ -2460,6 +2501,53 @@ button.repo-tree-file {
 
 .vscode-lesson-section {
   align-items: start;
+}
+
+.vscode-workspace .lab-panel {
+  display: grid;
+  grid-template-areas:
+    "guided"
+    "terminal";
+}
+
+.vscode-workspace .guided-panel {
+  grid-area: guided;
+}
+
+.vscode-workspace .terminal-panel {
+  grid-area: terminal;
+  overflow: hidden;
+  border-color: #333842;
+  background: #1e1e1e;
+  color: #d4d4d4;
+}
+
+.vscode-workspace .terminal-panel .section-header {
+  margin: -16px -16px 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #333842;
+  background: #252526;
+}
+
+.vscode-workspace .terminal-panel .section-kicker,
+.vscode-workspace .terminal-panel h2 {
+  color: #ffffff;
+}
+
+.vscode-workspace .terminal-note {
+  color: #c8c8c8;
+}
+
+.vscode-workspace .terminal-note code {
+  color: #111827;
+  background: #9cdcfe;
+}
+
+.vscode-workspace .terminal-output {
+  height: clamp(210px, 26vh, 320px);
+  border-color: #333842;
+  border-radius: 6px;
+  background: #0c0c0c;
 }
 
 .vscode-mock {
@@ -2546,6 +2634,22 @@ button.repo-tree-file {
   color: #ffffff;
 }
 
+.vscode-extension-row.active::after {
+  content: " installed";
+  color: #89d185;
+  font-size: 0.72rem;
+}
+
+.vscode-search-result,
+.vscode-source-row {
+  border-left: 2px solid transparent;
+}
+
+.vscode-search-result.active,
+.vscode-source-row.active {
+  border-left-color: #3794ff;
+}
+
 .vscode-editor {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -2593,6 +2697,45 @@ button.repo-tree-file {
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 800;
+}
+
+.vscode-reference-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.vscode-reference-panel h3 {
+  margin: 2px 0 0;
+  color: var(--navy);
+  font-size: 1rem;
+}
+
+.vscode-reference-panel article {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.vscode-reference-panel p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.vscode-reference-panel code {
+  overflow-wrap: anywhere;
+}
+
+.vscode-extension-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
 }
 
 .vscode-shortcuts {

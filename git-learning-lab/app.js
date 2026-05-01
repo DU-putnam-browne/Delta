@@ -396,8 +396,8 @@ const codexLab = {
   id: "codex-workflow",
   title: "Codex",
   level: "Tool setup",
-  time: "Download",
-  labTitle: "Official OpenAI setup",
+  time: "45 min",
+  labTitle: "Download",
   description:
     "Codex is separate from the Git labs. This lesson covers setup, prompting, safe repo inspection, and reviewable analyst handoff artifacts.",
   outcomes: [
@@ -700,6 +700,25 @@ const codexLab = {
   cliCommand: "npm install -g @openai/codex"
 };
 
+const codexSectionOrder = [
+  "Install Codex CLI",
+  "Terminal Survival Before Codex",
+  "Git Safety When Working With Codex",
+  "PACT Prompting Guide",
+  "Codex Onboarding Checklist",
+  "Using Codex for ADO Ticket Orientation",
+  "First Codex Sessions",
+  "Analyst Workflows With Codex",
+  "Automation With codex exec"
+];
+const codexSectionOrderSet = new Set(codexSectionOrder);
+codexLab.sections = [
+  ...codexSectionOrder
+    .map((title) => codexLab.sections.find((section) => section.title === title))
+    .filter(Boolean),
+  ...codexLab.sections.filter((section) => !codexSectionOrderSet.has(section.title))
+];
+
 const capstoneLab = {
   id: "repo-review-kit",
   title: "GIT Lab 3: Repo Review Kit",
@@ -796,58 +815,127 @@ const vscodeLab = {
   id: "vscode-lab",
   title: "VS Code Lab",
   level: "Beginner",
-  time: "15 min",
-  labTitle: "Editor orientation",
+  time: "35 min",
+  labTitle: "Editor workflow",
   setupUrl: "https://code.visualstudio.com/download",
   description:
-    "A brief VS Code orientation for learners who need to understand the workspace, Explorer, terminal, and Source Control before touching repo files.",
+    "A hands-on bridge from Codex and Git concepts into the editor: setup extensions, open the repo, find files, review diffs, stage commits, and recognize conflicts.",
+  extensions: [
+    {
+      name: "PowerShell",
+      id: "ms-vscode.PowerShell",
+      command: "code --install-extension ms-vscode.PowerShell",
+      reason: "PowerShell syntax, IntelliSense, script help, and a familiar terminal experience."
+    },
+    {
+      name: "GitLens",
+      id: "eamodio.gitlens",
+      command: "code --install-extension eamodio.gitlens",
+      reason: "Commit history, branch context, blame, and easier review of who changed what."
+    },
+    {
+      name: "Oracle SQL Developer",
+      id: "Oracle.sql-developer",
+      command: "code --install-extension Oracle.sql-developer",
+      reason: "Oracle SQL editing, schema navigation, worksheets, and database-focused SQL support."
+    }
+  ],
   sections: [
     {
-      title: "Open the Workspace",
-      kicker: "Workspace setup",
+      title: "Install Required Extensions",
+      kicker: "Tool setup",
       intro:
-        "Start by opening the repo folder, not a single file. The Explorer, search, terminal, and Git panels all depend on the folder context.",
+        "Start with a lean, required extension set so everyone sees the same PowerShell, Git, and Oracle SQL affordances in VS Code.",
+      checklist: [
+        "Install the PowerShell extension",
+        "Install GitLens",
+        "Install Oracle SQL Developer for VS Code",
+        "Confirm Extensions shows the three tools as installed"
+      ],
+      callout: "Keep this list required and small. Extra extensions can wait until the core workflow is understood.",
+      command: "code --install-extension ms-vscode.PowerShell"
+    },
+    {
+      title: "Open the Workspace",
+      kicker: "Repo context",
+      intro:
+        "Open the repo folder, not a single loose file. Explorer, search, terminal, Source Control, and Codex all depend on folder context.",
       checklist: [
         "Open VS Code",
         `Open folder: ${ORACLE_REPO_ROOT}`,
         "Confirm the Explorer shows the Oracle working tree",
         "Confirm the status bar shows the current Git branch"
       ],
-      callout: "If VS Code is opened on one loose file, Git context and repo search will feel broken."
+      callout: "If VS Code is opened on one loose file, Git context and repo search will feel broken.",
+      command: `code ${ORACLE_REPO_ROOT}`
     },
     {
-      title: "Find the Right File",
-      kicker: "Navigation",
+      title: "Navigate the Oracle Repo",
+      kicker: "File discovery",
       intro:
-        "Use the Explorer for known folders, Quick Open for known file names, and Search when you only know a term or table name.",
+        "Use Explorer for known folders, Quick Open for known file names, and Search when you only know a term, table, or ticket phrase.",
       checklist: [
         "Use Explorer to expand ccs/sql/meters",
         "Use Ctrl+P to jump to a file by name",
         "Use Ctrl+Shift+F to search across the repo",
         "Open related SQL files side by side before changing anything"
       ],
-      callout: "For this lab, the target area is ccs/sql/meters. Similar neighboring SQL files are your pattern library."
+      callout: "For this lab, the target area is ccs/sql/meters. Similar neighboring SQL files are your pattern library.",
+      command: "rg --files -g \"*.sql\""
     },
     {
-      title: "Use Terminal and Source Control",
-      kicker: "Git in VS Code",
+      title: "Edit, Diff, Stage, Commit",
+      kicker: "Reviewable change",
       intro:
-        "The integrated terminal and Source Control panel are two views of the same Git state. Use either, but keep the branch and staged files visible.",
+        "The editor, integrated terminal, and Source Control panel are three views of the same repo state. Make the change visible before saving a checkpoint.",
       checklist: [
-        "Open the integrated terminal",
+        "Open the target SQL file",
+        "Use the diff view to inspect exactly what changed",
+        "Stage only the intended file",
+        "Commit with a message tied to the work request"
+      ],
+      callout: "Source Control is the safety rail: changed files, staged files, and commit history should all agree.",
+      command: `git add ${oracleLab.featureFile}`
+    },
+    {
+      title: "Branch and PR Readiness",
+      kicker: "Review prep",
+      intro:
+        "Create the task branch, keep work scoped, and gather the details reviewers need before opening a pull request.",
+      checklist: [
         "Run git status before editing",
         "Create or switch to the task branch",
-        "Review staged files before committing"
+        "Confirm the branch name maps to the work request",
+        "Prepare summary, validation, assumptions, and reviewer focus"
       ],
-      callout: "Do not rely on memory. Let VS Code show the branch, changed files, and staged files before you commit."
+      callout: "Branch, changed files, and PR notes should tell the same story.",
+      command: `git switch -c ${oracleLab.branchName}`
+    },
+    {
+      title: "Conflict Awareness",
+      kicker: "Merge safety",
+      intro:
+        "Conflicts are not magic. VS Code shows both sides, lets you choose the correct result, and still requires a staged commit afterward.",
+      checklist: [
+        "Recognize conflict markers",
+        "Use the VS Code conflict actions to compare incoming and current changes",
+        "Resolve the final file content intentionally",
+        "Stage and commit the resolution"
+      ],
+      callout: "A resolved file is not finished until Git status is clean or the resolution is staged for commit.",
+      command: "git status"
     }
   ],
   shortcuts: [
+    ["Extensions", "Ctrl+Shift+X"],
+    ["Command Palette", "Ctrl+Shift+P"],
     ["Open folder", "File > Open Folder"],
     ["Quick Open", "Ctrl+P"],
     ["Repo Search", "Ctrl+Shift+F"],
     ["Integrated Terminal", "Ctrl+`"],
-    ["Source Control", "Ctrl+Shift+G"]
+    ["Source Control", "Ctrl+Shift+G"],
+    ["Open Diff", "Source Control > Open Changes"],
+    ["Stage File", "Source Control > +"]
   ]
 };
 
@@ -1756,8 +1844,32 @@ function createVSCodeState() {
     viewMode: "vscode",
     activeModuleId: vscodeLab.id,
     guidedStep: 0,
+    cwd: ORACLE_REPO_ROOT,
     vscodeSection: 0,
-    terminal: []
+    vscodeCli: createVSCodeCliState(),
+    terminal: [
+      {
+        type: "note",
+        text: "VS Code terminal simulator ready. Try: help"
+      },
+      {
+        type: "note",
+        text: "Practice the editor workflow from the repo root: install extensions, inspect Git status, branch, diff, stage, and commit."
+      }
+    ]
+  };
+}
+
+function createVSCodeCliState() {
+  return {
+    openedWorkspace: true,
+    installedExtensions: [],
+    branch: "main",
+    edited: false,
+    staged: false,
+    committed: false,
+    conflictOpen: false,
+    conflictResolved: false
   };
 }
 
@@ -2613,6 +2725,11 @@ function runCommand(rawCommand) {
     return;
   }
 
+  if (isVSCodeMode()) {
+    runVSCodeCommand(command);
+    return;
+  }
+
   appendTerminal("prompt", `${getPrompt()} ${command}`);
 
   const activeModule = getActiveModule();
@@ -2662,6 +2779,276 @@ function runCodexCommand(command) {
 
   saveState();
   render();
+}
+
+function runVSCodeCommand(command) {
+  ensureVSCodeCliState();
+  appendTerminal("prompt", `${getPrompt()} ${command}`);
+  const result = executeVSCodeCommand(command);
+  appendTerminal(result.type, result.text);
+  saveState();
+  render();
+}
+
+function ensureVSCodeCliState() {
+  state.vscodeCli = {
+    ...createVSCodeCliState(),
+    ...(state.vscodeCli && typeof state.vscodeCli === "object" ? state.vscodeCli : {})
+  };
+  state.vscodeCli.installedExtensions = Array.isArray(state.vscodeCli.installedExtensions)
+    ? state.vscodeCli.installedExtensions
+    : [];
+}
+
+function executeVSCodeCommand(command) {
+  ensureVSCodeCliState();
+  const text = String(command || "").trim();
+  const normalized = normalizeCommand(text);
+  const tokens = tokenize(text);
+  const lower = tokens.map((token) => token.toLowerCase());
+
+  if (!text) {
+    return { type: "note", text: "Type a VS Code or Git command." };
+  }
+
+  if (normalized === "help") {
+    return {
+      type: "note",
+      text:
+        [
+          "VS Code lab simulator commands:",
+          "  code .",
+          "  code --install-extension ms-vscode.PowerShell",
+          "  code --install-extension eamodio.gitlens",
+          "  code --install-extension Oracle.sql-developer",
+          "  code --list-extensions",
+          "  rg --files -g \"*.sql\"",
+          "  git status",
+          `  git switch -c ${oracleLab.branchName}`,
+          `  edit ${oracleLab.featureFile}`,
+          "  git diff",
+          `  git add ${oracleLab.featureFile}`,
+          "  git commit -m \"Add emergency orders ZIP report\"",
+          "  git merge main",
+          "  resolve conflict"
+        ].join("\n")
+    };
+  }
+
+  if (normalized === "code ." || normalizeCommand(text.replace(/^code\s+/i, "")) === normalizeCommand(ORACLE_REPO_ROOT)) {
+    state.vscodeCli.openedWorkspace = true;
+    state.cwd = ORACLE_REPO_ROOT;
+    return { type: "success", text: `VS Code opened ${ORACLE_REPO_ROOT}. Explorer, terminal, and Source Control now share repo context.` };
+  }
+
+  if (lower[0] === "code" && lower[1] === "--install-extension") {
+    return installVSCodeExtension(tokens.slice(2).join(" "));
+  }
+
+  if (normalized === "code --list-extensions") {
+    return {
+      type: "success",
+      text:
+        state.vscodeCli.installedExtensions.length
+          ? state.vscodeCli.installedExtensions.join("\n")
+          : "No required extensions installed in this simulator yet."
+    };
+  }
+
+  if (lower[0] === "cd" || lower[0] === "set-location") {
+    return commandVSCodeCd(tokens.slice(1));
+  }
+
+  if (normalized === "get-location" || normalized === "pwd") {
+    return { type: "success", text: state.cwd || ORACLE_REPO_ROOT };
+  }
+
+  if (lower[0] === "rg" && lower[1] === "--files") {
+    const sqlOnly = tokens.includes("-g") && tokens.some((token) => token.replaceAll("'", "").replaceAll('"', "") === "*.sql");
+    return { type: "success", text: renderCodexFileSearch(sqlOnly) };
+  }
+
+  if (normalized === "git status" || normalized === "git status --short") {
+    return { type: "success", text: renderVSCodeGitStatus(normalized.endsWith("--short")) };
+  }
+
+  if (normalized === "git branch") {
+    return { type: "success", text: state.vscodeCli.branch === "main" ? "* main\n  feature/ccs-emergency-orders-zip-prior-week-demo" : "  main\n* feature/ccs-emergency-orders-zip-prior-week-demo" };
+  }
+
+  if ((lower[0] === "git" && lower[1] === "switch" && lower[2] === "-c") || (lower[0] === "git" && lower[1] === "checkout" && lower[2] === "-b")) {
+    const branch = tokens.slice(3).join(" ").trim() || oracleLab.branchName;
+    state.vscodeCli.branch = branch;
+    return { type: "success", text: `Created and switched to branch ${branch}. The VS Code status bar now shows the task branch.` };
+  }
+
+  if (lower[0] === "edit") {
+    const target = tokens.slice(1).join(" ").trim() || oracleLab.featureFile;
+    state.vscodeCli.edited = true;
+    state.vscodeCli.staged = false;
+    state.vscodeCli.committed = false;
+    return { type: "success", text: `Edited ${target}. Source Control now shows one changed SQL file.` };
+  }
+
+  if (normalized === `code ${normalizeCommand(oracleLab.featureFile)}` || lower[0] === "code" && text.includes(oracleLab.featureFile)) {
+    state.vscodeCli.edited = true;
+    state.vscodeCli.staged = false;
+    return { type: "success", text: `Opened and marked ${oracleLab.featureFile} as edited for this simulator. Run git diff next.` };
+  }
+
+  if (normalized === "git diff") {
+    if (state.vscodeCli.conflictOpen) {
+      return {
+        type: "note",
+        text:
+          [
+            `diff -- ${oracleLab.featureFile}`,
+            "<<<<<<< HEAD",
+            "where activity_status = 'OPEN'",
+            "=======",
+            "where activity_status in ('OPEN', 'PENDING')",
+            ">>>>>>> main"
+          ].join("\n")
+      };
+    }
+    if (!state.vscodeCli.edited) {
+      return { type: "note", text: "No file edits yet. Try: edit ccs/sql/meters/ccs_emergency_response_activity_by_zip_prior_week.sql" };
+    }
+    return {
+      type: "success",
+      text:
+        [
+          `diff -- ${oracleLab.featureFile}`,
+          "+where activity_status in ('OPEN', 'PENDING')",
+          "+  and order_date >= trunc(sysdate) - 7"
+        ].join("\n")
+    };
+  }
+
+  if (lower[0] === "git" && lower[1] === "add") {
+    if (!state.vscodeCli.edited && !state.vscodeCli.conflictResolved) {
+      return { type: "note", text: "Nothing to stage yet. Edit a file or resolve a conflict first." };
+    }
+    state.vscodeCli.staged = true;
+    return { type: "success", text: "Staged the intended file. Source Control now shows it under Staged Changes." };
+  }
+
+  if (lower[0] === "git" && lower[1] === "commit") {
+    if (!state.vscodeCli.staged) {
+      return { type: "error", text: "No staged changes. Stage the intended file before committing." };
+    }
+    state.vscodeCli.committed = true;
+    state.vscodeCli.edited = false;
+    state.vscodeCli.staged = false;
+    state.vscodeCli.conflictOpen = false;
+    state.vscodeCli.conflictResolved = false;
+    return { type: "success", text: "Created commit c002 on the task branch. Review PR summary and validation notes next." };
+  }
+
+  if (normalized === "git log --oneline") {
+    return {
+      type: "success",
+      text:
+        state.vscodeCli.committed
+          ? "c002 Add emergency orders ZIP report\nc001 Add ticket context\nc000 Oracle repo baseline"
+          : "c001 Add ticket context\nc000 Oracle repo baseline"
+    };
+  }
+
+  if (normalized === "git merge main") {
+    state.vscodeCli.conflictOpen = true;
+    state.vscodeCli.conflictResolved = false;
+    state.vscodeCli.edited = true;
+    state.vscodeCli.staged = false;
+    return { type: "error", text: `CONFLICT (content): Merge conflict in ${oracleLab.featureFile}. Use the editor conflict actions, then run: resolve conflict` };
+  }
+
+  if (normalized === "resolve conflict") {
+    if (!state.vscodeCli.conflictOpen) {
+      return { type: "note", text: "No conflict is open. Run git merge main to load the conflict example." };
+    }
+    state.vscodeCli.conflictOpen = false;
+    state.vscodeCli.conflictResolved = true;
+    state.vscodeCli.edited = true;
+    return { type: "success", text: "Conflict markers removed. Stage and commit the resolved file." };
+  }
+
+  return { type: "error", text: "Command not recognized in the VS Code simulator. Type help for supported commands." };
+}
+
+function installVSCodeExtension(extensionId) {
+  const cleaned = String(extensionId || "").trim().replace(/^["']|["']$/g, "");
+  const extension = vscodeLab.extensions.find((item) => item.id.toLowerCase() === cleaned.toLowerCase());
+  if (!extension) {
+    return { type: "error", text: `Unknown required extension: ${extensionId}. Type help for the required extension commands.` };
+  }
+
+  if (!state.vscodeCli.installedExtensions.includes(extension.id)) {
+    state.vscodeCli.installedExtensions.push(extension.id);
+  }
+
+  return { type: "success", text: `${extension.name} installed. ${extension.reason}` };
+}
+
+function commandVSCodeCd(args) {
+  const target = args.join(" ").trim();
+  if (!target) {
+    return { type: "error", text: `Specify a folder, for example: cd ${ORACLE_REPO_ROOT}` };
+  }
+
+  const normalizedTarget = target.replaceAll("/", "\\").replace(/^["']|["']$/g, "");
+  if (normalizePathForCompare(normalizedTarget) === normalizePathForCompare(ORACLE_REPO_ROOT)) {
+    state.cwd = ORACLE_REPO_ROOT;
+    return { type: "success", text: `Location changed to ${ORACLE_REPO_ROOT}` };
+  }
+
+  return { type: "error", text: `This simulator is scoped to ${ORACLE_REPO_ROOT}.` };
+}
+
+function renderVSCodeGitStatus(short = false) {
+  ensureVSCodeCliState();
+  if (short) {
+    if (state.vscodeCli.conflictOpen) {
+      return `UU ${oracleLab.featureFile}`;
+    }
+    if (state.vscodeCli.staged) {
+      return `A  ${oracleLab.featureFile}`;
+    }
+    if (state.vscodeCli.edited || state.vscodeCli.conflictResolved) {
+      return ` M ${oracleLab.featureFile}`;
+    }
+    return "";
+  }
+
+  if (state.vscodeCli.conflictOpen) {
+    return [
+      `On branch ${state.vscodeCli.branch}`,
+      "You have unmerged paths.",
+      "",
+      "Unmerged paths:",
+      `  both modified: ${oracleLab.featureFile}`,
+      "",
+      "Fix conflicts and run git add."
+    ].join("\n");
+  }
+
+  if (state.vscodeCli.staged) {
+    return [
+      `On branch ${state.vscodeCli.branch}`,
+      "Changes to be committed:",
+      `  new file: ${oracleLab.featureFile}`
+    ].join("\n");
+  }
+
+  if (state.vscodeCli.edited || state.vscodeCli.conflictResolved) {
+    return [
+      `On branch ${state.vscodeCli.branch}`,
+      "Changes not staged for commit:",
+      `  modified: ${oracleLab.featureFile}`
+    ].join("\n");
+  }
+
+  return [`On branch ${state.vscodeCli.branch}`, "nothing to commit, working tree clean"].join("\n");
 }
 
 function splitCodexCommandLine(command) {
@@ -4668,7 +5055,7 @@ function renderVSCodeWorkspace() {
     <div class="lesson-task">
       <strong>${escapeHtml(section.kicker)}</strong>
       <span>${escapeHtml(section.callout)}</span>
-      <code>${escapeHtml(sectionIndex === 0 ? ORACLE_REPO_ROOT : sectionIndex === 1 ? "ccs/sql/meters" : "git status")}</code>
+      <code>${escapeHtml(section.command || "git status")}</code>
     </div>
     <div class="lesson-controls">
       <button class="text-button" type="button" data-action="vscode-prev" ${sectionIndex === 0 ? "disabled" : ""}>Previous</button>
@@ -4688,33 +5075,34 @@ function renderVSCodeWorkspace() {
 
   const form = document.getElementById("commandForm");
   if (form) {
-    form.hidden = true;
+    form.hidden = false;
   }
-  document.querySelector(".terminal-panel .section-kicker").textContent = "VS Code terminal";
-  document.querySelector(".terminal-panel h2").textContent = "Commands to recognize";
-  document.querySelector(".terminal-note").innerHTML = "These are examples learners should recognize in the integrated terminal.";
-  document.getElementById("terminalHistory").innerHTML = `
-    <div class="terminal-line note">Open the repo folder first: ${escapeHtml(ORACLE_REPO_ROOT)}</div>
-    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git status</div>
-    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git switch -c ${escapeHtml(oracleLab.branchName)}</div>
-    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git add ${escapeHtml(oracleLab.featureFile)}</div>
-    <div class="terminal-line success">Goal: know where branch, file changes, terminal output, and staged files appear in VS Code.</div>
-  `;
+  ensureVSCodeCliState();
+  const terminalOutput = document.getElementById("terminalOutput");
+  document.querySelector(".terminal-panel .section-kicker").textContent = "VS Code integrated terminal";
+  document.querySelector(".terminal-panel h2").textContent = "Practice the editor commands";
+  document.querySelector(".terminal-note").innerHTML = 'Type <code>help</code> for supported VS Code lab commands';
+  document.getElementById("promptLabel").textContent = getPrompt();
+  document.getElementById("terminalHistory").innerHTML = state.terminal
+    .map((line) => `<div class="terminal-line ${line.type}">${escapeHtml(line.text)}</div>`)
+    .join("");
+  document.getElementById("commandInput").placeholder = section.command ? `Try: ${section.command}` : "Try: git status";
+  terminalOutput.scrollTop = terminalOutput.scrollHeight;
 
   document.getElementById("quizScore").textContent = "VS Code checklist";
   document.querySelector(".quiz-panel .section-kicker").textContent = "Quick checks";
   document.getElementById("quizList").innerHTML = `
     <article class="quiz-card codex-check-card">
-      <strong>Before editing</strong>
-      <p>Confirm the opened folder is the repo root and confirm the branch shown in the status bar.</p>
+      <strong>Before changing files</strong>
+      <p>Confirm the opened folder is the repo root, required extensions are installed, and the branch shown in the status bar is correct.</p>
     </article>
     <article class="quiz-card codex-check-card">
       <strong>Before committing</strong>
       <p>Review the Source Control panel so only intended files are staged.</p>
     </article>
     <article class="quiz-card codex-check-card">
-      <strong>When lost</strong>
-      <p>Use <code>git status</code>, Explorer, and repo search. Those three usually tell you where you are.</p>
+      <strong>When a conflict appears</strong>
+      <p>Use the editor conflict view, remove markers, then run <code>git status</code> before staging the resolution.</p>
     </article>
   `;
 
@@ -4740,63 +5128,127 @@ function renderVSCodeLessonContent(sectionIndex) {
         </div>
         ${renderVSCodeMock(sectionIndex)}
       </section>
+      ${renderVSCodeSupportPanel(sectionIndex)}
       ${renderVSCodeShortcutGrid()}
     </div>
   `;
 }
 
 function renderVSCodeMock(sectionIndex) {
-  const openFiles = [
-    "README.md",
-    "ccs_emergency_response_activity_extract.sql",
-    "ccs_emergency_response_activity_by_zip_prior_week.sql"
-  ];
+  ensureVSCodeCliState();
+  const openFiles = vscodeOpenFiles(sectionIndex);
+  const activePanel = sectionIndex === 0 ? "X" : sectionIndex === 2 ? "S" : sectionIndex >= 3 ? "G" : "E";
   return `
     <div class="vscode-mock" aria-label="Mock VS Code workspace">
       <div class="vscode-titlebar">Visual Studio Code - Oracle</div>
       <div class="vscode-body">
         <div class="vscode-activity" aria-hidden="true">
-          <span class="${sectionIndex === 0 || sectionIndex === 1 ? "active" : ""}">E</span>
-          <span class="${sectionIndex === 1 ? "active" : ""}">S</span>
-          <span class="${sectionIndex === 2 ? "active" : ""}">G</span>
+          ${["E", "S", "G", "X"].map((label) => `<span class="${activePanel === label ? "active" : ""}">${label}</span>`).join("")}
         </div>
         <div class="vscode-explorer">
-          <strong>EXPLORER</strong>
-          <span>ORACLE</span>
-          <code>ccs/sql/meters</code>
-          ${openFiles
-            .map((file, index) => `<p class="${sectionIndex === 1 && index === 2 ? "active" : ""}">${escapeHtml(file)}</p>`)
-            .join("")}
+          ${renderVSCodeSidebar(sectionIndex)}
         </div>
         <div class="vscode-editor">
           <div class="vscode-tabs">
-            <span>README.md</span>
-            <span class="active">${escapeHtml(openFiles[sectionIndex === 1 ? 2 : 1])}</span>
+            ${openFiles.map((file, index) => `<span class="${index === openFiles.length - 1 ? "active" : ""}">${escapeHtml(file)}</span>`).join("")}
           </div>
           <pre><code>${escapeHtml(vscodeEditorSnippet(sectionIndex))}</code></pre>
         </div>
       </div>
       <div class="vscode-status">
-        <span>main</span>
-        <span>${sectionIndex === 2 ? "1 change" : "Oracle repo"}</span>
+        <span>${escapeHtml(state.vscodeCli.branch || "main")}</span>
+        <span>${escapeHtml(vscodeStatusSummary())}</span>
         <span>PowerShell</span>
       </div>
     </div>
   `;
 }
 
+function vscodeOpenFiles(sectionIndex) {
+  if (sectionIndex === 0) {
+    return ["Extensions", "Required tools"];
+  }
+  if (sectionIndex === 1) {
+    return ["README.md", "AGENTS.md"];
+  }
+  if (sectionIndex === 2) {
+    return ["Search", "ccs_emergency_response_activity_extract.sql"];
+  }
+  if (sectionIndex === 3) {
+    return ["ccs_emergency_response_activity_extract.sql", oracleLab.featureFile.split("/").pop()];
+  }
+  if (sectionIndex === 4) {
+    return ["pull_request_template.md", "PR summary notes"];
+  }
+  return ["MERGE_HEAD", oracleLab.featureFile.split("/").pop()];
+}
+
+function renderVSCodeSidebar(sectionIndex) {
+  if (sectionIndex === 0) {
+    return `
+      <strong>EXTENSIONS</strong>
+      <span>REQUIRED</span>
+      ${vscodeLab.extensions
+        .map(
+          (extension) => `
+            <p class="vscode-extension-row ${state.vscodeCli?.installedExtensions?.includes(extension.id) ? "active" : ""}">
+              ${escapeHtml(extension.name)}
+            </p>
+          `
+        )
+        .join("")}
+    `;
+  }
+
+  if (sectionIndex === 2) {
+    return `
+      <strong>SEARCH</strong>
+      <span>ccs emergency response</span>
+      <p class="vscode-search-result active">ccs/sql/meters/${escapeHtml(oracleLab.featureFile.split("/").pop())}</p>
+      <p class="vscode-search-result">ccs/sql/meters/ccs_emergency_response_activity_extract.sql</p>
+      <p class="vscode-search-result">docs/sql_inventory.md</p>
+    `;
+  }
+
+  if (sectionIndex >= 3) {
+    return `
+      <strong>SOURCE CONTROL</strong>
+      <span>${escapeHtml(vscodeStatusSummary())}</span>
+      <p class="vscode-source-row ${state.vscodeCli?.staged ? "active" : ""}">Staged Changes</p>
+      <p class="vscode-source-row ${state.vscodeCli?.edited || state.vscodeCli?.conflictOpen ? "active" : ""}">${escapeHtml(oracleLab.featureFile)}</p>
+      <p class="vscode-source-row">Branch: ${escapeHtml(state.vscodeCli?.branch || "main")}</p>
+    `;
+  }
+
+  return `
+    <strong>EXPLORER</strong>
+    <span>ORACLE</span>
+    <code>ccs/sql/meters</code>
+    <p>README.md</p>
+    <p>ccs_emergency_response_activity_extract.sql</p>
+    <p class="active">${escapeHtml(oracleLab.featureFile.split("/").pop())}</p>
+    <p>docs/sql_inventory.md</p>
+  `;
+}
+
 function vscodeEditorSnippet(sectionIndex) {
   if (sectionIndex === 0) {
+    return vscodeLab.extensions
+      .map((extension) => `${extension.command}\n# ${extension.reason}`)
+      .join("\n\n");
+  }
+  if (sectionIndex === 1) {
     return [
       "Open Folder",
       ORACLE_REPO_ROOT,
       "",
       "Confirm:",
       "- Explorer shows repo folders",
-      "- Status bar shows branch"
+      "- Status bar shows branch",
+      "- Integrated terminal starts at the repo root"
     ].join("\n");
   }
-  if (sectionIndex === 1) {
+  if (sectionIndex === 2) {
     return [
       "-- Compare with nearby SQL before editing",
       "select activity_id, premise_id, meter_id",
@@ -4805,14 +5257,102 @@ function vscodeEditorSnippet(sectionIndex) {
       "-- New file belongs under ccs/sql/meters"
     ].join("\n");
   }
+  if (sectionIndex === 3) {
+    return [
+      "-- Diff view",
+      "- where activity_status = 'OPEN'",
+      "+ where activity_status in ('OPEN', 'PENDING')",
+      "+   and order_date >= trunc(sysdate) - 7",
+      "",
+      "Source Control: stage only this SQL file."
+    ].join("\n");
+  }
+  if (sectionIndex === 4) {
+    return [
+      "PR summary draft",
+      "",
+      "Purpose: Add emergency orders ZIP reporting support.",
+      "Files changed: ccs/sql/meters/...",
+      "Validation: compared against neighboring CCS meter SQL patterns.",
+      "Reviewer focus: date window, status filter, output fields."
+    ].join("\n");
+  }
   return [
-    "PS C:\\Repositories\\Oracle> git status",
-    "On branch feature/ccs-emergency-orders...",
-    "Changes not staged for commit:",
-    "  modified: ccs/sql/meters/...",
+    "<<<<<<< HEAD",
+    "where activity_status = 'OPEN'",
+    "=======",
+    "where activity_status in ('OPEN', 'PENDING')",
+    ">>>>>>> main",
     "",
-    "Use Source Control to stage intentionally."
+    "Choose the final SQL, remove markers, then stage the file."
   ].join("\n");
+}
+
+function renderVSCodeSupportPanel(sectionIndex) {
+  if (sectionIndex === 0) {
+    return `
+      <section class="vscode-reference-panel">
+        <div>
+          <span class="section-kicker">Required extensions</span>
+          <h3>Install these before the Git labs</h3>
+        </div>
+        <div class="vscode-extension-grid">
+          ${vscodeLab.extensions
+            .map(
+              (extension) => `
+                <article>
+                  <strong>${escapeHtml(extension.name)}</strong>
+                  <p>${escapeHtml(extension.reason)}</p>
+                  <code>${escapeHtml(extension.command)}</code>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  const cards = [
+    ["Repo context", "Open the folder root so Explorer, terminal, Source Control, and Codex all see the same workspace."],
+    ["Search discipline", "Search table names, file names, and ticket phrases before editing; neighboring SQL is the pattern library."],
+    ["Reviewable diffs", "Use Source Control to inspect changed files, stage intentionally, and avoid unrelated formatting churn."],
+    ["PR readiness", "Branch name, changed files, summary, validation, assumptions, and reviewer focus should line up."],
+    ["Conflict safety", "Resolve content in the editor, then confirm with git status before staging and committing."]
+  ];
+
+  return `
+    <section class="vscode-reference-panel">
+      ${cards
+        .slice(Math.max(0, sectionIndex - 1), Math.max(0, sectionIndex - 1) + 2)
+        .map(
+          ([title, detail]) => `
+            <article>
+              <strong>${escapeHtml(title)}</strong>
+              <p>${escapeHtml(detail)}</p>
+            </article>
+          `
+        )
+        .join("")}
+    </section>
+  `;
+}
+
+function vscodeStatusSummary() {
+  ensureVSCodeCliState();
+  if (state.vscodeCli.conflictOpen) {
+    return "1 conflict";
+  }
+  if (state.vscodeCli.staged) {
+    return "1 staged";
+  }
+  if (state.vscodeCli.edited || state.vscodeCli.conflictResolved) {
+    return "1 change";
+  }
+  if (state.vscodeCli.committed) {
+    return "clean after commit";
+  }
+  return "Oracle repo";
 }
 
 function renderVSCodeShortcutGrid() {
@@ -5065,14 +5605,19 @@ function renderCodexPromptLibraryPanel(open = false) {
 }
 
 function renderPromptLibraryItem(item) {
+  const promptText = item.text || "";
   return `
     <article class="codex-reference-item">
-      <div>
+      <div class="codex-reference-item-header">
         <strong>${escapeHtml(item.label)}</strong>
-        ${renderCopyButton(item.text, "Copy prompt")}
-        ${renderCliFillButton(singleLinePrompt(item.text), "Type prompt")}
+        <div class="codex-reference-actions">
+          ${renderCopyButton(promptText, "Copy prompt")}
+          <button class="copy-prompt-button prompt-type-button" type="button" data-command-fill="${escapeAttribute(singleLinePrompt(promptText))}"${titleAttribute(`Type into the mock CLI:\n${singleLinePrompt(promptText)}`)}>
+            Type prompt
+          </button>
+        </div>
       </div>
-      <pre><code>${escapeHtml(item.text)}</code></pre>
+      <pre><code>${escapeHtml(promptText)}</code></pre>
     </article>
   `;
 }
@@ -6836,6 +7381,13 @@ function loadState() {
           parsed.cwd = CODEX_DEFAULT_CWD;
         }
         parsed.vscodeSection = clampIndex(parsed.vscodeSection, vscodeLab.sections.length);
+        parsed.vscodeCli = {
+          ...createVSCodeCliState(),
+          ...(parsed.vscodeCli && typeof parsed.vscodeCli === "object" ? parsed.vscodeCli : {})
+        };
+        parsed.vscodeCli.installedExtensions = Array.isArray(parsed.vscodeCli.installedExtensions)
+          ? parsed.vscodeCli.installedExtensions
+          : [];
         parsed.repoExplorerOpen = Boolean(parsed.repoExplorerOpen);
         parsed.repoExplorerTouched = Boolean(parsed.repoExplorerTouched);
         if (parsed.viewMode === "guided" && !parsed.repoExplorerTouched) {
