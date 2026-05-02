@@ -2449,6 +2449,12 @@ function bindEvents() {
   });
 
   document.body.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isHowToModalOpen()) {
+      event.preventDefault();
+      closeHowToModal();
+      return;
+    }
+
     if (event.key !== "Enter" && event.key !== " ") {
       return;
     }
@@ -2680,6 +2686,36 @@ function toggleFlowFile(button) {
   }
 
   state.flowCollapsedFiles.push(key);
+}
+
+function openHowToModal() {
+  const modal = document.getElementById("howToModal");
+  if (!modal) {
+    return;
+  }
+
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
+  modal.querySelector("button[data-action='close-how-to']")?.focus({ preventScroll: true });
+  window.setTimeout(() => {
+    modal.querySelector("button[data-action='close-how-to']")?.focus({ preventScroll: true });
+  }, 0);
+}
+
+function closeHowToModal() {
+  const modal = document.getElementById("howToModal");
+  if (!modal) {
+    return;
+  }
+
+  modal.hidden = true;
+  document.body.classList.remove("modal-open");
+  document.querySelector("[data-action='open-how-to']")?.focus();
+}
+
+function isHowToModalOpen() {
+  const modal = document.getElementById("howToModal");
+  return Boolean(modal && !modal.hidden);
 }
 
 function handleFlowFileDragStart(event) {
@@ -2920,8 +2956,18 @@ function clearFlowDropHighlights() {
 
 function handleAction(button) {
   const action = button.dataset.action;
-  if (wizardPlayback && action !== "run-command" && action !== "toggle-theme") {
+  if (wizardPlayback && action !== "run-command" && action !== "toggle-theme" && action !== "open-how-to" && action !== "close-how-to") {
     cancelWizardPlayback();
+  }
+
+  if (action === "open-how-to") {
+    openHowToModal();
+    return;
+  }
+
+  if (action === "close-how-to") {
+    closeHowToModal();
+    return;
   }
 
   if (action === "start-lesson") {

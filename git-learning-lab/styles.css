@@ -201,6 +201,136 @@ button {
   color: #fff;
 }
 
+.modal-open {
+  overflow: hidden;
+}
+
+.how-to-modal[hidden] {
+  display: none;
+}
+
+.how-to-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(14px, 3vw, 32px);
+}
+
+.how-to-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 17, 31, 0.72);
+}
+
+.how-to-dialog {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 14px;
+  width: min(920px, 100%);
+  max-height: min(760px, calc(100vh - 32px));
+  overflow: auto;
+  padding: clamp(16px, 2.2vw, 24px);
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--blue);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 24px 70px rgba(7, 17, 31, 0.32);
+}
+
+.how-to-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.how-to-header h2 {
+  margin: 2px 0 0;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  font-size: clamp(1.4rem, 2.4vw, 2rem);
+}
+
+.how-to-dialog p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.how-to-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.how-to-grid article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.how-to-grid article > span {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--mint);
+  font-weight: 900;
+}
+
+.how-to-grid strong {
+  align-self: center;
+  color: var(--ink);
+  font-family: Rubik, Arial, sans-serif;
+}
+
+.how-to-grid p,
+.how-to-grid code {
+  grid-column: 2;
+}
+
+.how-to-grid code,
+.how-to-footer code {
+  overflow-wrap: anywhere;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+.how-to-grid code {
+  padding: 6px 8px;
+  border-radius: 7px;
+  color: var(--navy);
+  background: rgba(195, 244, 230, 0.62);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.how-to-footer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(112, 231, 196, 0.45);
+  border-radius: var(--radius);
+  background: rgba(195, 244, 230, 0.28);
+  color: var(--ink);
+}
+
+.how-to-footer strong {
+  color: var(--navy);
+}
+
 .theme-toggle {
   min-height: 40px;
   display: inline-flex;
@@ -4154,7 +4284,8 @@ button.repo-tree-file {
   .topbar-action-row,
   .icon-button,
   .command-form,
-  .file-main {
+  .file-main,
+  .how-to-header {
     align-items: stretch;
   }
 
@@ -4186,6 +4317,26 @@ button.repo-tree-file {
   .practice-mission-card,
   .practice-replay-step {
     width: 100%;
+  }
+
+  .how-to-dialog {
+    max-height: calc(100vh - 20px);
+    padding: 14px;
+  }
+
+  .how-to-header,
+  .how-to-grid,
+  .how-to-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .how-to-header {
+    display: grid;
+  }
+
+  .how-to-grid p,
+  .how-to-grid code {
+    grid-column: 1 / -1;
   }
 
   .terminal-output {

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Git Learning Lab</title>
     <link rel="stylesheet" href="styles.css" />
-    <script defer src="app.js?v=20260501-missions-replay-vscode"></script>
+    <script defer src="app.js?v=20260501-how-to"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -22,6 +22,10 @@
             <button class="icon-button secondary" type="button" data-action="back-portal" title="Return to the course overview">
               <span aria-hidden="true">H</span>
               <span>Home</span>
+            </button>
+            <button class="icon-button secondary" type="button" data-action="open-how-to" title="How to use this learning environment">
+              <span aria-hidden="true">?</span>
+              <span>How to</span>
             </button>
             <button class="theme-toggle" id="themeToggle" type="button" data-action="toggle-theme" aria-pressed="false" title="Switch to dark mode">
               <span class="theme-switch" aria-hidden="true">
@@ -112,6 +116,52 @@
           <div id="quizList"></div>
         </aside>
       </div>
+    </div>
+
+    <div class="how-to-modal" id="howToModal" hidden>
+      <div class="how-to-backdrop" data-action="close-how-to"></div>
+      <section class="how-to-dialog" role="dialog" aria-modal="true" aria-labelledby="howToTitle" aria-describedby="howToSummary">
+        <div class="how-to-header">
+          <div>
+            <span class="section-kicker">Quick start</span>
+            <h2 id="howToTitle">How to use this lab</h2>
+          </div>
+          <button class="text-button" type="button" data-action="close-how-to">Close</button>
+        </div>
+        <p id="howToSummary">
+          Use the lessons to learn the workflow, then use the practice labs to type commands and watch the repository state change.
+        </p>
+        <div class="how-to-grid">
+          <article>
+            <span>1</span>
+            <strong>Start with Codex</strong>
+            <p>Open the Codex lesson to practice setup, login, safe repo inspection, and prompt examples.</p>
+            <code>codex wizard mode</code>
+          </article>
+          <article>
+            <span>2</span>
+            <strong>Use VS Code Lab next</strong>
+            <p>Practice required extensions, opening the repo folder, search, Source Control, diffs, commits, and conflicts.</p>
+            <code>code --wizard mode</code>
+          </article>
+          <article>
+            <span>3</span>
+            <strong>Run the Git lessons</strong>
+            <p>Type the highlighted PowerShell/Git commands into the terminal. The graph and explorer update as you go.</p>
+            <code>git status</code>
+          </article>
+          <article>
+            <span>4</span>
+            <strong>Practice freely</strong>
+            <p>Open the Practice Lab for missions, randomized recovery drills, badges, PR readiness, and command replay.</p>
+            <code>git wizard mode</code>
+          </article>
+        </div>
+        <div class="how-to-footer">
+          <strong>Good path:</strong>
+          <span>Codex lesson -> VS Code Lab -> Git Lab 1 -> Practice Lab -> Git Lab 2 -> Git Lab 3.</span>
+        </div>
+      </section>
     </div>
   </body>
 </html>
