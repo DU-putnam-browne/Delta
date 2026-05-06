@@ -480,6 +480,48 @@ button:active {
     var(--surface);
 }
 
+.resume-work-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: clamp(16px, 1.7vw, 22px);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--green);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(195, 244, 230, 0.38), rgba(255, 255, 255, 0) 58%),
+    var(--surface);
+  box-shadow: var(--shadow);
+}
+
+[data-theme="dark"] .resume-work-card {
+  background:
+    linear-gradient(135deg, rgba(112, 231, 196, 0.12), rgba(13, 27, 47, 0) 58%),
+    var(--surface);
+}
+
+.resume-work-card h2 {
+  margin: 6px 0 8px;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  font-size: clamp(1.2rem, 2vw, 1.72rem);
+}
+
+.resume-work-card p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.48;
+}
+
+.resume-work-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 [data-theme="dark"] .course-card {
   background:
     linear-gradient(135deg, rgba(112, 231, 196, 0.13), rgba(13, 27, 47, 0) 52%),
@@ -494,6 +536,7 @@ button:active {
 }
 
 [data-theme="dark"] .capstone-course-card,
+[data-theme="dark"] .sql-course-card,
 [data-theme="dark"] .codex-course-card {
   background:
     linear-gradient(135deg, rgba(111, 147, 255, 0.16), rgba(13, 27, 47, 0) 54%),
@@ -504,6 +547,13 @@ button:active {
   border-top-color: var(--amber);
   background:
     linear-gradient(135deg, rgba(255, 201, 92, 0.18), rgba(255, 255, 255, 0) 54%),
+    var(--surface);
+}
+
+.sql-course-card {
+  border-top-color: var(--green);
+  background:
+    linear-gradient(135deg, rgba(112, 231, 196, 0.2), rgba(255, 201, 92, 0.1) 54%),
     var(--surface);
 }
 
@@ -723,6 +773,10 @@ button:active {
   grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
 }
 
+.main-grid.sql-workspace {
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
+}
+
 .main-grid.capstone-workspace {
   grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(260px, 340px);
 }
@@ -783,7 +837,9 @@ button:active {
 .capstone-workspace .repo-directory-panel,
 .capstone-workspace .repo-flow,
 .vscode-workspace .repo-directory-panel,
-.vscode-workspace .repo-flow {
+.vscode-workspace .repo-flow,
+.sql-workspace .repo-directory-panel,
+.sql-workspace .repo-flow {
   display: none;
 }
 
@@ -1504,6 +1560,133 @@ button:active {
 .repo-directory-panel {
   padding: 0;
   overflow: hidden;
+}
+
+.scenario-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(195, 244, 230, 0.16), rgba(0, 66, 255, 0.05));
+}
+
+[data-theme="dark"] .scenario-panel {
+  background: linear-gradient(135deg, rgba(112, 231, 196, 0.08), rgba(111, 147, 255, 0.08));
+}
+
+.scenario-card {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.scenario-card h3 {
+  margin: 3px 0 5px;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.scenario-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.38;
+}
+
+.scenario-file-list {
+  display: grid;
+  grid-template-columns: minmax(80px, auto) minmax(0, 1fr);
+  gap: 6px 8px;
+  align-items: center;
+}
+
+.scenario-file-list span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.scenario-file-list code {
+  min-width: 0;
+  overflow: hidden;
+  padding: 5px 7px;
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--surface-alt);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scenario-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.scenario-card-head strong {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--mint);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.7rem;
+}
+
+.scenario-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-alt);
+}
+
+.scenario-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), var(--mint));
+}
+
+.scenario-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.scenario-check {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 24px;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface-alt);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.scenario-check.complete {
+  border-color: rgba(20, 198, 20, 0.42);
+  color: var(--navy);
+  background: var(--mint);
+}
+
+[data-theme="dark"] .scenario-check.complete,
+[data-theme="dark"] .scenario-card-head strong {
+  color: #07111f;
 }
 
 .repo-explorer-toggle {
@@ -3469,6 +3652,748 @@ button.repo-tree-file {
   line-height: 1.3;
 }
 
+.sql-workspace .lab-panel {
+  display: grid;
+  grid-template-areas:
+    "guided"
+    "terminal";
+}
+
+.sql-workspace .guided-panel {
+  grid-area: guided;
+}
+
+.sql-workspace .terminal-panel {
+  grid-area: terminal;
+}
+
+.sql-lesson-content {
+  display: grid;
+  gap: 14px;
+}
+
+.sql-ide {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #0f1419;
+  color: #e6edf7;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+}
+
+.sql-ide-titlebar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2b3340;
+  background: #1f242b;
+}
+
+.sql-ide-titlebar span {
+  font-weight: 900;
+}
+
+.sql-title-meta {
+  display: flex;
+  min-width: 0;
+  gap: 10px;
+  align-items: center;
+}
+
+.sql-title-meta strong,
+.sql-title-meta em {
+  min-width: 0;
+  overflow: hidden;
+  color: #9cdcfe;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.76rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sql-title-meta em {
+  max-width: min(520px, 46vw);
+  color: #9aa7b8;
+}
+
+.sql-ide-menubar {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  overflow-x: auto;
+  padding: 3px 8px;
+  border-bottom: 1px solid #2b3340;
+  background: #252a33;
+  scrollbar-width: thin;
+}
+
+.sql-ide-menubar span {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #c8d0dc;
+  font-size: 0.72rem;
+}
+
+.sql-ide-menubar span:hover {
+  color: #ffffff;
+  background: #333b49;
+}
+
+.sql-ide-body {
+  display: grid;
+  grid-template-columns: 42px minmax(210px, 0.34fr) minmax(0, 1fr);
+  min-height: clamp(360px, 44vh, 540px);
+}
+
+.sql-activity-bar {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 10px 6px;
+  border-right: 1px solid #2b3340;
+  background: #181d24;
+}
+
+.sql-activity-bar span {
+  display: grid;
+  place-items: center;
+  min-height: 32px;
+  border-left: 2px solid transparent;
+  border-radius: 6px;
+  color: #9aa7b8;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.sql-activity-bar span.active {
+  border-left-color: #7be4d0;
+  color: #ffffff;
+  background: #2a3240;
+}
+
+.sql-file-tree {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 12px 10px 16px;
+  border-right: 1px solid #2b3340;
+  background: #1e1e1e;
+}
+
+.sql-file-tree-heading {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.sql-file-tree-heading strong {
+  color: #ffffff;
+  font-size: 0.82rem;
+}
+
+.sql-file-tree-heading em {
+  overflow: hidden;
+  color: #9aa7b8;
+  font-size: 0.68rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sql-tree-node {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 5px;
+  align-items: center;
+  min-width: 0;
+  padding: 3px 4px;
+  color: #d7dde7;
+  font-size: 0.74rem;
+}
+
+.sql-tree-node span {
+  color: #c8d0dc;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.7rem;
+}
+
+.sql-tree-node strong {
+  overflow: hidden;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sql-tree-node.indent {
+  padding-left: 14px;
+}
+
+.sql-tree-node.indent-2 {
+  padding-left: 28px;
+}
+
+.sql-file-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+  width: 100%;
+  min-height: 36px;
+  padding: 5px 7px;
+  border: 0;
+  border-radius: 6px;
+  color: #d4d4d4;
+  background: transparent;
+  text-align: left;
+}
+
+.sql-file-row:hover,
+.sql-file-row.active {
+  background: #094771;
+  color: #ffffff;
+}
+
+.sql-file-row strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sql-file-row div {
+  min-width: 0;
+}
+
+.sql-file-row em {
+  display: block;
+  overflow: hidden;
+  color: #b7fbe7;
+  font-size: 0.68rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sql-file-row small {
+  grid-column: 2;
+  justify-self: start;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #111827;
+  background: #7be4d0;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sql-object-icon {
+  color: #74d680;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.sql-editor-pane {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  min-width: 0;
+  background: #1e1e1e;
+}
+
+.sql-editor-tabs {
+  display: flex;
+  min-width: 0;
+  border-bottom: 1px solid #2b3340;
+  background: #252526;
+}
+
+.sql-editor-tabs span {
+  max-width: 240px;
+  overflow: hidden;
+  padding: 8px 11px;
+  border-right: 1px solid #2b3340;
+  color: #b8c7d9;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.sql-editor-tabs span.active {
+  color: #ffffff;
+  background: #1e1e1e;
+}
+
+.sql-worksheet-toolbar {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  overflow-x: auto;
+  padding: 7px 10px;
+  border-bottom: 1px solid #2b3340;
+  background: #202734;
+  scrollbar-width: thin;
+}
+
+.sql-worksheet-toolbar button,
+.sql-connection-pill,
+.sql-autocommit {
+  flex: 0 0 auto;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.sql-worksheet-toolbar button {
+  padding: 5px 9px;
+  border: 1px solid #3a4b62;
+  color: #dce7f7;
+  background: #263445;
+}
+
+.sql-worksheet-toolbar button:hover:not(:disabled) {
+  border-color: #7be4d0;
+  color: #ffffff;
+}
+
+.sql-worksheet-toolbar .sql-run-button {
+  border-color: #23b263;
+  color: #07130d;
+  background: #7be4d0;
+}
+
+.sql-worksheet-toolbar button.disabled {
+  opacity: 0.45;
+}
+
+.sql-connection-pill,
+.sql-autocommit {
+  padding: 4px 8px;
+  color: #c8d0dc;
+  background: #161b22;
+}
+
+.sql-autocommit {
+  color: #f7d774;
+}
+
+.sql-breadcrumbs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  overflow-x: auto;
+  padding: 6px 12px;
+  border-bottom: 1px solid #2b3340;
+  color: #8ca0ba;
+  background: #1b2028;
+  font-size: 0.72rem;
+  scrollbar-width: thin;
+}
+
+.sql-breadcrumbs span::after {
+  content: ">";
+  margin-left: 6px;
+  color: #52657e;
+}
+
+.sql-breadcrumbs strong {
+  color: #dce7f7;
+}
+
+.sql-code-editor {
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 0 18px;
+  background: #1e1e1e;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.sql-editor-line {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  min-width: max-content;
+}
+
+.sql-editor-line:hover {
+  background: #252b35;
+}
+
+.sql-line-number {
+  padding-right: 12px;
+  color: #6f7d8f;
+  text-align: right;
+  user-select: none;
+}
+
+.sql-editor-line code {
+  color: #d4d4d4;
+  white-space: pre;
+}
+
+.sql-token.keyword {
+  color: #569cd6;
+  font-weight: 900;
+}
+
+.sql-token.alias {
+  color: #4ec9b0;
+}
+
+.sql-result-panel {
+  border-top: 1px solid #2b3340;
+  background: #171c24;
+}
+
+.sql-result-tabs {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  padding: 6px 8px 0;
+  background: #202734;
+  scrollbar-width: thin;
+}
+
+.sql-result-tabs span {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  color: #aebace;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.sql-result-tabs span.active {
+  border-color: #2b3340;
+  color: #ffffff;
+  background: #171c24;
+}
+
+.sql-result-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  color: #dbe8ff;
+  font-size: 0.78rem;
+}
+
+.sql-result-meta span {
+  color: #b7fbe7;
+  font-weight: 900;
+}
+
+.sql-result-scroll {
+  max-height: 210px;
+  overflow: auto;
+}
+
+.sql-result-grid {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.74rem;
+  background: #111820;
+}
+
+.sql-result-grid th,
+.sql-result-grid td {
+  max-width: 210px;
+  overflow: hidden;
+  padding: 7px 9px;
+  border: 1px solid #2b3340;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sql-result-grid th {
+  position: sticky;
+  top: 0;
+  color: #111827;
+  background: #9cdcfe;
+  text-align: left;
+}
+
+.sql-result-grid td {
+  color: #e6edf7;
+}
+
+.sql-helper-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 10px;
+}
+
+.sql-helper-grid article,
+.sql-command-palette {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.sql-helper-grid strong {
+  color: var(--navy);
+}
+
+.sql-helper-grid p,
+.sql-helper-grid li {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.sql-helper-grid ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.sql-command-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  gap: 8px;
+}
+
+.sql-command-card {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  text-align: left;
+}
+
+.sql-command-card:hover {
+  border-color: var(--blue);
+  box-shadow: inset 3px 0 0 var(--blue);
+}
+
+.sql-command-card strong {
+  color: var(--navy);
+}
+
+.sql-command-card code {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+}
+
+.sql-workspace .terminal-output {
+  height: clamp(360px, 46vh, 620px);
+}
+
+.sql-terminal-panel .section-header {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.sql-terminal-panel .terminal-output {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding: 0;
+  border-color: #2b3340;
+  color: #d4d4d4;
+  background: #1e1e1e;
+  cursor: default;
+}
+
+.sql-terminal-panel #terminalHistory {
+  min-height: 0;
+  overflow: auto;
+}
+
+.sql-runner-shell {
+  display: grid;
+  min-height: 100%;
+  grid-template-rows: auto auto auto minmax(0, auto);
+  background: #1e1e1e;
+}
+
+.sql-runner-tabbar {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  padding: 7px 9px 0;
+  border-bottom: 1px solid #2b3340;
+  background: #252526;
+  scrollbar-width: thin;
+}
+
+.sql-runner-tabbar span {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  color: #aebace;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.sql-runner-tabbar span.active {
+  border-color: #2b3340;
+  color: #ffffff;
+  background: #1e1e1e;
+}
+
+.sql-runner-history {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #2b3340;
+  background: #1e1e1e;
+}
+
+.sql-runner-empty {
+  padding: 10px 12px;
+  border: 1px dashed #52657e;
+  border-radius: 8px;
+  color: #aebace;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.sql-runner-line {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid #2b3340;
+  border-radius: 7px;
+  background: #161b22;
+}
+
+.sql-runner-line span {
+  color: #9cdcfe;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sql-runner-line code {
+  overflow: hidden;
+  color: #d4d4d4;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sql-runner-line.statement {
+  border-color: rgba(123, 228, 208, 0.36);
+}
+
+.sql-runner-line.success span {
+  color: #7be4d0;
+}
+
+.sql-runner-line.error span {
+  color: #ffb4ad;
+}
+
+.sql-runner-line.note span {
+  color: #f7d774;
+}
+
+.sql-runner-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2b3340;
+  color: #dce7f7;
+  background: #171c24;
+  font-size: 0.78rem;
+}
+
+.sql-runner-status span {
+  color: #7be4d0;
+  font-weight: 900;
+}
+
+.sql-terminal-panel .command-form {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  border-top: 1px solid #2b3340;
+  background: #1e1e1e;
+}
+
+.sql-terminal-panel .command-form span {
+  display: grid;
+  align-self: stretch;
+  place-items: center;
+  max-width: none;
+  padding: 10px 8px;
+  color: #6f7d8f;
+  background: #181d24;
+  font-size: 0.72rem;
+}
+
+.sql-terminal-panel .command-form input {
+  min-height: 46px;
+  padding: 10px 12px;
+  color: #d4d4d4;
+  background: #1e1e1e;
+  caret-color: #7be4d0;
+}
+
+.sql-terminal-panel .command-form input::placeholder {
+  color: #7f8ea3;
+}
+
+.sql-terminal-panel .command-form button {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 7px 9px;
+  padding: 8px 11px;
+  clip: auto;
+  border: 1px solid #23b263;
+  border-radius: 7px;
+  color: #07130d;
+  background: #7be4d0;
+  white-space: nowrap;
+  font-weight: 900;
+}
+
+.sql-terminal-panel .sql-result-panel {
+  min-height: 0;
+}
+
+.sql-terminal-panel .sql-result-scroll {
+  max-height: 180px;
+}
+
 .branch-builder {
   display: grid;
   gap: 10px;
@@ -4119,7 +5044,8 @@ button.repo-tree-file {
   .main-grid,
   .main-grid.codex-workspace,
   .main-grid.capstone-workspace,
-  .main-grid.vscode-workspace {
+  .main-grid.vscode-workspace,
+  .main-grid.sql-workspace {
     grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
   }
 
@@ -4129,6 +5055,25 @@ button.repo-tree-file {
   }
 
   #quizList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1380px) {
+  .main-grid.sql-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .sql-workspace .lesson-panel,
+  .sql-workspace .quiz-panel {
+    position: static;
+  }
+
+  .sql-workspace .lesson-list {
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  }
+
+  .sql-workspace #quizList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -4156,6 +5101,35 @@ button.repo-tree-file {
       "graph graph"
       "files files"
       "explorer terminal";
+  }
+
+  .sql-ide-body {
+    grid-template-columns: 1fr;
+  }
+
+  .sql-activity-bar {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(42px, max-content);
+    align-content: stretch;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid #2b3340;
+  }
+
+  .sql-activity-bar span {
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  .sql-activity-bar span.active {
+    border-bottom-color: #7be4d0;
+  }
+
+  .sql-file-tree {
+    max-height: 240px;
+    overflow: auto;
+    border-right: 0;
+    border-bottom: 1px solid #2b3340;
   }
 }
 
@@ -4186,10 +5160,44 @@ button.repo-tree-file {
   .main-grid.codex-workspace,
   .main-grid.capstone-workspace,
   .main-grid.vscode-workspace,
+  .main-grid.sql-workspace,
   .repo-flow,
   #quizList,
+  .resume-work-card,
+  .scenario-panel,
   .prompt-grid {
     grid-template-columns: 1fr;
+  }
+
+  .resume-work-actions {
+    justify-content: flex-start;
+  }
+
+  .sql-ide-body {
+    grid-template-columns: 1fr;
+  }
+
+  .sql-activity-bar {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(42px, max-content);
+    align-content: stretch;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid #2b3340;
+  }
+
+  .sql-activity-bar span {
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  .sql-activity-bar span.active {
+    border-bottom-color: #7be4d0;
+  }
+
+  .sql-file-tree {
+    border-right: 0;
+    border-bottom: 1px solid #2b3340;
   }
 
   .practice-workspace .lab-panel {
@@ -4326,11 +5334,17 @@ button.repo-tree-file {
 
   .how-to-header,
   .how-to-grid,
-  .how-to-footer {
+  .how-to-footer,
+  .scenario-card-head,
+  .scenario-file-list {
     grid-template-columns: 1fr;
   }
 
   .how-to-header {
+    display: grid;
+  }
+
+  .scenario-card-head {
     display: grid;
   }
 

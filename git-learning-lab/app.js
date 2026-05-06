@@ -162,15 +162,17 @@ const oracleRepoMap = [
 const modules = [
   {
     id: "git-basics",
-    title: "GIT Lab 1: Orientation",
+    title: "Ticket to First PR",
     level: "Beginner",
     time: "60 min",
     description:
-      "A hands-on companion to the Oracle-first orientation: start from an ADO-style request, use a task branch, and keep changes reviewable.",
+      "Start from an ADO-style request, make a scoped branch change, review the diff, publish the branch, and understand what the PR must prove.",
     outcomes: [
       "Anchor work to a ticket",
       "Use a safe task branch",
       "Read status and history",
+      "Review the diff before committing",
+      "Publish a branch for PR review",
       "Explain what a PR should communicate"
     ],
     lessons: [
@@ -179,10 +181,10 @@ const modules = [
       ["Why review discipline matters", "Branches and PR notes make the handoff easier to audit."]
     ],
     resources: [["Git Docs", "https://git-scm.com/docs"]],
-    labTitle: "Emergency orders demo branch",
-    labSteps: ["Ticket context", "Init repo", "Commit context", "Branch", "Add SQL asset", "Merge"],
+    labTitle: "Ticket-to-PR scenario",
+    labSteps: ["Ticket context", "Init repo", "Commit context", "Branch", "Diff review", "Publish", "PR gate"],
     meetingContext: [
-      "Default workflow: ticket -> separate branch -> focused commit -> PR when work needs review.",
+      "Default workflow: ticket -> branch -> diff review -> focused commit -> publish -> PR.",
       "Demo request: CCS emergency orders by ZIP for the prior completed Monday-Sunday week.",
       "Good habits: small branch, honest validation notes, clear reviewer focus."
     ],
@@ -197,10 +199,12 @@ const modules = [
       { cmd: `git switch -c ${oracleLab.branchName}`, desc: "Creates and switches to the task branch" },
       { cmd: `edit ${oracleLab.featureFile}`, desc: "Adds the demo SQL file on the task branch" },
       { cmd: "git status", desc: "Shows the branch-specific SQL change" },
+      { cmd: "git diff", desc: "Reviews the SQL change before staging" },
       { cmd: `git add ${oracleLab.featureFile}`, desc: "Stages the SQL asset for review" },
       { cmd: `git commit -m "${oracleLab.featureCommitMessage}"`, desc: "Creates a branch commit for the report asset" },
+      { cmd: `git push -u origin ${oracleLab.branchName}`, desc: "Publishes the task branch so an ADO PR can be opened" },
       { cmd: "git switch main", desc: "Returns HEAD to the main branch" },
-      { cmd: `git merge ${oracleLab.branchName}`, desc: "Fast-forwards main to include the task branch work" }
+      { cmd: `git merge ${oracleLab.branchName}`, desc: "Completes the simulated PR merge back to main" }
     ],
     quiz: [
       {
@@ -243,7 +247,7 @@ const modules = [
   },
   {
     id: "project-work",
-    title: "GIT Lab 2: Projects",
+    title: "Project Capsule Workflow",
     level: "Beginner",
     time: "45 min",
     description:
@@ -260,7 +264,7 @@ const modules = [
       ["Workstreams", "Parallel or multi-day work needs a small tracker so handoffs do not depend on chat memory."]
     ],
     resources: [["Git Docs", "https://git-scm.com/docs"]],
-    labTitle: "GIT Lab 2: Projects",
+    labTitle: "Project-to-PR scenario",
     startLabel: "Start Lesson",
     folder: projectLab.folder,
     folderDisplay: projectLab.folderDisplay,
@@ -295,10 +299,12 @@ const modules = [
       { cmd: `git switch -c ${projectLab.branchName}`, desc: "Creates a focused branch for one workstream" },
       { cmd: `edit ${projectLab.workstreamsFile}`, desc: "Updates workstream notes on the branch" },
       { cmd: "git status", desc: "Shows the branch-specific workstream change" },
+      { cmd: "git diff", desc: "Reviews the workstream note before staging" },
       { cmd: `git add ${projectLab.workstreamsFile}`, desc: "Stages the workstream update" },
       { cmd: `git commit -m "${projectLab.workstreamCommitMessage}"`, desc: "Commits the focused workstream update" },
+      { cmd: `git push -u origin ${projectLab.branchName}`, desc: "Publishes the workstream branch for PR review" },
       { cmd: "git switch main", desc: "Returns to the main branch" },
-      { cmd: `git merge ${projectLab.branchName}`, desc: "Fast-forwards main to include the workstream update" }
+      { cmd: `git merge ${projectLab.branchName}`, desc: "Completes the simulated PR merge back to main" }
     ],
     quiz: [
       {
@@ -327,9 +333,9 @@ const lessonCommandGroups = [
   [0, 1, 2, 3, 4],
   [5],
   [6],
-  [7, 8, 9],
-  [10, 11],
-  [12, 13]
+  [7, 8, 9, 10],
+  [11, 12, 13],
+  [14, 15]
 ];
 
 const projectLessons = [
@@ -361,17 +367,17 @@ const projectLessons = [
     title: "Branch a Workstream",
     concept:
       "Once the capsule exists, everyday work returns to the normal branch model.",
-    task: "Create a focused branch and update the workstream tracker there.",
+    task: "Create a focused branch, update the workstream tracker, and review the diff.",
     hint: "The branch carries one workstream while main keeps the project map.",
-    complete: (state) => state.guidedStep >= 12
+    complete: (state) => state.guidedStep >= 13
   },
   {
     title: "Commit Workstream Progress",
     concept:
       "A workstream commit should explain what moved, what remains open, and what reviewers should inspect.",
-    task: "Stage and commit the workstream update.",
-    hint: "Small commits keep longer projects reviewable even when the project is broad.",
-    complete: (state) => state.guidedStep >= 14
+    task: "Stage, commit, and publish the workstream update.",
+    hint: "Small commits and published branches keep longer projects reviewable even when the project is broad.",
+    complete: (state) => state.guidedStep >= 16 || (state.taskFlags.branchCommitted && state.taskFlags.pushed)
   },
   {
     title: "Merge and Continue",
@@ -387,9 +393,9 @@ const projectLessonCommandGroups = [
   [0, 1, 2],
   [3, 4, 5, 6],
   [7, 8],
-  [9, 10, 11],
-  [12, 13],
-  [14, 15]
+  [9, 10, 11, 12],
+  [13, 14, 15],
+  [16, 17]
 ];
 
 const codexLab = {
@@ -1085,6 +1091,352 @@ const vscodeLab = {
   ]
 };
 
+const oracleSqlFiles = [
+  {
+    path: "ccs/sql/meters/ccs_emergency_response_activity_extract.sql",
+    table: "ccs_emergency_response_activity_extract",
+    status: "existing",
+    note: "CCS emergency response activity extract used as the starter table."
+  },
+  {
+    path: "ccs/sql/meters/ccs_open_field_activity_extract.sql",
+    table: "ccs_open_field_activity_extract",
+    status: "existing",
+    note: "Open field activity extract for cross-checking field activity patterns."
+  },
+  {
+    path: "ccs/sql/meters/ccs_field_activity_appointment_performance.sql",
+    table: "ccs_field_activity_appointment_performance",
+    status: "existing",
+    note: "Appointment performance SQL from the real ccs/sql/meters folder."
+  },
+  {
+    path: "ccs/sql/meters/ccs_device_service_agreement_extract.sql",
+    table: "ccs_device_service_agreement_extract",
+    status: "existing",
+    note: "Lookup-style table used to practice joins and customer-class filters."
+  },
+  {
+    path: "ccs/sql/meters/ccs_device_channel_multiplier_audit.sql",
+    table: "ccs_device_channel_multiplier_audit",
+    status: "existing",
+    note: "Device channel multiplier audit SQL from the real ccs/sql/meters folder."
+  },
+  {
+    path: "ccs/sql/meters/ccs_emergency_response_activity_by_zip_prior_week.sql",
+    table: "ccs_emergency_response_activity_by_zip_prior_week",
+    status: "created in lab",
+    note: "Review-ready query learners build from the neighboring extract."
+  }
+];
+
+const oracleSqlTables = {
+  ccs_emergency_response_activity_extract: {
+    label: "CCS emergency response activity extract",
+    sourcePath: "ccs/sql/meters/ccs_emergency_response_activity_extract.sql",
+    grain: "One row per emergency response activity",
+    columns: [
+      "ACTIVITY_ID",
+      "PREMISE_ID",
+      "SERVICE_POINT_ID",
+      "METER_ID",
+      "ZIP_CODE",
+      "ACTIVITY_STATUS",
+      "ACTIVITY_TYPE",
+      "ORDER_DATE",
+      "COMPLETED_DATE"
+    ],
+    rows: [
+      {
+        ACTIVITY_ID: "ER-1001",
+        PREMISE_ID: "P-44001",
+        SERVICE_POINT_ID: "SP-7001",
+        METER_ID: "MTR-101",
+        ZIP_CODE: "70112",
+        ACTIVITY_STATUS: "OPEN",
+        ACTIVITY_TYPE: "EMERGENCY",
+        ORDER_DATE: "2026-04-28",
+        COMPLETED_DATE: ""
+      },
+      {
+        ACTIVITY_ID: "ER-1002",
+        PREMISE_ID: "P-44002",
+        SERVICE_POINT_ID: "SP-7002",
+        METER_ID: "MTR-102",
+        ZIP_CODE: "70112",
+        ACTIVITY_STATUS: "CLOSED",
+        ACTIVITY_TYPE: "EMERGENCY",
+        ORDER_DATE: "2026-04-29",
+        COMPLETED_DATE: "2026-04-30"
+      },
+      {
+        ACTIVITY_ID: "ER-1003",
+        PREMISE_ID: "P-44003",
+        SERVICE_POINT_ID: "SP-7003",
+        METER_ID: "MTR-103",
+        ZIP_CODE: "70001",
+        ACTIVITY_STATUS: "PENDING",
+        ACTIVITY_TYPE: "FIELD_CHECK",
+        ORDER_DATE: "2026-04-30",
+        COMPLETED_DATE: ""
+      },
+      {
+        ACTIVITY_ID: "ER-1004",
+        PREMISE_ID: "P-44004",
+        SERVICE_POINT_ID: "SP-7004",
+        METER_ID: "MTR-104",
+        ZIP_CODE: "70123",
+        ACTIVITY_STATUS: "CLOSED",
+        ACTIVITY_TYPE: "EMERGENCY",
+        ORDER_DATE: "2026-05-01",
+        COMPLETED_DATE: "2026-05-02"
+      },
+      {
+        ACTIVITY_ID: "ER-1005",
+        PREMISE_ID: "P-44005",
+        SERVICE_POINT_ID: "SP-7005",
+        METER_ID: "MTR-105",
+        ZIP_CODE: "70115",
+        ACTIVITY_STATUS: "OPEN",
+        ACTIVITY_TYPE: "EMERGENCY",
+        ORDER_DATE: "2026-05-02",
+        COMPLETED_DATE: ""
+      },
+      {
+        ACTIVITY_ID: "ER-1006",
+        PREMISE_ID: "P-44006",
+        SERVICE_POINT_ID: "SP-7006",
+        METER_ID: "MTR-106",
+        ZIP_CODE: "70001",
+        ACTIVITY_STATUS: "CLOSED",
+        ACTIVITY_TYPE: "FIELD_CHECK",
+        ORDER_DATE: "2026-05-03",
+        COMPLETED_DATE: "2026-05-03"
+      }
+    ]
+  },
+  ccs_open_field_activity_extract: {
+    label: "CCS open field activity extract",
+    sourcePath: "ccs/sql/meters/ccs_open_field_activity_extract.sql",
+    grain: "One row per open field activity",
+    columns: ["ACTIVITY_ID", "SERVICE_POINT_ID", "CREW_AREA", "ACTIVITY_STATUS", "SCHEDULED_DATE"],
+    rows: [
+      {
+        ACTIVITY_ID: "FA-2001",
+        SERVICE_POINT_ID: "SP-7001",
+        CREW_AREA: "NOLA",
+        ACTIVITY_STATUS: "OPEN",
+        SCHEDULED_DATE: "2026-05-05"
+      },
+      {
+        ACTIVITY_ID: "FA-2002",
+        SERVICE_POINT_ID: "SP-7004",
+        CREW_AREA: "JEFFERSON",
+        ACTIVITY_STATUS: "SCHEDULED",
+        SCHEDULED_DATE: "2026-05-06"
+      },
+      {
+        ACTIVITY_ID: "FA-2003",
+        SERVICE_POINT_ID: "SP-7005",
+        CREW_AREA: "NOLA",
+        ACTIVITY_STATUS: "OPEN",
+        SCHEDULED_DATE: "2026-05-07"
+      }
+    ]
+  },
+  ccs_field_activity_appointment_performance: {
+    label: "CCS field activity appointment performance",
+    sourcePath: "ccs/sql/meters/ccs_field_activity_appointment_performance.sql",
+    grain: "One row per field activity appointment",
+    columns: ["APPOINTMENT_ID", "ACTIVITY_TYPE", "SCHEDULED_DATE", "COMPLETION_STATUS"],
+    rows: [
+      {
+        APPOINTMENT_ID: "APT-3001",
+        ACTIVITY_TYPE: "EMERGENCY",
+        SCHEDULED_DATE: "2026-05-01",
+        COMPLETION_STATUS: "ON_TIME"
+      },
+      {
+        APPOINTMENT_ID: "APT-3002",
+        ACTIVITY_TYPE: "FIELD_CHECK",
+        SCHEDULED_DATE: "2026-05-02",
+        COMPLETION_STATUS: "LATE"
+      },
+      {
+        APPOINTMENT_ID: "APT-3003",
+        ACTIVITY_TYPE: "EMERGENCY",
+        SCHEDULED_DATE: "2026-05-03",
+        COMPLETION_STATUS: "ON_TIME"
+      }
+    ]
+  },
+  ccs_device_service_agreement_extract: {
+    label: "CCS device service agreement extract",
+    sourcePath: "ccs/sql/meters/ccs_device_service_agreement_extract.sql",
+    grain: "One row per service point and active service agreement",
+    columns: ["SERVICE_POINT_ID", "SERVICE_AGREEMENT_ID", "CUSTOMER_CLASS", "START_DATE", "END_DATE"],
+    rows: [
+      {
+        SERVICE_POINT_ID: "SP-7001",
+        SERVICE_AGREEMENT_ID: "SA-5001",
+        CUSTOMER_CLASS: "RES",
+        START_DATE: "2023-02-01",
+        END_DATE: ""
+      },
+      {
+        SERVICE_POINT_ID: "SP-7002",
+        SERVICE_AGREEMENT_ID: "SA-5002",
+        CUSTOMER_CLASS: "COM",
+        START_DATE: "2022-11-15",
+        END_DATE: ""
+      },
+      {
+        SERVICE_POINT_ID: "SP-7003",
+        SERVICE_AGREEMENT_ID: "SA-5003",
+        CUSTOMER_CLASS: "RES",
+        START_DATE: "2024-07-10",
+        END_DATE: ""
+      },
+      {
+        SERVICE_POINT_ID: "SP-7004",
+        SERVICE_AGREEMENT_ID: "SA-5004",
+        CUSTOMER_CLASS: "IND",
+        START_DATE: "2021-05-21",
+        END_DATE: ""
+      },
+      {
+        SERVICE_POINT_ID: "SP-7005",
+        SERVICE_AGREEMENT_ID: "SA-5005",
+        CUSTOMER_CLASS: "RES",
+        START_DATE: "2025-01-06",
+        END_DATE: ""
+      },
+      {
+        SERVICE_POINT_ID: "SP-7006",
+        SERVICE_AGREEMENT_ID: "SA-5006",
+        CUSTOMER_CLASS: "COM",
+        START_DATE: "2020-08-13",
+        END_DATE: ""
+      }
+    ]
+  },
+  ccs_device_channel_multiplier_audit: {
+    label: "CCS device channel multiplier audit",
+    sourcePath: "ccs/sql/meters/ccs_device_channel_multiplier_audit.sql",
+    grain: "One row per device channel multiplier audit record",
+    columns: ["DEVICE_ID", "CHANNEL_ID", "MULTIPLIER", "EFFECTIVE_DATE"],
+    rows: [
+      {
+        DEVICE_ID: "DEV-101",
+        CHANNEL_ID: "CH-1",
+        MULTIPLIER: 1,
+        EFFECTIVE_DATE: "2026-01-01"
+      },
+      {
+        DEVICE_ID: "DEV-102",
+        CHANNEL_ID: "CH-2",
+        MULTIPLIER: 10,
+        EFFECTIVE_DATE: "2026-02-15"
+      },
+      {
+        DEVICE_ID: "DEV-103",
+        CHANNEL_ID: "CH-1",
+        MULTIPLIER: 1,
+        EFFECTIVE_DATE: "2026-03-01"
+      }
+    ]
+  }
+};
+
+const oracleSqlLab = {
+  id: "oracle-sql-lab",
+  title: "Oracle SQL Lab",
+  level: "Beginner",
+  time: "75 min",
+  labTitle: "Interactive worksheet",
+  description:
+    "A soup-to-nuts Oracle SQL module using repo-shaped CCS files: start with SELECT *, narrow columns, filter, aggregate, join, and build a review-ready query.",
+  repoRoot: ORACLE_REPO_ROOT,
+  sections: [
+    {
+      id: "select-all",
+      title: "SELECT * From a File",
+      kicker: "Starting point",
+      intro:
+        "In this lab, the repo file maps to a table-like object. Replace [file name] with the SQL file's table name, then inspect all rows.",
+      task: "Run the starter query and read the result grid before narrowing anything.",
+      query: "SELECT *\nFROM ccs_emergency_response_activity_extract;",
+      objectives: ["Recognize the table/file target", "See every column", "Understand that SELECT * is inspection, not final output"]
+    },
+    {
+      id: "select-columns",
+      title: "Choose Columns",
+      kicker: "Projection",
+      intro:
+        "Real reviewable SQL usually names the columns it needs. That keeps output stable and easier to validate.",
+      task: "Return only the identifiers, ZIP, status, and order date needed for the business question.",
+      query:
+        "SELECT activity_id, zip_code, activity_status, order_date\nFROM ccs_emergency_response_activity_extract;",
+      objectives: ["Use explicit columns", "Keep output focused", "Avoid accidental downstream column changes"]
+    },
+    {
+      id: "filter-rows",
+      title: "Filter Rows",
+      kicker: "WHERE",
+      intro:
+        "WHERE turns a broad extract into the rows that matter. Start with readable filters before adding complexity.",
+      task: "Filter to open or pending emergency response activity.",
+      query:
+        "SELECT activity_id, zip_code, activity_status, order_date\nFROM ccs_emergency_response_activity_extract\nWHERE activity_status IN ('OPEN', 'PENDING');",
+      objectives: ["Use WHERE", "Use IN for multiple values", "Validate which statuses survive the filter"]
+    },
+    {
+      id: "date-window",
+      title: "Add a Date Window",
+      kicker: "Oracle dates",
+      intro:
+        "Oracle date filters should be explicit. TRUNC(SYSDATE) - 7 is a common rolling-window pattern for recent activity checks.",
+      task: "Limit the extract to the recent order window and sort newest first.",
+      query:
+        "SELECT activity_id, zip_code, activity_status, order_date\nFROM ccs_emergency_response_activity_extract\nWHERE order_date >= TRUNC(SYSDATE) - 7\nORDER BY order_date DESC;",
+      objectives: ["Use a date predicate", "Sort with ORDER BY", "Make the time window obvious to reviewers"]
+    },
+    {
+      id: "aggregate",
+      title: "Summarize by ZIP",
+      kicker: "GROUP BY",
+      intro:
+        "Aggregation changes the grain. The result is no longer one row per activity; it becomes one row per ZIP code.",
+      task: "Count recent emergency response rows by ZIP code.",
+      query:
+        "SELECT zip_code, COUNT(*) AS order_count\nFROM ccs_emergency_response_activity_extract\nWHERE order_date >= TRUNC(SYSDATE) - 7\nGROUP BY zip_code\nORDER BY order_count DESC;",
+      objectives: ["Use COUNT(*)", "Use GROUP BY", "State the output grain plainly"]
+    },
+    {
+      id: "join-lookup",
+      title: "Join a Lookup",
+      kicker: "JOIN",
+      intro:
+        "Joins bring context from another file. In Oracle repo work, always know the join key and watch for duplicate-row risk.",
+      task: "Join emergency activity to service agreement context by service point.",
+      query:
+        "SELECT e.activity_id, e.zip_code, e.activity_status, s.customer_class\nFROM ccs_emergency_response_activity_extract e\nJOIN ccs_device_service_agreement_extract s\n  ON e.service_point_id = s.service_point_id\nWHERE s.customer_class = 'RES';",
+      objectives: ["Use table aliases", "Join on service_point_id", "Filter on lookup context"]
+    },
+    {
+      id: "cte-review",
+      title: "Build the Review Query",
+      kicker: "CTE",
+      intro:
+        "A CTE makes the final query readable: one named step for row filtering, one final step for the report output.",
+      task: "Create the prior-week ZIP summary as a reviewable query.",
+      query:
+        "WITH prior_week AS (\n  SELECT activity_id, zip_code, activity_status, order_date\n  FROM ccs_emergency_response_activity_extract\n  WHERE order_date >= TRUNC(SYSDATE) - 7\n)\nSELECT zip_code, COUNT(*) AS order_count\nFROM prior_week\nGROUP BY zip_code\nORDER BY order_count DESC;",
+      objectives: ["Use WITH for readability", "Separate filtering from reporting", "Produce the ZIP summary reviewers asked for"]
+    }
+  ]
+};
+
 const lessons = [
   {
     title: "Setup and Context",
@@ -1121,17 +1473,17 @@ const lessons = [
   {
     title: "Reviewable Commit",
     concept:
-      "A focused branch commit makes the review surface smaller and easier to explain.",
-    task: "Stage and commit the SQL report asset on the task branch.",
-    hint: "Clear commit messages help a reviewer understand intent without guessing.",
-    complete: (state) => state.guidedStep >= 12 || state.taskFlags.branchCommitted
+      "A focused branch commit makes the review surface smaller and easier to explain. Review the diff before the checkpoint.",
+    task: "Review the SQL diff, stage the file, commit it, and publish the branch.",
+    hint: "A reviewer should be able to see what changed before reading the PR summary.",
+    complete: (state) => state.guidedStep >= 14 || (state.taskFlags.branchCommitted && state.taskFlags.pushed)
   },
   {
     title: "Merge and PR Readiness",
     concept:
-      "A merge combines branch work back into the baseline. In real work, this happens through review and pull request discipline.",
-    task: "Return to main and fast-forward merge the task branch.",
-    hint: "The lab stops at merge mechanics; the meeting workflow continues with PR notes and validation context.",
+      "A merge combines branch work back into the baseline after review. In ADO, publishing the branch is what makes the PR possible.",
+    task: "Return to main and complete the simulated PR merge.",
+    hint: "Real completion means the branch is published, the diff is understood, and validation notes are ready for reviewers.",
     complete: (state) => state.guidedStep >= getActiveModule().commands.length || state.taskFlags.merged
   }
 ];
@@ -1252,6 +1604,17 @@ const practiceChallenges = [
     ]
   },
   {
+    id: "publish-ready",
+    title: "Publish Ready",
+    level: "PR prep",
+    prompt: "Publish the branch so a pull request can exist outside your workstation.",
+    success: "Branch published. The remote now has the reviewable branch head.",
+    hint: "Run git push from the task branch before returning to main.",
+    steps: [
+      { id: "push", label: "Publish the branch", type: "state", condition: "published" }
+    ]
+  },
+  {
     id: "merge-ready",
     title: "Merge Ready",
     level: "Finish",
@@ -1271,10 +1634,10 @@ const practiceMissions = [
     id: "orientation-path",
     title: "Ticket-to-PR Path",
     level: "Guided",
-    prompt: "Run the normal Oracle ticket workflow from baseline inspection through merge readiness.",
+    prompt: "Run the normal Oracle ticket workflow from baseline inspection through published branch and merge readiness.",
     setup: "standard",
-    success: "The learner completed the full branch workflow and can explain the repo story.",
-    target: "Inspect, branch, edit, commit, merge, and verify history."
+    success: "The learner completed the full branch workflow and can explain the repo and PR story.",
+    target: "Inspect, branch, edit, diff, commit, publish, merge, and verify history."
   },
   {
     id: "wrong-branch-recovery",
@@ -1347,6 +1710,11 @@ const practiceBadgeDefinitions = [
     id: "reviewable-commit",
     label: "Reviewable Change",
     desc: "Saved the branch work as a commit."
+  },
+  {
+    id: "branch-published",
+    label: "Branch Published",
+    desc: "Pushed the branch so a PR could be opened."
   },
   {
     id: "merge-ready",
@@ -1766,6 +2134,143 @@ const codexRoundThreeQuizzes = [
   }
 ];
 
+const oracleSqlChoiceQuizzes = [
+  {
+    question: "What does SELECT * do in the first SQL lesson?",
+    options: ["Returns every column from the chosen table", "Deletes every row", "Stages a Git file", "Creates a new Oracle schema"],
+    answer: "Returns every column from the chosen table",
+    feedback: "SELECT * is useful for inspection, but final reviewable SQL should usually name columns."
+  },
+  {
+    question: "Which clause filters rows?",
+    options: ["WHERE", "FROM", "ORDER BY", "SELECT"],
+    answer: "WHERE",
+    feedback: "WHERE limits which rows survive into the result set."
+  },
+  {
+    question: "What does GROUP BY change?",
+    options: ["The output grain", "The Git branch", "The file extension", "The SQL editor theme"],
+    answer: "The output grain",
+    feedback: "GROUP BY changes the result from detail rows to one row per group."
+  },
+  {
+    question: "Why use explicit column names instead of SELECT * in final SQL?",
+    options: ["The output schema is reviewable and stable", "It makes the database ignore filters", "It hides row counts", "It automatically commits the file"],
+    answer: "The output schema is reviewable and stable",
+    feedback: "Named columns help reviewers know exactly what the output contains."
+  },
+  {
+    question: "What should you know before joining two repo SQL files?",
+    options: ["The join key and row-grain risk", "Only the file color", "Only the branch name", "The monitor size"],
+    answer: "The join key and row-grain risk",
+    feedback: "Joins can duplicate rows if the key is not unique at the expected grain."
+  },
+  {
+    question: "What does TRUNC(SYSDATE) - 7 represent in this lab?",
+    options: ["A recent date window", "A Git reset", "A table alias", "A file rename"],
+    answer: "A recent date window",
+    feedback: "It is a common Oracle-style rolling date boundary."
+  },
+  {
+    question: "Why use a CTE for the final query?",
+    options: ["It separates readable steps", "It hides the FROM clause", "It prevents validation", "It changes PowerShell prompts"],
+    answer: "It separates readable steps",
+    feedback: "A CTE can make filtering, joining, and final aggregation easier to review."
+  }
+];
+
+const oracleSqlRoundTwoQuizzes = [
+  {
+    question: "Fill in the starter command to inspect every column from the emergency response extract.",
+    answer: "SELECT * FROM ccs_emergency_response_activity_extract",
+    placeholder: "SELECT * FROM ...",
+    feedback: "Start broad, then narrow once you understand the table."
+  },
+  {
+    question: "Fill in the clause that filters rows to OPEN status.",
+    answer: "WHERE activity_status = 'OPEN'",
+    placeholder: "WHERE ...",
+    feedback: "A WHERE clause limits the rows returned by the query."
+  },
+  {
+    question: "Fill in the aggregation expression that counts rows.",
+    answer: "COUNT(*)",
+    placeholder: "COUNT...",
+    feedback: "COUNT(*) counts rows in the current group."
+  },
+  {
+    question: "Fill in the clause that groups the ZIP summary.",
+    answer: "GROUP BY zip_code",
+    placeholder: "GROUP BY ...",
+    feedback: "Every non-aggregated selected column must be grouped."
+  },
+  {
+    question: "Fill in the Oracle rolling date predicate used in the lab.",
+    answer: "order_date >= TRUNC(SYSDATE) - 7",
+    placeholder: "order_date >= ...",
+    feedback: "This keeps the date window visible in the SQL."
+  },
+  {
+    question: "Fill in the join condition between activity and service agreement data.",
+    answer: "ON e.service_point_id = s.service_point_id",
+    placeholder: "ON ...",
+    feedback: "The join key should be explicit and reviewable."
+  },
+  {
+    question: "Fill in the keyword that starts a common table expression.",
+    answer: "WITH",
+    placeholder: "SQL keyword",
+    feedback: "WITH starts a CTE."
+  }
+];
+
+const oracleSqlRoundThreeQuizzes = [
+  {
+    question: "Type a query that returns all columns from the starter emergency response extract.",
+    acceptedAnswers: [
+      "select * from ccs_emergency_response_activity_extract",
+      "select * from ccs/sql/meters/ccs_emergency_response_activity_extract.sql"
+    ],
+    answerLabel: "SELECT * FROM ccs_emergency_response_activity_extract",
+    placeholder: "SELECT * FROM ...",
+    feedback: "This is the first broad inspection step."
+  },
+  {
+    question: "Type the filter that keeps OPEN and PENDING statuses.",
+    acceptedAnswers: [
+      "where activity_status in ('OPEN', 'PENDING')",
+      "where activity_status in ('OPEN','PENDING')"
+    ],
+    answerLabel: "WHERE activity_status IN ('OPEN', 'PENDING')",
+    placeholder: "WHERE ...",
+    feedback: "IN is clearer than a long chain of OR conditions for this case."
+  },
+  {
+    question: "Type the grouped ZIP count query.",
+    acceptedAnswers: [
+      "select zip_code, count(*) as order_count from ccs_emergency_response_activity_extract group by zip_code",
+      "select zip_code, count(*) from ccs_emergency_response_activity_extract group by zip_code"
+    ],
+    answerLabel: "SELECT zip_code, COUNT(*) AS order_count FROM ccs_emergency_response_activity_extract GROUP BY zip_code",
+    placeholder: "ZIP count query",
+    feedback: "The output grain is one row per ZIP code."
+  },
+  {
+    question: "Type the join condition that connects emergency activity to service agreement context.",
+    acceptedAnswers: ["on e.service_point_id = s.service_point_id"],
+    answerLabel: "ON e.service_point_id = s.service_point_id",
+    placeholder: "JOIN condition",
+    feedback: "The aliases make the join source clear."
+  },
+  {
+    question: "Type the final ORDER BY clause to show highest ZIP counts first.",
+    acceptedAnswers: ["order by order_count desc", "order by count(*) desc"],
+    answerLabel: "ORDER BY order_count DESC",
+    placeholder: "ORDER BY ...",
+    feedback: "Sort summaries so reviewers can scan the highest-count areas first."
+  }
+];
+
 const conflictScenarios = [
   {
     id: "ccs-source-view",
@@ -1911,6 +2416,12 @@ const commandProcessSteps = [
     detail: "git status shows the new SQL asset while HEAD is on the task branch."
   },
   {
+    area: "diff",
+    label: "Diff review",
+    title: "Review the branch diff",
+    detail: "git diff shows the exact SQL change before it is staged or committed."
+  },
+  {
     area: "staging",
     label: "Staging area",
     title: "Stage the branch change",
@@ -1921,6 +2432,12 @@ const commandProcessSteps = [
     label: "Feature commit",
     title: "Commit on the branch",
     detail: "The feature branch now points to a new commit that main does not have yet."
+  },
+  {
+    area: "remote",
+    label: "Remote",
+    title: "Publish the branch",
+    detail: "git push creates the remote branch so Azure DevOps can open a pull request."
   },
   {
     area: "branch",
@@ -2010,6 +2527,12 @@ const projectProcessSteps = [
     detail: "git status confirms the workstream update is the only open change."
   },
   {
+    area: "diff",
+    label: "Diff review",
+    title: "Review the workstream diff",
+    detail: "git diff shows what reviewers will inspect before the workstream update is staged."
+  },
+  {
     area: "staging",
     label: "Staging area",
     title: "Stage workstream update",
@@ -2020,6 +2543,12 @@ const projectProcessSteps = [
     label: "Branch commit",
     title: "Commit workstream progress",
     detail: "The workstream branch now has a focused progress checkpoint."
+  },
+  {
+    area: "remote",
+    label: "Remote",
+    title: "Publish the workstream branch",
+    detail: "git push creates the remote branch so the workstream can move through PR review."
   },
   {
     area: "branch",
@@ -2045,6 +2574,7 @@ let practiceReplayActive = false;
 const GIT_WIZARD_COMMAND = "git wizard mode";
 const CODEX_WIZARD_COMMAND = "codex wizard mode";
 const VSCODE_WIZARD_COMMAND = "code --wizard mode";
+const SQL_WIZARD_COMMAND = "sql wizard mode";
 
 document.addEventListener("DOMContentLoaded", () => {
   applyTheme(loadTheme());
@@ -2170,6 +2700,46 @@ function createVSCodeState() {
         text: "Practice the editor workflow from the repo root: install extensions, inspect Git status, branch, diff, stage, and commit."
       }
     ]
+  };
+}
+
+function createSqlState() {
+  return {
+    ...createTrainingState("git-basics"),
+    viewMode: "sql",
+    activeModuleId: oracleSqlLab.id,
+    guidedStep: 0,
+    cwd: oracleSqlLab.repoRoot,
+    sqlSection: 0,
+    sqlWorksheet: createSqlWorksheetState(),
+    quizSession: createQuizSession(oracleSqlLab.id),
+    terminal: [
+      {
+        type: "note",
+        text: "Oracle SQL worksheet ready. Start with: SELECT * FROM ccs_emergency_response_activity_extract"
+      },
+      {
+        type: "note",
+        text: "Use show files, describe <table>, SELECT statements, or sql wizard mode."
+      }
+    ]
+  };
+}
+
+function createSqlWorksheetState() {
+  return {
+    selectedFile: oracleSqlFiles[0]?.path || "",
+    completedSections: [],
+    queryLog: [],
+    lastResult: createSqlResult(
+      ["FILE_PATH", "TABLE_NAME", "STATUS"],
+      oracleSqlFiles.map((file) => ({
+        FILE_PATH: file.path,
+        TABLE_NAME: file.table,
+        STATUS: file.status
+      })),
+      "Repository SQL files loaded."
+    )
   };
 }
 
@@ -2925,7 +3495,7 @@ function visualGitCommit(file, location) {
 
 function advanceGuidedStepForVisualCommand(command) {
   const expected = getActiveModule().commands[state.guidedStep];
-  if (state.inLesson && expected && normalizeCommand(command) === normalizeCommand(expected.cmd)) {
+  if (state.inLesson && expected && guidedCommandMatchesExpected(command, expected)) {
     appendTerminal("success", `Guided step complete - ${expected.desc}`);
     state.guidedStep += 1;
   }
@@ -3005,6 +3575,13 @@ function handleAction(button) {
     return;
   }
 
+  if (action === "open-sql-lab") {
+    state = createSqlState();
+    saveState();
+    render();
+    return;
+  }
+
   if (action === "back-portal") {
     state.inLesson = false;
     saveState();
@@ -3019,11 +3596,13 @@ function handleAction(button) {
         ? createCapstoneState()
         : isVSCodeMode()
           ? createVSCodeState()
-          : isPracticeMode()
-            ? createAdvancedState()
-            : state.inLesson
-              ? createTrainingState()
-              : createInitialState();
+          : isSqlMode()
+            ? createSqlState()
+            : isPracticeMode()
+              ? createAdvancedState()
+              : state.inLesson
+                ? createTrainingState()
+                : createInitialState();
     saveState();
     render();
     return;
@@ -3192,6 +3771,19 @@ function handleAction(button) {
     return;
   }
 
+  if (action === "sql-prev" || action === "sql-next" || action === "sql-section") {
+    ensureSqlWorksheetState();
+    const current = Number.isInteger(state.sqlSection) ? state.sqlSection : 0;
+    const requested =
+      action === "sql-section"
+        ? Number(button.dataset.sqlSection)
+        : current + (action === "sql-next" ? 1 : -1);
+    state.sqlSection = clampIndex(requested, oracleSqlLab.sections.length);
+    saveState();
+    render();
+    return;
+  }
+
   if (action === "start-quiz-round") {
     const round = clampQuizRound(Number(button.dataset.round));
     state.quizSession = createQuizSession(state.activeModuleId, round);
@@ -3237,6 +3829,11 @@ function runCommand(rawCommand) {
     return;
   }
 
+  if (isSqlMode()) {
+    runSqlCommand(command);
+    return;
+  }
+
   if (isVSCodeMode()) {
     runVSCodeCommand(command);
     return;
@@ -3246,8 +3843,8 @@ function runCommand(rawCommand) {
 
   const activeModule = getActiveModule();
   const expected = activeModule.commands[state.guidedStep];
-  if (state.inLesson && !isPracticeMode() && expected && !isGuidedUtilityCommand(command)) {
-    if (normalizeCommand(command) !== normalizeCommand(expected.cmd)) {
+  if (state.inLesson && !isPracticeMode() && expected && !isGuidedUtilityCommand(command, expected)) {
+    if (!guidedCommandMatchesExpected(command, expected)) {
       appendTerminal("error", `Wrong command. Expected: ${expected.cmd}`);
       saveState();
       render();
@@ -3286,13 +3883,13 @@ function runCommand(rawCommand) {
 
 function isWizardModeCommand(command) {
   const normalized = normalizeCommand(command);
-  return [GIT_WIZARD_COMMAND, CODEX_WIZARD_COMMAND, VSCODE_WIZARD_COMMAND].includes(normalized);
+  return [GIT_WIZARD_COMMAND, CODEX_WIZARD_COMMAND, VSCODE_WIZARD_COMMAND, SQL_WIZARD_COMMAND].includes(normalized);
 }
 
 function runWizardMode(command) {
   const normalized = normalizeCommand(command);
   const expectedWizardCommand = getExpectedWizardCommand();
-  const prompt = isCodexMode() ? getCodexPrompt() : getPrompt();
+  const prompt = isCodexMode() ? getCodexPrompt() : isSqlMode() ? getSqlPrompt() : getPrompt();
   appendTerminal("prompt", `${prompt} ${command}`);
 
   if (normalized !== expectedWizardCommand) {
@@ -3304,6 +3901,8 @@ function runWizardMode(command) {
 
   if (isCodexMode()) {
     runCodexWizardMode();
+  } else if (isSqlMode()) {
+    runSqlWizardMode();
   } else if (isVSCodeMode()) {
     runVSCodeWizardMode();
   } else if (isPracticeMode()) {
@@ -3325,6 +3924,9 @@ function getExpectedWizardCommand() {
   if (isVSCodeMode()) {
     return VSCODE_WIZARD_COMMAND;
   }
+  if (isSqlMode()) {
+    return SQL_WIZARD_COMMAND;
+  }
   return GIT_WIZARD_COMMAND;
 }
 
@@ -3334,6 +3936,9 @@ function getWizardUsageMessage() {
   }
   if (isVSCodeMode()) {
     return `VS Code Lab uses ${VSCODE_WIZARD_COMMAND}. Git labs use ${GIT_WIZARD_COMMAND}. Codex uses ${CODEX_WIZARD_COMMAND}.`;
+  }
+  if (isSqlMode()) {
+    return `Oracle SQL Lab uses ${SQL_WIZARD_COMMAND}. Git labs use ${GIT_WIZARD_COMMAND}. VS Code Lab uses ${VSCODE_WIZARD_COMMAND}.`;
   }
   return `This simulator uses ${GIT_WIZARD_COMMAND}. VS Code Lab uses ${VSCODE_WIZARD_COMMAND}. Codex uses ${CODEX_WIZARD_COMMAND}.`;
 }
@@ -3469,7 +4074,12 @@ function getPracticeWizardSections(branchName) {
     },
     {
       title: "Stage and commit",
-      commands: [`git add ${oracleLab.featureFile}`, `git commit -m "${oracleLab.featureCommitMessage}"`, "git log --oneline"]
+      commands: [
+        `git add ${oracleLab.featureFile}`,
+        `git commit -m "${oracleLab.featureCommitMessage}"`,
+        `git push -u origin ${branchName}`,
+        "git log --oneline"
+      ]
     },
     {
       title: "Merge to main",
@@ -3693,6 +4303,9 @@ function updatePracticeAwards(command, result) {
   if (state.taskFlags?.branchCommitted) {
     addBadge("reviewable-commit");
   }
+  if (state.taskFlags?.pushed || Object.keys(state.remoteBranches || {}).some((branch) => branch !== "origin/main")) {
+    addBadge("branch-published");
+  }
   if (state.taskFlags?.merged) {
     addBadge("merge-ready");
   }
@@ -3750,13 +4363,21 @@ function calculatePRReadiness() {
   const ran = (expected) => replay.some((entry) => commandMatches(entry, expected));
   const status = state.initialized ? getStatus() : { clean: false, staged: [], unstaged: [], untracked: [] };
   const checks = [
-    { id: "inspect", label: "Baseline inspected", points: 15, complete: ran("git status") && ran("git branch") },
-    { id: "branch", label: "Task branch created", points: 20, complete: Boolean(state.taskFlags?.branchCreated) || Object.keys(state.branches || {}).some((branch) => branch !== "main") },
+    { id: "inspect", label: "Baseline inspected", points: 12, complete: ran("git status") && ran("git branch") },
+    { id: "branch", label: "Task branch created", points: 15, complete: Boolean(state.taskFlags?.branchCreated) || Object.keys(state.branches || {}).some((branch) => branch !== "main") },
     { id: "diff", label: "Change reviewed", points: 15, complete: ran("git diff") || ran("git diff --stat") },
-    { id: "commit", label: "Reviewable commit saved", points: 20, complete: Boolean(state.taskFlags?.branchCommitted || state.taskFlags?.committed) },
-    { id: "clean", label: "Working tree clean", points: 15, complete: Boolean(status.clean) && !state.pendingMerge },
-    { id: "history", label: "History verified", points: 10, complete: ran("git log --oneline") },
-    { id: "merge", label: "Merge story complete", points: 5, complete: Boolean(state.taskFlags?.merged) }
+    { id: "commit", label: "Reviewable commit saved", points: 15, complete: Boolean(state.taskFlags?.branchCommitted || state.taskFlags?.committed) },
+    {
+      id: "publish",
+      label: "Branch published",
+      points: 15,
+      complete:
+        Boolean(state.taskFlags?.pushed) ||
+        Object.keys(state.remoteBranches || {}).some((branch) => branch !== "origin/main")
+    },
+    { id: "clean", label: "Working tree clean", points: 10, complete: Boolean(status.clean) && !state.pendingMerge },
+    { id: "history", label: "History verified", points: 8, complete: ran("git log --oneline") },
+    { id: "merge", label: "Merge or PR story complete", points: 10, complete: Boolean(state.taskFlags?.merged) }
   ];
   const score = Math.min(100, checks.reduce((total, check) => total + (check.complete ? check.points : 0), 0));
   return { score, checks };
@@ -4019,6 +4640,11 @@ function practiceChallengeConditionMet(condition) {
         state.indexFiles?.[oracleLab.featureFile] !== currentHeadFiles()[oracleLab.featureFile];
     case "branch-committed":
       return Boolean(state.taskFlags?.branchCommitted);
+    case "published":
+      return (
+        Boolean(state.taskFlags?.pushed) ||
+        Object.keys(state.remoteBranches || {}).some((branch) => branch !== "origin/main")
+      );
     case "on-main-with-branch":
       return state.currentBranch === "main" && Object.keys(state.branches || {}).some((branch) => branch !== "main");
     case "merged":
@@ -4066,6 +4692,43 @@ function runVSCodeWizardMode() {
     steps,
     onComplete: () => {
       appendTerminal("note", "VS Code wizard mode: lab complete.");
+    }
+  });
+}
+
+function runSqlWizardMode() {
+  ensureSqlWorksheetState();
+  const sectionIndex = clampIndex(state.sqlSection || 0, oracleSqlLab.sections.length);
+  const section = oracleSqlLab.sections[sectionIndex];
+  const steps = [];
+
+  for (let index = sectionIndex; index < oracleSqlLab.sections.length; index += 1) {
+    const command = singleLineSql(oracleSqlLab.sections[index].query);
+    steps.push({
+      command,
+      run: () => {
+        appendTerminal("prompt", `${getSqlPrompt()} ${command}`);
+        const result = executeSqlCommand(command);
+        appendTerminal(result.type, result.text);
+        if (result.result) {
+          state.sqlWorksheet.lastResult = result.result;
+        }
+        if (result.type === "error") {
+          appendTerminal("error", "SQL wizard stopped so the learner can correct the worksheet query.");
+          return false;
+        }
+        completeSqlSection(index, false);
+        state.sqlSection = clampIndex(index + 1, oracleSqlLab.sections.length);
+        return true;
+      }
+    });
+  }
+
+  startWizardPlayback({
+    label: `SQL wizard mode: ghost typing the Oracle SQL lab from ${section.title}.`,
+    steps,
+    onComplete: () => {
+      appendTerminal("note", "SQL wizard mode: lab complete.");
     }
   });
 }
@@ -4346,6 +5009,466 @@ function runVSCodeCommand(command) {
   recordVSCodeMissionCommand(command, result);
   saveState();
   render();
+}
+
+function runSqlCommand(command) {
+  ensureSqlWorksheetState();
+  appendTerminal("prompt", `${getSqlPrompt()} ${command}`);
+  const result = executeSqlCommand(command);
+  appendTerminal(result.type, result.text);
+
+  if (result.result) {
+    state.sqlWorksheet.lastResult = result.result;
+  }
+
+  recordSqlQuery(command, result);
+  saveState();
+  render();
+}
+
+function ensureSqlWorksheetState() {
+  state.sqlWorksheet = {
+    ...createSqlWorksheetState(),
+    ...(state.sqlWorksheet && typeof state.sqlWorksheet === "object" ? state.sqlWorksheet : {})
+  };
+  state.sqlWorksheet.completedSections = Array.isArray(state.sqlWorksheet.completedSections)
+    ? state.sqlWorksheet.completedSections
+    : [];
+  state.sqlWorksheet.queryLog = Array.isArray(state.sqlWorksheet.queryLog) ? state.sqlWorksheet.queryLog : [];
+  if (!state.sqlWorksheet.lastResult || typeof state.sqlWorksheet.lastResult !== "object") {
+    state.sqlWorksheet.lastResult = createSqlWorksheetState().lastResult;
+  }
+  state.sqlSection = clampIndex(state.sqlSection, oracleSqlLab.sections.length);
+  return state.sqlWorksheet;
+}
+
+function executeSqlCommand(command) {
+  ensureSqlWorksheetState();
+  const text = String(command || "").trim();
+  const normalized = normalizeSqlStatement(text);
+
+  if (!text) {
+    return { type: "note", text: "Type a SELECT statement, show files, describe <table>, or help." };
+  }
+
+  if (normalized === "help" || normalized === "sql help") {
+    return {
+      type: "note",
+      text:
+        [
+          "Oracle SQL worksheet commands:",
+          "  show files",
+          "  show tables",
+          "  describe ccs_emergency_response_activity_extract",
+          "  SELECT * FROM ccs_emergency_response_activity_extract",
+          "  SELECT activity_id, zip_code FROM ccs_emergency_response_activity_extract WHERE activity_status = 'OPEN'",
+          "  SELECT zip_code, COUNT(*) AS order_count FROM ccs_emergency_response_activity_extract GROUP BY zip_code",
+          `  ${SQL_WIZARD_COMMAND}`
+        ].join("\n")
+    };
+  }
+
+  if (normalized === "show files" || normalized === "show tables") {
+    const result = createSqlResult(
+      ["FILE_PATH", "TABLE_NAME", "STATUS"],
+      oracleSqlFiles.map((file) => ({
+        FILE_PATH: file.path,
+        TABLE_NAME: file.table,
+        STATUS: file.status
+      })),
+      "Repository SQL files available in this simulator."
+    );
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  }
+
+  if (normalized.startsWith("describe ") || normalized.startsWith("desc ")) {
+    return describeSqlTable(text);
+  }
+
+  if (normalized.includes("[file name]")) {
+    return {
+      type: "note",
+      text: "Replace [file name] with a repo table name, for example: ccs_emergency_response_activity_extract"
+    };
+  }
+
+  if (!normalized.startsWith("select ") && !normalized.startsWith("with ")) {
+    return { type: "error", text: "This worksheet only runs SELECT-style training queries. Type help for examples." };
+  }
+
+  if (normalized.startsWith("with ")) {
+    return executeSqlCteQuery(text);
+  }
+
+  return executeSqlSelectStatement(text);
+}
+
+function describeSqlTable(command) {
+  const tableName = resolveSqlTableName(command);
+  const table = tableName ? oracleSqlTables[tableName] : null;
+  if (!table) {
+    return { type: "error", text: "Unknown table. Try show files to see the repository SQL targets." };
+  }
+
+  const result = createSqlResult(
+    ["COLUMN_NAME", "DATA_TYPE", "NOTES"],
+    table.columns.map((column) => ({
+      COLUMN_NAME: column,
+      DATA_TYPE: inferSqlColumnType(column),
+      NOTES: column === "SERVICE_POINT_ID" ? "Join key in this lab" : column.endsWith("_DATE") ? "Oracle DATE-like field" : ""
+    })),
+    `${table.label}. Grain: ${table.grain}. Source: ${table.sourcePath}`
+  );
+  state.sqlWorksheet.selectedFile = table.sourcePath;
+  return { type: "success", text: formatSqlResultForTerminal(result), result };
+}
+
+function executeSqlSelectStatement(command) {
+  const tableName = resolveSqlTableName(command);
+  const table = tableName ? oracleSqlTables[tableName] : null;
+  if (!table) {
+    return { type: "error", text: "Could not identify a repo SQL file/table. Try: show files" };
+  }
+
+  state.sqlWorksheet.selectedFile = table.sourcePath;
+
+  if (normalizeSqlStatement(command).includes(" join ")) {
+    return executeSqlJoinQuery(command);
+  }
+
+  if (isSqlAggregateQuery(command)) {
+    return executeSqlAggregateQuery(command, tableName);
+  }
+
+  const rows = applySqlWhere(table.rows, command);
+  const columns = parseSqlSelectedColumns(command, table.columns);
+  const projected = projectSqlRows(applySqlOrder(rows, command), columns);
+  const result = createSqlResult(columns, projected, `${projected.length} row${projected.length === 1 ? "" : "s"} returned from ${tableName}.`);
+  return { type: "success", text: formatSqlResultForTerminal(result), result };
+}
+
+function executeSqlJoinQuery(command) {
+  const normalized = normalizeSqlStatement(command);
+  if (!normalized.includes("service_point_id")) {
+    return { type: "error", text: "The lab join must use service_point_id so reviewers can validate the key." };
+  }
+
+  const activity = oracleSqlTables.ccs_emergency_response_activity_extract;
+  const service = oracleSqlTables.ccs_device_service_agreement_extract;
+  const serviceByPoint = new Map(service.rows.map((row) => [row.SERVICE_POINT_ID, row]));
+  const joined = activity.rows
+    .map((row) => ({ ...row, ...(serviceByPoint.get(row.SERVICE_POINT_ID) || {}) }))
+    .filter((row) => row.SERVICE_AGREEMENT_ID);
+  const filtered = applySqlWhere(joined, command);
+  const combinedColumns = uniqueSqlColumns([...activity.columns, ...service.columns]);
+  const columns = parseSqlSelectedColumns(command, combinedColumns);
+  const projected = projectSqlRows(applySqlOrder(filtered, command), columns);
+  const result = createSqlResult(columns, projected, `${projected.length} joined row${projected.length === 1 ? "" : "s"} returned using service_point_id.`);
+  state.sqlWorksheet.selectedFile = "ccs/sql/meters/ccs_device_service_agreement_extract.sql";
+  return { type: "success", text: formatSqlResultForTerminal(result), result };
+}
+
+function executeSqlAggregateQuery(command, tableName) {
+  const table = oracleSqlTables[tableName];
+  const rows = applySqlWhere(table.rows, command);
+  const groupColumn = parseSqlGroupByColumn(command) || "ZIP_CODE";
+  if (!table.columns.includes(groupColumn) && !rows.some((row) => Object.prototype.hasOwnProperty.call(row, groupColumn))) {
+    return { type: "error", text: `Cannot group by ${groupColumn}; describe ${tableName} to inspect available columns.` };
+  }
+
+  const counts = new Map();
+  rows.forEach((row) => {
+    const key = row[groupColumn] || "(blank)";
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+
+  const resultRows = [...counts.entries()].map(([key, count]) => ({
+    [groupColumn]: key,
+    ORDER_COUNT: count
+  }));
+  const ordered = applySqlOrder(resultRows, command);
+  const result = createSqlResult(
+    [groupColumn, "ORDER_COUNT"],
+    ordered,
+    `${ordered.length} grouped row${ordered.length === 1 ? "" : "s"} returned. Output grain: one row per ${groupColumn.toLowerCase()}.`
+  );
+  return { type: "success", text: formatSqlResultForTerminal(result), result };
+}
+
+function executeSqlCteQuery(command) {
+  const normalized = normalizeSqlStatement(command);
+  if (!normalized.includes("prior_week") || !normalized.includes("ccs_emergency_response_activity_extract")) {
+    return { type: "error", text: "This CTE lesson expects prior_week built from ccs_emergency_response_activity_extract." };
+  }
+
+  const rows = applySqlWhere(oracleSqlTables.ccs_emergency_response_activity_extract.rows, command);
+  const counts = new Map();
+  rows.forEach((row) => {
+    counts.set(row.ZIP_CODE, (counts.get(row.ZIP_CODE) || 0) + 1);
+  });
+
+  const resultRows = [...counts.entries()]
+    .map(([zipCode, count]) => ({ ZIP_CODE: zipCode, ORDER_COUNT: count }))
+    .sort((a, b) => b.ORDER_COUNT - a.ORDER_COUNT || String(a.ZIP_CODE).localeCompare(String(b.ZIP_CODE)));
+  const result = createSqlResult(
+    ["ZIP_CODE", "ORDER_COUNT"],
+    resultRows,
+    "Review query returned the prior-week ZIP summary from the prior_week CTE."
+  );
+  state.sqlWorksheet.selectedFile = "ccs/sql/meters/ccs_emergency_response_activity_by_zip_prior_week.sql";
+  return { type: "success", text: formatSqlResultForTerminal(result), result };
+}
+
+function recordSqlQuery(command, result) {
+  ensureSqlWorksheetState();
+  state.sqlWorksheet.queryLog.push({
+    command,
+    ok: result?.type !== "error",
+    section: oracleSqlLab.sections[state.sqlSection]?.id || ""
+  });
+  if (state.sqlWorksheet.queryLog.length > 40) {
+    state.sqlWorksheet.queryLog = state.sqlWorksheet.queryLog.slice(-40);
+  }
+
+  if (result?.type === "error") {
+    return;
+  }
+
+  const sectionIndex = clampIndex(state.sqlSection, oracleSqlLab.sections.length);
+  const section = oracleSqlLab.sections[sectionIndex];
+  if (!isSqlSectionSatisfied(section, command, result)) {
+    return;
+  }
+
+  completeSqlSection(sectionIndex, true);
+}
+
+function completeSqlSection(sectionIndex, announce = false) {
+  ensureSqlWorksheetState();
+  const section = oracleSqlLab.sections[sectionIndex];
+  if (!section) {
+    return;
+  }
+
+  if (!state.sqlWorksheet.completedSections.includes(section.id)) {
+    state.sqlWorksheet.completedSections.push(section.id);
+    if (announce) {
+      appendTerminal("success", `SQL section complete - ${section.title}.`);
+    }
+  }
+
+  if (sectionIndex === state.sqlSection && sectionIndex < oracleSqlLab.sections.length - 1) {
+    state.sqlSection = sectionIndex + 1;
+    if (announce) {
+      appendTerminal("note", `Next SQL lesson: ${oracleSqlLab.sections[state.sqlSection].title}.`);
+    }
+  }
+}
+
+function isSqlSectionSatisfied(section, command, result) {
+  if (!section || result?.type === "error") {
+    return false;
+  }
+
+  const normalized = normalizeSqlStatement(command);
+  const hasStarterTable = normalized.includes("ccs_emergency_response_activity_extract");
+  switch (section.id) {
+    case "select-all":
+      return normalized.startsWith("select *") && hasStarterTable;
+    case "select-columns":
+      return hasStarterTable && !normalized.includes("select *") && ["activity_id", "zip_code", "activity_status"].every((part) => normalized.includes(part));
+    case "filter-rows":
+      return hasStarterTable && normalized.includes(" where ") && normalized.includes("activity_status");
+    case "date-window":
+      return hasStarterTable && normalized.includes("order_date >=") && normalized.includes("order by");
+    case "aggregate":
+      return hasStarterTable && normalized.includes("count(") && normalized.includes("group by zip_code");
+    case "join-lookup":
+      return normalized.includes(" join ") && normalized.includes("ccs_device_service_agreement_extract") && normalized.includes("service_point_id");
+    case "cte-review":
+      return normalized.startsWith("with ") && normalized.includes("prior_week") && normalized.includes("count(") && normalized.includes("group by zip_code");
+    default:
+      return false;
+  }
+}
+
+function createSqlResult(columns, rows, message = "") {
+  return {
+    columns: Array.isArray(columns) ? columns : [],
+    rows: Array.isArray(rows) ? rows : [],
+    message
+  };
+}
+
+function normalizeSqlStatement(value) {
+  return String(value || "")
+    .replace(/;+\s*$/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function resolveSqlTableName(command) {
+  const normalized = normalizeSqlStatement(command);
+  const direct = Object.keys(oracleSqlTables)
+    .sort((a, b) => b.length - a.length)
+    .find((table) => normalized.includes(table.toLowerCase()));
+  if (direct) {
+    return direct;
+  }
+
+  const fileMatch = oracleSqlFiles.find((file) => {
+    const path = file.path.toLowerCase();
+    const base = path.split("/").pop()?.replace(/\.sql$/i, "") || "";
+    return normalized.includes(path) || normalized.includes(base);
+  });
+
+  return fileMatch?.table && oracleSqlTables[fileMatch.table] ? fileMatch.table : null;
+}
+
+function parseSqlSelectedColumns(command, fallbackColumns) {
+  const selectMatch = String(command || "").match(/select\s+([\s\S]+?)\s+from/i);
+  if (!selectMatch || selectMatch[1].includes("*")) {
+    return fallbackColumns;
+  }
+
+  const columns = selectMatch[1]
+    .split(",")
+    .map(cleanSqlColumnExpression)
+    .filter(Boolean);
+  return columns.length ? uniqueSqlColumns(columns) : fallbackColumns;
+}
+
+function cleanSqlColumnExpression(expression) {
+  const text = String(expression || "").trim();
+  const alias = text.match(/\s+as\s+([A-Za-z0-9_]+)$/i)?.[1];
+  if (alias) {
+    return alias.toUpperCase();
+  }
+  if (/count\s*\(\s*\*\s*\)/i.test(text)) {
+    return "ORDER_COUNT";
+  }
+  return text
+    .replace(/^[A-Za-z0-9_]+\./, "")
+    .replace(/["']/g, "")
+    .trim()
+    .toUpperCase();
+}
+
+function applySqlWhere(rows, command) {
+  const normalized = normalizeSqlStatement(command);
+  let filtered = [...rows];
+
+  const statusIn = normalized.match(/activity_status\s+in\s*\(([^)]+)\)/i);
+  const statusEq = normalized.match(/activity_status\s*=\s*'([^']+)'/i);
+  if (statusIn) {
+    const statuses = statusIn[1]
+      .split(",")
+      .map((item) => item.replace(/['"]/g, "").trim().toUpperCase())
+      .filter(Boolean);
+    filtered = filtered.filter((row) => statuses.includes(String(row.ACTIVITY_STATUS || "").toUpperCase()));
+  } else if (statusEq) {
+    const status = statusEq[1].toUpperCase();
+    filtered = filtered.filter((row) => String(row.ACTIVITY_STATUS || "").toUpperCase() === status);
+  }
+
+  const zipEq = normalized.match(/zip_code\s*=\s*'([^']+)'/i);
+  if (zipEq) {
+    filtered = filtered.filter((row) => String(row.ZIP_CODE || "") === zipEq[1]);
+  }
+
+  const customerClassEq = normalized.match(/customer_class\s*=\s*'([^']+)'/i);
+  if (customerClassEq) {
+    const customerClass = customerClassEq[1].toUpperCase();
+    filtered = filtered.filter((row) => String(row.CUSTOMER_CLASS || "").toUpperCase() === customerClass);
+  }
+
+  const dateLiteral = normalized.match(/order_date\s*>=\s*date\s*'(\d{4}-\d{2}-\d{2})'/i);
+  const dateBoundary = normalized.includes("trunc(sysdate) - 7") ? "2026-04-27" : dateLiteral?.[1];
+  if (dateBoundary) {
+    filtered = filtered.filter((row) => !row.ORDER_DATE || String(row.ORDER_DATE) >= dateBoundary);
+  }
+
+  return filtered;
+}
+
+function isSqlAggregateQuery(command) {
+  const normalized = normalizeSqlStatement(command);
+  return normalized.includes("count(") && normalized.includes("group by");
+}
+
+function parseSqlGroupByColumn(command) {
+  const match = normalizeSqlStatement(command).match(/group by\s+([a-z0-9_.]+)/i);
+  return match ? cleanSqlColumnExpression(match[1]) : "";
+}
+
+function applySqlOrder(rows, command) {
+  const normalized = normalizeSqlStatement(command);
+  const match = normalized.match(/order by\s+([a-z0-9_().*]+)(\s+desc|\s+asc)?/i);
+  if (!match) {
+    return rows;
+  }
+
+  const column = cleanSqlColumnExpression(match[1]);
+  const desc = !match[2] || match[2].trim().toLowerCase() === "desc";
+  return [...rows].sort((a, b) => {
+    const left = a[column];
+    const right = b[column];
+    if (Number.isFinite(Number(left)) && Number.isFinite(Number(right))) {
+      return desc ? Number(right) - Number(left) : Number(left) - Number(right);
+    }
+    return desc
+      ? String(right ?? "").localeCompare(String(left ?? ""))
+      : String(left ?? "").localeCompare(String(right ?? ""));
+  });
+}
+
+function projectSqlRows(rows, columns) {
+  return rows.map((row) =>
+    Object.fromEntries(columns.map((column) => [column, Object.prototype.hasOwnProperty.call(row, column) ? row[column] : ""]))
+  );
+}
+
+function uniqueSqlColumns(columns) {
+  return [...new Set(columns.filter(Boolean))];
+}
+
+function inferSqlColumnType(column) {
+  if (column.endsWith("_DATE")) {
+    return "DATE";
+  }
+  if (column.includes("COUNT")) {
+    return "NUMBER";
+  }
+  return "VARCHAR2";
+}
+
+function formatSqlResultForTerminal(result) {
+  const header = result.message || `${result.rows.length} row${result.rows.length === 1 ? "" : "s"} returned.`;
+  return `${header}\n${formatSqlRowsAsText(result.rows, result.columns)}`;
+}
+
+function formatSqlRowsAsText(rows, columns, maxRows = 8) {
+  if (!rows.length) {
+    return "(no rows)";
+  }
+
+  const visibleRows = rows.slice(0, maxRows);
+  const widths = columns.map((column) => {
+    const longest = Math.max(
+      String(column).length,
+      ...visibleRows.map((row) => String(row[column] ?? "").length)
+    );
+    return Math.min(Math.max(longest, 6), 22);
+  });
+  const formatCell = (value, width) => truncate(String(value ?? ""), width).padEnd(width, " ");
+  const header = columns.map((column, index) => formatCell(column, widths[index])).join(" | ");
+  const divider = widths.map((width) => "-".repeat(width)).join("-+-");
+  const body = visibleRows
+    .map((row) => columns.map((column, index) => formatCell(row[column], widths[index])).join(" | "))
+    .join("\n");
+  const more = rows.length > visibleRows.length ? `\n... ${rows.length - visibleRows.length} more row(s)` : "";
+  return `${header}\n${divider}\n${body}${more}`;
 }
 
 function ensureVSCodeCliState() {
@@ -5961,14 +7084,17 @@ function render() {
   const codexMode = isCodexMode();
   const capstoneMode = isCapstoneMode();
   const vscodeMode = isVSCodeMode();
+  const sqlMode = isSqlMode();
   portalView.hidden = Boolean(state.inLesson);
-  statusStrip.hidden = !state.inLesson || practiceMode || codexMode || capstoneMode || vscodeMode;
+  statusStrip.hidden = !state.inLesson || practiceMode || codexMode || capstoneMode || vscodeMode || sqlMode;
   labView.hidden = !state.inLesson;
   labView.classList.toggle("practice-workspace", practiceMode);
   labView.classList.toggle("codex-workspace", codexMode);
   labView.classList.toggle("capstone-workspace", capstoneMode);
   labView.classList.toggle("vscode-workspace", vscodeMode);
-  labView.classList.toggle("git-workspace", !practiceMode && !codexMode && !capstoneMode && !vscodeMode);
+  labView.classList.toggle("sql-workspace", sqlMode);
+  labView.classList.toggle("git-workspace", !practiceMode && !codexMode && !capstoneMode && !vscodeMode && !sqlMode);
+  document.querySelector(".terminal-panel")?.classList.toggle("sql-terminal-panel", sqlMode);
   updateTopbarContextActions(practiceMode);
 
   if (!state.inLesson) {
@@ -5987,6 +7113,11 @@ function render() {
 
   if (vscodeMode) {
     renderVSCodeWorkspace();
+    return;
+  }
+
+  if (sqlMode) {
+    renderSqlWorkspace();
     return;
   }
 
@@ -6060,8 +7191,10 @@ function renderPortal() {
   const projectModule = modules.find((module) => module.id === "project-work");
   document.getElementById("portalView").innerHTML = `
     <div class="course-stack">
+      ${renderResumeWorkItemPanel(gitModule)}
       ${renderCodexCourseCard()}
       ${renderVSCodeCourseCard()}
+      ${renderSqlCourseCard()}
       ${renderCourseCard(gitModule)}
       ${projectModule ? renderCourseCard(projectModule) : ""}
       ${renderCapstoneCourseCard()}
@@ -6072,9 +7205,16 @@ function renderPortal() {
         <ol class="lab-steps">
           <li><strong>${escapeHtml(codexLab.title)}</strong><span>Separate Codex lesson and official setup link.</span></li>
           <li><strong>${escapeHtml(vscodeLab.title)}</strong><span>Brief editor orientation: Explorer, search, terminal, and Source Control.</span></li>
-          <li><strong>${escapeHtml(gitModule.title)}</strong><span>Interactive Git mechanics, ADO context, branches, commits, and merge readiness.</span></li>
-          <li><strong>${escapeHtml(projectModule?.title || "GIT Lab 2: Projects")}</strong><span>Project capsule methodology: README, decision-index, workstreams, then branch-based execution.</span></li>
+          <li><strong>${escapeHtml(oracleSqlLab.title)}</strong><span>Interactive Oracle SQL worksheet using repo-shaped CCS files and result grids.</span></li>
+          <li><strong>${escapeHtml(gitModule.title)}</strong><span>Interactive ticket-to-PR mechanics: ADO context, branches, commits, diff review, publishing, and merge readiness.</span></li>
+          <li><strong>${escapeHtml(projectModule?.title || "Project Capsule Workflow")}</strong><span>Project capsule methodology: README, decision-index, workstreams, then branch-based execution.</span></li>
           <li><strong>${escapeHtml(capstoneLab.title)}</strong><span>Codex-assisted repo review kit with durable notes, lineage, quality checks, and final diff review.</span></li>
+        </ol>
+      </section>
+      <section class="course-section">
+        <h3>Oracle SQL path</h3>
+        <ol class="lab-steps">
+          ${oracleSqlLab.sections.map((section) => `<li>${escapeHtml(section.title)}</li>`).join("")}
         </ol>
       </section>
       <section class="course-section">
@@ -6141,6 +7281,36 @@ function renderPortal() {
         </ul>
       </section>
     </aside>
+  `;
+}
+
+function renderResumeWorkItemPanel(gitModule) {
+  const projectModule = modules.find((module) => module.id === "project-work");
+  return `
+    <section class="resume-work-card">
+      <div>
+        <span class="section-kicker">Recommended next work item</span>
+        <h2>Ticket-to-PR practice path</h2>
+        <p>
+          Start with the core job workflow: understand the ticket, branch safely, review the diff, publish the branch,
+          and know what belongs in the PR before merge.
+        </p>
+      </div>
+      <div class="resume-work-actions">
+        <button class="icon-button primary-button" type="button" data-action="start-lesson" data-module-id="${escapeAttribute(gitModule.id)}">
+          <span aria-hidden="true">1</span>
+          <span>${escapeHtml(gitModule.title)}</span>
+        </button>
+        ${
+          projectModule
+            ? `<button class="icon-button secondary" type="button" data-action="start-lesson" data-module-id="${escapeAttribute(projectModule.id)}">
+                <span aria-hidden="true">2</span>
+                <span>${escapeHtml(projectModule.title)}</span>
+              </button>`
+            : ""
+        }
+      </div>
+    </section>
   `;
 }
 
@@ -6214,6 +7384,27 @@ function renderVSCodeCourseCard() {
           <span aria-hidden="true">D</span>
           <span>Get VS Code</span>
         </a>
+      </div>
+    </article>
+  `;
+}
+
+function renderSqlCourseCard() {
+  return `
+    <article class="course-card sql-course-card">
+      <span class="section-kicker">Data module</span>
+      <h2>${escapeHtml(oracleSqlLab.title)}</h2>
+      <p>${escapeHtml(oracleSqlLab.description)}</p>
+      <div class="course-meta">
+        <span class="pill blue">${escapeHtml(oracleSqlLab.level)}</span>
+        <span class="pill green">${escapeHtml(oracleSqlLab.time)}</span>
+        <span class="pill gray">${escapeHtml(oracleSqlLab.labTitle)}</span>
+      </div>
+      <div class="portal-actions">
+        <button class="icon-button primary-button" type="button" data-action="open-sql-lab">
+          <span aria-hidden="true">Q</span>
+          <span>Open SQL Lab</span>
+        </button>
       </div>
     </article>
   `;
@@ -6397,6 +7588,139 @@ function renderLessonCommandSummary(lessonIndex, expanded) {
   `;
 }
 
+function getActiveScenarioSpec() {
+  if (state.activeModuleId === "project-work") {
+    return {
+      kind: "Project capsule",
+      title: "CCS dimensional modeling continuation",
+      request: "Create durable project context on main, then branch a focused workstream update for review.",
+      branch: projectLab.branchName,
+      contextFiles: [projectLab.readmeFile, projectLab.decisionFile, projectLab.workstreamsFile],
+      changedFiles: [projectLab.workstreamsFile],
+      acceptance: [
+        "README and decision-index are visible on main",
+        "Workstream change is isolated on a branch",
+        "Diff is reviewed before commit",
+        "Branch is published for PR review",
+        "Merge story is clear"
+      ]
+    };
+  }
+
+  return {
+    kind: "ADO ticket",
+    title: oracleLab.ticketTitle,
+    request: "Build a reviewable CCS emergency-orders-by-ZIP prior-week SQL asset from a ticket-sized request.",
+    branch: oracleLab.branchName,
+    contextFiles: [oracleLab.firstFile],
+    changedFiles: [oracleLab.featureFile],
+    acceptance: [
+      "Ticket context captured",
+      "Task branch created from main",
+      "SQL diff reviewed before commit",
+      "Branch published for PR review",
+      "Validation and reviewer focus are explainable"
+    ]
+  };
+}
+
+function terminalCommandRan(expected) {
+  const expectedNormalized = normalizeCommand(expected);
+  return (state.terminal || []).some((line) => {
+    if (line.type !== "prompt") {
+      return false;
+    }
+    const text = String(line.text || "")
+      .replace(/^PS\s+.*?>\s*/i, "")
+      .replace(/^SQL>\s*/i, "")
+      .replace(/^codex>\s*/i, "");
+    const normalized = normalizeCommand(text);
+    return normalized === expectedNormalized || commandMatches(normalized, expectedNormalized);
+  });
+}
+
+function fileExistsInScenario(path) {
+  return Boolean(
+    Object.prototype.hasOwnProperty.call(state.workingFiles || {}, path) ||
+      Object.prototype.hasOwnProperty.call(state.indexFiles || {}, path) ||
+      Object.prototype.hasOwnProperty.call(currentHeadFiles(), path) ||
+      (state.commits || []).some((commit) => Object.prototype.hasOwnProperty.call(commit.files || {}, path))
+  );
+}
+
+function calculateScenarioGates() {
+  const scenario = getActiveScenarioSpec();
+  const hasBranch = Object.keys(state.branches || {}).some((branch) => branch !== "main");
+  const status = state.initialized ? getStatus() : { clean: false };
+  return [
+    {
+      label: state.activeModuleId === "project-work" ? "Project context exists" : "Ticket context exists",
+      complete: scenario.contextFiles.every((path) => fileExistsInScenario(path))
+    },
+    { label: "Task branch exists", complete: Boolean(state.taskFlags?.branchCreated) || hasBranch },
+    { label: "Diff reviewed", complete: terminalCommandRan("git diff") || terminalCommandRan("git diff --stat") },
+    { label: "Branch commit saved", complete: Boolean(state.taskFlags?.branchCommitted) },
+    {
+      label: "Branch published",
+      complete:
+        Boolean(state.taskFlags?.pushed) ||
+        Object.keys(state.remoteBranches || {}).some((branch) => branch !== "origin/main")
+    },
+    { label: "Working tree clean", complete: Boolean(status.clean) && !state.pendingMerge && !state.conflict },
+    { label: "Merged to main", complete: Boolean(state.taskFlags?.merged) }
+  ];
+}
+
+function renderGuidedScenarioPanel() {
+  if (isPracticeMode() || isCodexMode() || isVSCodeMode() || isSqlMode() || isCapstoneMode()) {
+    return "";
+  }
+
+  const scenario = getActiveScenarioSpec();
+  const gates = calculateScenarioGates();
+  const complete = gates.filter((gate) => gate.complete).length;
+  return `
+    <section class="scenario-panel" aria-label="ADO ticket and pull request readiness">
+      <article class="scenario-card scenario-ticket-card">
+        <div>
+          <span class="section-kicker">${escapeHtml(scenario.kind)}</span>
+          <h3>${escapeHtml(scenario.title)}</h3>
+          <p>${escapeHtml(scenario.request)}</p>
+        </div>
+        <div class="scenario-file-list">
+          <span>Target branch</span>
+          <code>${escapeHtml(scenario.branch)}</code>
+          <span>Files in scope</span>
+          ${[...scenario.contextFiles, ...scenario.changedFiles].map((path) => `<code>${escapeHtml(path)}</code>`).join("")}
+        </div>
+      </article>
+      <article class="scenario-card scenario-pr-card">
+        <div class="scenario-card-head">
+          <div>
+            <span class="section-kicker">Simulated PR gate</span>
+            <h3>${complete}/${gates.length} ready</h3>
+          </div>
+          <strong>${escapeHtml(currentHeadLabel())}</strong>
+        </div>
+        <div class="scenario-progress-track" aria-hidden="true">
+          <span style="width: ${(complete / gates.length) * 100}%"></span>
+        </div>
+        <div class="scenario-checks">
+          ${gates
+            .map(
+              (gate) => `
+                <span class="scenario-check ${gate.complete ? "complete" : ""}">
+                  ${gate.complete ? "Done" : "Open"} ${escapeHtml(gate.label)}
+                </span>
+              `
+            )
+            .join("")}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
 function renderRepositoryDirectory() {
   const panel = document.getElementById("repoDirectoryPanel");
   if (!panel) {
@@ -6405,6 +7729,7 @@ function renderRepositoryDirectory() {
 
   const open = state.repoExplorerTouched ? Boolean(state.repoExplorerOpen) : true;
   panel.innerHTML = `
+    ${renderGuidedScenarioPanel()}
     <button class="repo-explorer-toggle" type="button" data-action="toggle-repo-explorer" aria-expanded="${open}"${titleAttribute("Show or hide the Oracle repository explorer")}>
       <span aria-hidden="true">${open ? "v" : ">"}</span>
       <strong>Repository Explorer</strong>
@@ -6937,6 +8262,381 @@ function renderVSCodeWorkspace() {
   if (directoryPanel) {
     directoryPanel.innerHTML = "";
   }
+}
+
+function renderSqlWorkspace() {
+  ensureSqlWorksheetState();
+  const sectionIndex = clampIndex(state.sqlSection, oracleSqlLab.sections.length);
+  const section = oracleSqlLab.sections[sectionIndex];
+  const completedCount = oracleSqlLab.sections.filter((item) => state.sqlWorksheet.completedSections.includes(item.id)).length;
+
+  document.getElementById("lessonProgress").textContent = `${completedCount} of ${oracleSqlLab.sections.length} complete`;
+  document.getElementById("lessonList").innerHTML = oracleSqlLab.sections
+    .map((item, index) => {
+      const complete = state.sqlWorksheet.completedSections.includes(item.id);
+      return `
+        <article class="lesson-button ${index === sectionIndex ? "active" : ""} ${complete ? "complete" : ""}" role="button" tabindex="0" data-action="sql-section" data-sql-section="${index}" aria-expanded="${index === sectionIndex}">
+          <span>${complete ? "Complete" : `Section ${index + 1}`}</span>
+          <strong>${escapeHtml(item.title)}</strong>
+          <em class="lesson-command-count">${escapeHtml(item.kicker)}</em>
+        </article>
+      `;
+    })
+    .join("");
+
+  document.getElementById("lessonDetail").innerHTML = `
+    <span class="section-kicker">Oracle SQL lab</span>
+    <h2>${escapeHtml(section.title)}</h2>
+    <p>${escapeHtml(section.intro)}</p>
+    <div class="lesson-task">
+      <strong>${escapeHtml(section.kicker)}</strong>
+      <span>${escapeHtml(section.task)}</span>
+      <code>${escapeHtml(singleLineSql(section.query))}</code>
+    </div>
+    <section class="lesson-glossary" aria-label="SQL terms">
+      <div class="lesson-glossary-header">
+        <span class="section-kicker">SQL glossary</span>
+        <strong>Plain-English Oracle SQL terms</strong>
+      </div>
+      ${renderSqlGlossary()}
+    </section>
+    <div class="lesson-controls">
+      <button class="text-button" type="button" data-action="sql-prev" ${sectionIndex === 0 ? "disabled" : ""}>Previous</button>
+      <button class="text-button" type="button" data-action="sql-next" ${sectionIndex === oracleSqlLab.sections.length - 1 ? "disabled" : ""}>Next</button>
+    </div>
+  `;
+
+  document.querySelector(".repo-flow").className = "repo-flow";
+  document.getElementById("workingZone").innerHTML = "";
+  document.getElementById("stagingZone").innerHTML = "";
+  document.getElementById("repositoryZone").innerHTML = "";
+  document.getElementById("guidedTitle").textContent = "Oracle SQL Worksheet";
+  document.getElementById("guidedProgress").textContent = `Section ${sectionIndex + 1} of ${oracleSqlLab.sections.length}`;
+  document.querySelector(".guided-panel .section-kicker").textContent = "Interactive SQL";
+  document.getElementById("processMap").innerHTML = renderSqlLessonContent(sectionIndex);
+  document.getElementById("guidedCommands").innerHTML = renderSqlCommandPalette(section);
+
+  renderSqlTerminal(section);
+  renderQuiz();
+
+  const directoryPanel = document.getElementById("repoDirectoryPanel");
+  if (directoryPanel) {
+    directoryPanel.innerHTML = "";
+  }
+}
+
+function renderSqlLessonContent(sectionIndex) {
+  const section = oracleSqlLab.sections[sectionIndex] || oracleSqlLab.sections[0];
+  return `
+    <div class="sql-lesson-content">
+      <section class="sql-ide" aria-label="Mock Oracle SQL IDE">
+        <div class="sql-ide-titlebar">
+          <span>Oracle SQL Developer for VS Code</span>
+          <div class="sql-title-meta">
+            <strong>ORACLE_DEV</strong>
+            <em>${escapeHtml(oracleSqlLab.repoRoot)}</em>
+          </div>
+        </div>
+        <div class="sql-ide-menubar" aria-label="SQL IDE menu">
+          <span>File</span>
+          <span>Edit</span>
+          <span>Run</span>
+          <span>Explain Plan</span>
+          <span>Connections</span>
+          <span>Source Control</span>
+        </div>
+        <div class="sql-ide-body">
+          <nav class="sql-activity-bar" aria-label="IDE activity bar">
+            <span class="active" title="Explorer">EX</span>
+            <span title="Search">SR</span>
+            <span title="Source Control">SC</span>
+            <span title="SQL worksheet">SQL</span>
+          </nav>
+          <aside class="sql-file-tree" aria-label="Repository SQL files">
+            <div class="sql-file-tree-heading">
+              <span class="section-kicker">Connections</span>
+              <strong>ORACLE_DEV</strong>
+              <em>CCS / SQL / METERS</em>
+            </div>
+            <div class="sql-tree-node open"><span>v</span><strong>Oracle database</strong></div>
+            <div class="sql-tree-node indent open"><span>v</span><strong>CCS_METER</strong></div>
+            <div class="sql-tree-node indent-2"><span>></span><strong>Tables</strong></div>
+            <div class="sql-tree-node indent-2 open"><span>v</span><strong>Repository SQL files</strong></div>
+            ${oracleSqlFiles.map(renderSqlFileTreeItem).join("")}
+          </aside>
+          <section class="sql-editor-pane">
+            <div class="sql-editor-tabs">
+              <span class="active">${escapeHtml(sqlActiveFileName())}</span>
+              <span>Worksheet.sql</span>
+            </div>
+            <div class="sql-worksheet-toolbar" aria-label="Worksheet toolbar">
+              <button class="sql-run-button" type="button" data-command-fill="${escapeAttribute(singleLineSql(section.query))}">Run</button>
+              <button type="button" data-command-fill="DESCRIBE ${escapeAttribute(resolveSqlTableName(section.query) || oracleSqlFiles[0].table)}">Describe</button>
+              <button class="disabled" type="button" disabled>Explain</button>
+              <button class="disabled" type="button" disabled>Commit</button>
+              <button class="disabled" type="button" disabled>Rollback</button>
+              <span class="sql-connection-pill">ORACLE_DEV</span>
+              <span class="sql-connection-pill">CCS_METER</span>
+              <span class="sql-autocommit">Autocommit off</span>
+            </div>
+            <div class="sql-breadcrumbs">
+              <span>Oracle</span>
+              <span>CCS</span>
+              <span>sql</span>
+              <span>meters</span>
+              <strong>${escapeHtml(sqlActiveFileName())}</strong>
+            </div>
+            <div class="sql-code-editor" role="textbox" aria-label="SQL worksheet text">
+              ${renderSqlEditorLines(section.query)}
+            </div>
+          </section>
+        </div>
+        ${renderSqlResultPanel()}
+      </section>
+      <section class="sql-helper-grid">
+        <article>
+          <span class="section-kicker">Concept</span>
+          <strong>${escapeHtml(section.kicker)}</strong>
+          <p>${escapeHtml(section.intro)}</p>
+        </article>
+        <article>
+          <span class="section-kicker">Objectives</span>
+          <ul>
+            ${section.objectives.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+      </section>
+    </div>
+  `;
+}
+
+function renderSqlFileTreeItem(file) {
+  const selected = state.sqlWorksheet?.selectedFile === file.path;
+  return `
+    <button class="sql-file-row ${selected ? "active" : ""}" type="button" data-command-fill="SELECT * FROM ${escapeAttribute(file.table)}"${titleAttribute(`${file.path}\n${file.note}`)}>
+      <span class="sql-object-icon">SQL</span>
+      <div>
+        <strong>${escapeHtml(file.path.split("/").pop())}</strong>
+        <em>${escapeHtml(file.table)}</em>
+      </div>
+      <small>${escapeHtml(file.status)}</small>
+    </button>
+  `;
+}
+
+function renderSqlResultPanel() {
+  ensureSqlWorksheetState();
+  const result = state.sqlWorksheet.lastResult || createSqlWorksheetState().lastResult;
+  const columns = result.columns || [];
+  const rows = result.rows || [];
+  return `
+    <section class="sql-result-panel" aria-label="SQL result grid">
+      <div class="sql-result-tabs" role="tablist" aria-label="SQL output tabs">
+        <span class="active" role="tab" aria-selected="true">Results</span>
+        <span role="tab" aria-selected="false">Script Output</span>
+        <span role="tab" aria-selected="false">Explain</span>
+        <span role="tab" aria-selected="false">Messages</span>
+      </div>
+      <div class="sql-result-meta">
+        <strong>${escapeHtml(result.message || "Statement executed.")}</strong>
+        <span>${rows.length} row${rows.length === 1 ? "" : "s"} fetched | 00:00.018</span>
+      </div>
+      <div class="sql-result-scroll">
+        <table class="sql-result-grid">
+          <thead>
+            <tr>${columns.map((column) => `<th>${escapeHtml(column)}</th>`).join("")}</tr>
+          </thead>
+          <tbody>
+            ${rows
+              .map(
+                (row) => `
+                  <tr>
+                    ${columns.map((column) => `<td>${escapeHtml(row[column] ?? "")}</td>`).join("")}
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+function renderSqlEditorLines(query) {
+  return String(query || "")
+    .split(/\r?\n/)
+    .map(
+      (line, index) => `
+        <div class="sql-editor-line">
+          <span class="sql-line-number">${index + 1}</span>
+          <code>${highlightSqlLine(line)}</code>
+        </div>
+      `
+    )
+    .join("");
+}
+
+function highlightSqlLine(line) {
+  let escaped = escapeHtml(line);
+  escaped = escaped.replace(/\b(GROUP BY|ORDER BY)\b/gi, (match) => `<span class="sql-token keyword">${match}</span>`);
+  escaped = escaped.replace(/\b(SELECT|FROM|WHERE|JOIN|ON|WITH|AS|COUNT|IN|AND|DESC|DATE|TRUNC|SYSDATE)\b/gi, (match) => `<span class="sql-token keyword">${match}</span>`);
+  escaped = escaped.replace(/\b([a-z][a-z0-9_]*\.)/gi, (match) => `<span class="sql-token alias">${match}</span>`);
+  return escaped;
+}
+
+function renderSqlCommandPalette(section) {
+  const helpers = [
+    { label: "Lesson query", command: section.query },
+    { label: "Show repo files", command: "show files" },
+    { label: "Describe starter table", command: "DESCRIBE ccs_emergency_response_activity_extract" },
+    { label: "Run SQL wizard", command: SQL_WIZARD_COMMAND }
+  ];
+  return `
+    <section class="sql-command-palette" aria-label="SQL query shortcuts">
+      <span class="section-kicker">Click to type into the worksheet</span>
+      <div class="sql-command-grid">
+        ${helpers
+          .map(
+            (item) => `
+              <button class="sql-command-card" type="button" data-command-fill="${escapeAttribute(singleLineSql(item.command))}"${titleAttribute(`Type into SQL worksheet:\n${singleLineSql(item.command)}`)}>
+                <strong>${escapeHtml(item.label)}</strong>
+                <code>${escapeHtml(singleLineSql(item.command))}</code>
+              </button>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderSqlTerminal(section) {
+  ensureSqlWorksheetState();
+  const form = document.getElementById("commandForm");
+  const output = document.getElementById("terminalOutput");
+  const history = document.getElementById("terminalHistory");
+  const input = document.getElementById("commandInput");
+  const panel = document.querySelector(".terminal-panel");
+  if (form) {
+    form.hidden = false;
+  }
+  panel?.classList.add("sql-terminal-panel");
+
+  document.querySelector(".terminal-panel .section-kicker").textContent = "Oracle SQL worksheet";
+  document.querySelector(".terminal-panel h2").textContent = "Edit and run SQL statements";
+  document.querySelector(".terminal-note").innerHTML = `Try <code>SELECT * FROM ${escapeHtml(oracleSqlFiles[0].table)}</code> or <code>${escapeHtml(SQL_WIZARD_COMMAND)}</code>`;
+  document.getElementById("promptLabel").textContent = "SQL";
+  const runButton = form?.querySelector('button[data-action="run-command"]');
+  if (runButton) {
+    runButton.textContent = "Run statement";
+  }
+  if (input) {
+    input.placeholder = singleLineSql(section.query);
+  }
+  history.innerHTML = renderSqlWorksheetRunner();
+  output.scrollTop = output.scrollHeight;
+}
+
+function renderSqlWorksheetRunner() {
+  ensureSqlWorksheetState();
+  const result = state.sqlWorksheet.lastResult || createSqlWorksheetState().lastResult;
+  const recent = state.terminal.slice(-8);
+  const historyRows = recent.length
+    ? recent.map(renderSqlRunnerHistoryLine).join("")
+    : `<div class="sql-runner-empty">Run the lesson query or type <strong>show files</strong> to inspect the simulated Oracle repo tables.</div>`;
+  return `
+    <div class="sql-runner-shell">
+      <div class="sql-runner-tabbar" aria-label="SQL worksheet runner tabs">
+        <span class="active">Worksheet.sql</span>
+        <span>Query History</span>
+        <span>DBMS Output</span>
+      </div>
+      <div class="sql-runner-history" aria-label="Recent SQL statements and messages">
+        ${historyRows}
+      </div>
+      <div class="sql-runner-status">
+        <strong>${escapeHtml(result.message || "Ready.")}</strong>
+        <span>${result.rows?.length || 0} rows | read-only simulator</span>
+      </div>
+      ${renderSqlResultPanel()}
+    </div>
+  `;
+}
+
+function renderSqlRunnerHistoryLine(line) {
+  const type = line?.type || "note";
+  const text = String(line?.text || "");
+  if (type === "prompt") {
+    return `
+      <div class="sql-runner-line statement">
+        <span>SQL</span>
+        <code>${escapeHtml(text.replace(/^SQL>\s*/i, ""))}</code>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="sql-runner-line ${escapeAttribute(type)}">
+      <span>${escapeHtml(type)}</span>
+      <code>${escapeHtml(summarizeSqlRunnerMessage(text))}</code>
+    </div>
+  `;
+}
+
+function summarizeSqlRunnerMessage(text) {
+  const value = String(text || "").trim();
+  if (!value) {
+    return "Ready.";
+  }
+  const firstLine = value.split(/\r?\n/).find((line) => line.trim());
+  if (!firstLine) {
+    return value;
+  }
+  if (/^\+[-+]+\+$/.test(firstLine.trim()) || firstLine.includes("|")) {
+    return "Statement executed. Review the Results tab below.";
+  }
+  return firstLine.length > 160 ? `${firstLine.slice(0, 157)}...` : firstLine;
+}
+
+function renderSqlGlossary() {
+  const terms = [
+    ["SELECT", "Chooses which columns appear in the output"],
+    ["FROM", "Names the file/table the rows come from"],
+    ["WHERE", "Filters rows before they reach the result"],
+    ["ORDER BY", "Sorts the visible result"],
+    ["GROUP BY", "Changes the result grain into one row per group"],
+    ["JOIN", "Adds context from another file/table using a key"],
+    ["CTE", "A named query step that starts with WITH"]
+  ];
+  return `
+    <div class="glossary-table" role="table" aria-label="SQL glossary">
+      <div class="glossary-row glossary-head" role="row">
+        <span role="columnheader">Term</span>
+        <span role="columnheader">Plain-English meaning</span>
+      </div>
+      ${terms
+        .map(
+          ([term, meaning]) => `
+            <div class="glossary-row" role="row">
+              <strong role="cell">${escapeHtml(term)}</strong>
+              <span role="cell">${escapeHtml(meaning)}</span>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function sqlActiveFileName() {
+  ensureSqlWorksheetState();
+  const selected = state.sqlWorksheet.selectedFile || oracleSqlFiles[0]?.path || "Worksheet.sql";
+  return selected.split("/").pop();
+}
+
+function singleLineSql(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
 }
 
 function renderVSCodeLessonContent(sectionIndex) {
@@ -7737,7 +9437,7 @@ function renderPracticeReadinessPanel() {
     <section class="practice-readiness-panel" aria-label="Practice progress">
       <div class="practice-readiness-score">
         <div>
-          <span class="section-kicker">PR readiness</span>
+          <span class="section-kicker">Skill readiness</span>
           <strong>${readiness.score}</strong>
           <small>best ${Math.max(progress.bestReadiness || 0, readiness.score)}</small>
         </div>
@@ -9028,6 +10728,16 @@ function getQuizBank(moduleId = state?.activeModuleId || "git-basics", round = s
     return normalizeQuizItems(codexRoundItems, quizRound);
   }
 
+  if (moduleId === oracleSqlLab.id) {
+    const sqlRoundItems =
+      quizRound === 1
+        ? oracleSqlChoiceQuizzes
+        : quizRound === 2
+          ? oracleSqlRoundTwoQuizzes.map((quiz) => ({ type: "fill", ...quiz }))
+          : oracleSqlRoundThreeQuizzes.map((quiz) => ({ type: "freeform", ...quiz }));
+    return normalizeQuizItems(sqlRoundItems, quizRound);
+  }
+
   const active = modules.find((module) => module.id === moduleId) || modules[0];
   const primaryItems = active.quiz || [];
   const roundItems =
@@ -9464,8 +11174,16 @@ function isVSCodeMode() {
   return Boolean(state?.inLesson && state.viewMode === "vscode");
 }
 
+function isSqlMode() {
+  return Boolean(state?.inLesson && state.viewMode === "sql");
+}
+
 function getPrompt() {
   return state.cwd ? `PS ${state.cwd}>` : PS_PROMPT;
+}
+
+function getSqlPrompt() {
+  return "SQL>";
 }
 
 function getCurrentProcessArea() {
@@ -9473,16 +11191,68 @@ function getCurrentProcessArea() {
   if (!active || state.guidedStep >= active.commands.length) {
     return "history";
   }
-  return (commandProcessSteps[state.guidedStep] || commandProcessSteps[0]).area;
+  const steps = active.id === "project-work" ? projectProcessSteps : commandProcessSteps;
+  return (steps[state.guidedStep] || steps[0]).area;
 }
 
 function normalizeCommand(command) {
   return tokenize(String(command).trim()).join(" ").replace(/\s+/g, " ").toLowerCase();
 }
 
-function isGuidedUtilityCommand(command) {
+function guidedCommandMatchesExpected(command, expected) {
+  if (!expected?.cmd) {
+    return false;
+  }
+
   const normalized = normalizeCommand(command);
-  return normalized === "help" || normalized === "git help";
+  const expectedNormalized = normalizeCommand(expected.cmd);
+  if (normalized === expectedNormalized || commandMatches(normalized, expectedNormalized)) {
+    return true;
+  }
+
+  const expectedText = String(expected.cmd || "").trim();
+  const switchCreate = expectedText.match(/^git\s+switch\s+-c\s+(.+)$/i);
+  if (switchCreate) {
+    return normalized === normalizeCommand(`git checkout -b ${switchCreate[1]}`);
+  }
+
+  const switchBranch = expectedText.match(/^git\s+switch\s+(.+)$/i);
+  if (switchBranch) {
+    return normalized === normalizeCommand(`git checkout ${switchBranch[1]}`);
+  }
+
+  if (expectedNormalized.startsWith("git add ") && normalized === "git add .") {
+    return true;
+  }
+
+  if (expectedNormalized.startsWith("git commit -m ") && normalized.startsWith("git commit -m ")) {
+    return true;
+  }
+
+  if (expectedNormalized.startsWith("git push ") && normalized.startsWith("git push")) {
+    return true;
+  }
+
+  return false;
+}
+
+function isGuidedUtilityCommand(command, expected = null) {
+  const normalized = normalizeCommand(command);
+  if (expected && guidedCommandMatchesExpected(command, expected)) {
+    return false;
+  }
+
+  return [
+    "help",
+    "git help",
+    "git status",
+    "git branch",
+    "git log",
+    "git log --oneline",
+    "git diff",
+    "git diff --stat",
+    "git diff --staged"
+  ].includes(normalized);
 }
 
 function hasHeadCommit() {
@@ -9633,7 +11403,7 @@ function loadState() {
         parsed.activeModuleId = parsed.activeModuleId || "git-basics";
         parsed.guidedStep = parsed.guidedStep || 0;
         parsed.inLesson = Boolean(parsed.inLesson);
-        parsed.viewMode = ["practice", "codex", "capstone", "vscode"].includes(parsed.viewMode) ? parsed.viewMode : "guided";
+        parsed.viewMode = ["practice", "codex", "capstone", "vscode", "sql"].includes(parsed.viewMode) ? parsed.viewMode : "guided";
         parsed.codexSection = clampIndex(parsed.codexSection, codexLab.sections.length);
         parsed.codexCli = {
           ...createCodexCliState(),
@@ -9652,6 +11422,15 @@ function loadState() {
           ? parsed.vscodeCli.installedExtensions
           : [];
         parsed.vscodeCli.missionLog = Array.isArray(parsed.vscodeCli.missionLog) ? parsed.vscodeCli.missionLog : [];
+        parsed.sqlSection = clampIndex(parsed.sqlSection, oracleSqlLab.sections.length);
+        parsed.sqlWorksheet = {
+          ...createSqlWorksheetState(),
+          ...(parsed.sqlWorksheet && typeof parsed.sqlWorksheet === "object" ? parsed.sqlWorksheet : {})
+        };
+        parsed.sqlWorksheet.completedSections = Array.isArray(parsed.sqlWorksheet.completedSections)
+          ? parsed.sqlWorksheet.completedSections.filter((id) => oracleSqlLab.sections.some((section) => section.id === id))
+          : [];
+        parsed.sqlWorksheet.queryLog = Array.isArray(parsed.sqlWorksheet.queryLog) ? parsed.sqlWorksheet.queryLog : [];
         parsed.repoExplorerOpen = Boolean(parsed.repoExplorerOpen);
         parsed.repoExplorerTouched = Boolean(parsed.repoExplorerTouched);
         if (parsed.viewMode === "guided" && !parsed.repoExplorerTouched) {
