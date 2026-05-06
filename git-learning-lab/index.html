@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Git Learning Lab</title>
     <link rel="stylesheet" href="styles.css" />
-    <script defer src="app.js?v=20260506-ticket-pr-redesign"></script>
+    <script defer src="app.js?v=20260506-context-how-to"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -123,7 +123,7 @@
       <section class="how-to-dialog" role="dialog" aria-modal="true" aria-labelledby="howToTitle" aria-describedby="howToSummary">
         <div class="how-to-header">
           <div>
-            <span class="section-kicker">Quick start</span>
+            <span class="section-kicker" id="howToKicker">Quick start</span>
             <h2 id="howToTitle">How to use this lab</h2>
           </div>
           <button class="text-button" type="button" data-action="close-how-to">Close</button>
@@ -131,7 +131,7 @@
         <p id="howToSummary">
           Use the lessons to learn the workflow, then use the practice labs to type commands and watch the repository state change.
         </p>
-        <div class="how-to-grid">
+        <div class="how-to-grid" id="howToGrid">
           <article>
             <span>1</span>
             <strong>Start with Codex</strong>
@@ -163,7 +163,7 @@
             <code>git wizard mode</code>
           </article>
         </div>
-        <div class="how-to-footer">
+        <div class="how-to-footer" id="howToFooter">
           <strong>Good path:</strong>
           <span>Codex lesson -> VS Code Lab -> Oracle SQL Lab -> Git Lab 1 -> Practice Lab -> Git Lab 2 -> Git Lab 3.</span>
         </div>

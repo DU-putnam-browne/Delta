@@ -3264,6 +3264,7 @@ function openHowToModal() {
     return;
   }
 
+  renderHowToModalContent();
   modal.hidden = false;
   document.body.classList.add("modal-open");
   modal.querySelector("button[data-action='close-how-to']")?.focus({ preventScroll: true });
@@ -3286,6 +3287,341 @@ function closeHowToModal() {
 function isHowToModalOpen() {
   const modal = document.getElementById("howToModal");
   return Boolean(modal && !modal.hidden);
+}
+
+function renderHowToModalContent() {
+  const content = getHowToContent();
+  const kicker = document.getElementById("howToKicker");
+  const title = document.getElementById("howToTitle");
+  const summary = document.getElementById("howToSummary");
+  const grid = document.getElementById("howToGrid");
+  const footer = document.getElementById("howToFooter");
+
+  if (kicker) {
+    kicker.textContent = content.kicker;
+  }
+  if (title) {
+    title.textContent = content.title;
+  }
+  if (summary) {
+    summary.textContent = content.summary;
+  }
+  if (grid) {
+    grid.innerHTML = content.steps
+      .map(
+        (step, index) => `
+          <article class="${step.emphasis ? "emphasis" : ""}">
+            <span>${index + 1}</span>
+            <strong>${escapeHtml(step.title)}</strong>
+            <p>${escapeHtml(step.body)}</p>
+            ${step.command ? `<code>${escapeHtml(step.command)}</code>` : ""}
+          </article>
+        `
+      )
+      .join("");
+  }
+  if (footer) {
+    footer.innerHTML = `
+      <strong>${escapeHtml(content.footerLabel)}</strong>
+      <span>${escapeHtml(content.footer)}</span>
+    `;
+  }
+}
+
+function getHowToContent() {
+  if (!state || !state.inLesson) {
+    return getPortalHowToContent();
+  }
+
+  if (isCodexMode()) {
+    return getCodexHowToContent();
+  }
+  if (isVSCodeMode()) {
+    return getVSCodeHowToContent();
+  }
+  if (isSqlMode()) {
+    return getSqlHowToContent();
+  }
+  if (isPracticeMode()) {
+    return getPracticeHowToContent();
+  }
+  if (isCapstoneMode()) {
+    return getCapstoneHowToContent();
+  }
+
+  return getGuidedGitHowToContent();
+}
+
+function getPortalHowToContent() {
+  return {
+    kicker: "Course map",
+    title: "How to use the learning platform",
+    summary:
+      "Use the recommended path when you want the shortest route to job-ready workflow practice. Open a lesson first, then use practice mode for recovery and repetition.",
+    steps: [
+      {
+        title: "Start with the banner",
+        body: "Use Ticket to First PR first. It teaches the core work unit: ticket, branch, diff, commit, publish, PR.",
+        command: "Ticket to First PR",
+        emphasis: true
+      },
+      {
+        title: "Use Codex and VS Code as tools",
+        body: "Codex and VS Code are separate lessons, but they support the same repo workflow instead of replacing it.",
+        command: "codex wizard mode"
+      },
+      {
+        title: "Practice SQL in context",
+        body: "Use Oracle SQL Lab to inspect repo-shaped SQL files, run SELECT statements, and reason through filters, joins, and summaries.",
+        command: "sql wizard mode"
+      },
+      {
+        title: "Move to recovery practice",
+        body: "Open the Git practice lab when the basics are clear. It adds wrong-branch, unstaged, dirty-switch, and conflict states.",
+        command: "git wizard mode"
+      }
+    ],
+    footerLabel: "Recommended path:",
+    footer: "Codex lesson -> VS Code Lab -> Oracle SQL Lab -> Ticket to First PR -> Practice Lab -> Project Capsule Workflow -> Repo Review Kit."
+  };
+}
+
+function getGuidedGitHowToContent() {
+  const active = getActiveModule();
+  const lessonsForModule = getActiveLessons();
+  const lesson = lessonsForModule[getCurrentLessonIndex()] || lessonsForModule[0];
+  const expected = active.commands[state.guidedStep];
+  const done = Math.min(state.guidedStep, active.commands.length);
+  return {
+    kicker: "Active Git lesson",
+    title: `How to run ${active.title}`,
+    summary: `${lesson.title}: ${lesson.task}`,
+    steps: [
+      {
+        title: "Follow the left learning path",
+        body: "Open the current section to see the exact commands. Clicking a command fills it into the PowerShell prompt.",
+        command: `${done}/${active.commands.length} commands complete`,
+        emphasis: true
+      },
+      {
+        title: "Type or run the next command",
+        body: expected
+          ? "Enter the next command in the PowerShell terminal. The repository graph, file explorer, and PR gate update from that command."
+          : "The guided command list is complete. Use the graph and PR gate to explain what changed.",
+        command: expected?.cmd || "git log --oneline"
+      },
+      {
+        title: "Use inspection commands",
+        body: "You can run status, branch, log, or diff commands during the lesson without losing your place.",
+        command: "git status"
+      },
+      {
+        title: "Watch the PR gate",
+        body: "The right-side ADO/PR panel shows whether context, branch, diff review, commit, publish, clean state, and merge are ready.",
+        command: "git push"
+      },
+      {
+        title: "Let wizard mode demonstrate",
+        body: "Wizard mode types the remaining commands so learners can watch the whole workflow before trying it manually.",
+        command: GIT_WIZARD_COMMAND
+      }
+    ],
+    footerLabel: "Current goal:",
+    footer: expected ? expected.desc : "Explain the branch, commit, publish, and merge story from the final graph."
+  };
+}
+
+function getPracticeHowToContent() {
+  const mission = getActivePracticeMission();
+  return {
+    kicker: "Active practice lab",
+    title: "How to use Git practice mode",
+    summary:
+      "Practice mode is for independent reps. The simulator accepts Git commands, updates the live graph, and scores readiness from actual state.",
+    steps: [
+      {
+        title: "Choose a mission",
+        body: `Current mission: ${mission.title}. Read the objective, then decide which Git command proves the next state.`,
+        command: mission.target,
+        emphasis: true
+      },
+      {
+        title: "Use the terminal as the source of truth",
+        body: "Type commands into the PowerShell prompt. The graph, file explorer, command replay, and readiness panel all react to the command.",
+        command: "git status"
+      },
+      {
+        title: "Publish before merge readiness",
+        body: "Practice now includes the remote step. Push the branch so the simulated PR can exist outside your workstation.",
+        command: "git push"
+      },
+      {
+        title: "Load failure states when ready",
+        body: "Use Load conflict drill from this tab for randomized merge conflict practice after baseline branch work makes sense.",
+        command: "resolve <file>"
+      },
+      {
+        title: "Replay or ghost type",
+        body: "Use command replay to inspect your path, or wizard mode to watch a clean run from the current mission.",
+        command: GIT_WIZARD_COMMAND
+      }
+    ],
+    footerLabel: "Skill target:",
+    footer: "Learners should recover from wrong branch, unstaged changes, dirty switches, and conflicts without guessing."
+  };
+}
+
+function getCodexHowToContent() {
+  const section = codexLab.sections[state.codexSection] || codexLab.sections[0];
+  const firstCommand = section.steps?.[0]?.command || section.cards?.[0]?.command || CODEX_WIZARD_COMMAND;
+  return {
+    kicker: "Active Codex lesson",
+    title: "How to run the Codex lesson",
+    summary: `${section.title}: ${section.intro || "Practice safe setup, prompting, repo inspection, and reviewable handoff artifacts."}`,
+    steps: [
+      {
+        title: "Use the learning path order",
+        body: "Move through setup, onboarding, prompting, ticket orientation, prompt library, repo review kit, and safety.",
+        command: "Next",
+        emphasis: true
+      },
+      {
+        title: "Practice in the mock CLI",
+        body: "Type the section command into the Codex terminal. The simulator tracks install, login, repo navigation, and prompt runs.",
+        command: firstCommand
+      },
+      {
+        title: "Copy prompts deliberately",
+        body: "Use copy buttons for reusable prompts, then adjust ticket text, repo area, expected output, and validation notes.",
+        command: "Copy prompt"
+      },
+      {
+        title: "Inspect before editing",
+        body: "Codex should orient on files, risks, and assumptions before changing repo content.",
+        command: "git status"
+      },
+      {
+        title: "Watch the demo path",
+        body: "Codex wizard mode walks through install, login, repo navigation, and prompt execution.",
+        command: CODEX_WIZARD_COMMAND
+      }
+    ],
+    footerLabel: "Rule:",
+    footer: "Codex should improve judgment and speed, not hide Git state or validation responsibility."
+  };
+}
+
+function getVSCodeHowToContent() {
+  const section = vscodeLab.sections[state.vscodeSection] || vscodeLab.sections[0];
+  return {
+    kicker: "Active VS Code lab",
+    title: "How to run the VS Code Lab",
+    summary: `${section.title}: ${section.intro || "Practice editor setup, repo navigation, search, terminal, Source Control, diffs, and conflicts."}`,
+    steps: [
+      {
+        title: "Start with extensions",
+        body: "Install or recognize the required editor tools, then open the Oracle repo folder instead of a random file.",
+        command: "code C:\\Repositories\\Oracle",
+        emphasis: true
+      },
+      {
+        title: "Use Explorer and Search",
+        body: "Find the SQL or markdown files in the repo tree. Search before editing so changes match existing patterns.",
+        command: "Ctrl+Shift+F"
+      },
+      {
+        title: "Use the integrated terminal",
+        body: "Run Git from the VS Code terminal so Source Control, diffs, and branch state line up.",
+        command: "git status"
+      },
+      {
+        title: "Review Source Control",
+        body: "Inspect diffs before staging, stage the intended files only, then commit with a clear message.",
+        command: "git diff"
+      },
+      {
+        title: "Run wizard mode",
+        body: "The VS Code wizard demonstrates the workflow inside the mock editor and terminal.",
+        command: VSCODE_WIZARD_COMMAND
+      }
+    ],
+    footerLabel: "Skill target:",
+    footer: "Learners should know where files live, how to inspect diffs, and how editor state maps back to Git."
+  };
+}
+
+function getSqlHowToContent() {
+  const section = oracleSqlLab.sections[state.sqlSection] || oracleSqlLab.sections[0];
+  const starter = section.query || "SELECT * FROM ccs_emergency_response_activity_extract;";
+  return {
+    kicker: "Active SQL lesson",
+    title: "How to use the Oracle SQL worksheet",
+    summary: `${section.title}: ${section.intro || "Run SELECT queries against repo-shaped Oracle SQL files and inspect the result grid."}`,
+    steps: [
+      {
+        title: "Choose a repository SQL file",
+        body: "Use the Connections panel to see the CCS SQL files modeled from the repo.",
+        command: "show files",
+        emphasis: true
+      },
+      {
+        title: "Start broad",
+        body: "Begin with SELECT * so learners see the grain and available columns before filtering.",
+        command: starter
+      },
+      {
+        title: "Run and read the result grid",
+        body: "Use Run to return rows, then inspect columns, counts, and messages before moving to the next query.",
+        command: "Run"
+      },
+      {
+        title: "Describe before guessing",
+        body: "Use describe when the table shape is unclear. This builds SQL reasoning instead of memorizing column names.",
+        command: "describe ccs_emergency_response_activity_extract"
+      },
+      {
+        title: "Use wizard mode for a worked example",
+        body: "SQL wizard mode walks from SELECT * through filters, summaries, joins, and final review.",
+        command: SQL_WIZARD_COMMAND
+      }
+    ],
+    footerLabel: "Skill target:",
+    footer: "Learners should explain output grain, filters, joins, and validation risks before treating a query as done."
+  };
+}
+
+function getCapstoneHowToContent() {
+  return {
+    kicker: "Active capstone",
+    title: "How to run Git Lab 3",
+    summary:
+      "The capstone turns Codex-assisted repo inspection into durable review artifacts: notes, lineage, quality checks, and final review.",
+    steps: [
+      {
+        title: "Start from read-only inspection",
+        body: "Use the prompt library to ask Codex for repo orientation before creating artifacts.",
+        command: "Inspect before editing",
+        emphasis: true
+      },
+      {
+        title: "Create durable files",
+        body: "Complete REPO_NOTES, SQL_LINEAGE, DATA_QUALITY_REPORT, and CODEX_REVIEW rather than leaving the work in chat.",
+        command: "Copy prompt"
+      },
+      {
+        title: "Review the diff",
+        body: "Use the terminal panel to inspect the changed-file surface before treating the kit as complete.",
+        command: "git diff --stat"
+      },
+      {
+        title: "Use the prompt library",
+        body: "Open the collapsible prompt panel for reusable prompts; copy them and tailor to the current repo question.",
+        command: "Prompt library"
+      }
+    ],
+    footerLabel: "Output:",
+    footer: "A reviewer should be able to understand repo purpose, SQL lineage, data quality risks, and Codex assumptions from the files."
+  };
 }
 
 function handleFlowFileDragStart(event) {
@@ -3590,6 +3926,7 @@ function handleAction(button) {
   }
 
   if (action === "reset") {
+    const activeModuleId = state.activeModuleId || "git-basics";
     state = isCodexMode()
       ? createCodexState()
       : isCapstoneMode()
@@ -3601,7 +3938,7 @@ function handleAction(button) {
             : isPracticeMode()
               ? createAdvancedState()
               : state.inLesson
-                ? createTrainingState()
+                ? createTrainingState(activeModuleId)
                 : createInitialState();
     saveState();
     render();
@@ -7190,8 +7527,8 @@ function renderPortal() {
   const gitModule = modules[0];
   const projectModule = modules.find((module) => module.id === "project-work");
   document.getElementById("portalView").innerHTML = `
+    ${renderResumeWorkItemPanel(gitModule)}
     <div class="course-stack">
-      ${renderResumeWorkItemPanel(gitModule)}
       ${renderCodexCourseCard()}
       ${renderVSCodeCourseCard()}
       ${renderSqlCourseCard()}
@@ -7289,12 +7626,21 @@ function renderResumeWorkItemPanel(gitModule) {
   return `
     <section class="resume-work-card">
       <div>
+        <span class="resume-work-badge">Start here</span>
         <span class="section-kicker">Recommended next work item</span>
-        <h2>Ticket-to-PR practice path</h2>
+        <h2>Build the core ticket-to-PR workflow first</h2>
         <p>
           Start with the core job workflow: understand the ticket, branch safely, review the diff, publish the branch,
           and know what belongs in the PR before merge.
         </p>
+        <div class="resume-work-track" aria-label="Recommended sequence">
+          <span>Ticket</span>
+          <span>Branch</span>
+          <span>Diff</span>
+          <span>Commit</span>
+          <span>Publish</span>
+          <span>PR</span>
+        </div>
       </div>
       <div class="resume-work-actions">
         <button class="icon-button primary-button" type="button" data-action="start-lesson" data-module-id="${escapeAttribute(gitModule.id)}">

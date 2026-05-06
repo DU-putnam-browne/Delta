@@ -279,6 +279,19 @@ button {
   background: var(--surface-alt);
 }
 
+.how-to-grid article.emphasis {
+  border-color: rgba(112, 231, 196, 0.72);
+  background:
+    linear-gradient(135deg, rgba(195, 244, 230, 0.5), rgba(255, 255, 255, 0) 62%),
+    var(--surface-alt);
+}
+
+[data-theme="dark"] .how-to-grid article.emphasis {
+  background:
+    linear-gradient(135deg, rgba(112, 231, 196, 0.12), rgba(111, 147, 255, 0.08) 62%),
+    var(--surface-alt);
+}
+
 .how-to-grid article > span {
   display: inline-grid;
   width: 28px;
@@ -481,31 +494,53 @@ button:active {
 }
 
 .resume-work-card {
+  grid-column: 1 / -1;
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
+  grid-template-columns: minmax(0, 1.2fr) auto;
+  gap: clamp(18px, 3vw, 36px);
   align-items: center;
-  padding: clamp(16px, 1.7vw, 22px);
-  border: 1px solid var(--line);
-  border-top: 4px solid var(--green);
+  padding: clamp(18px, 2.2vw, 30px);
+  border: 1px solid rgba(20, 198, 20, 0.44);
+  border-top: 6px solid var(--green);
+  border-left: 6px solid var(--green);
   border-radius: var(--radius);
   background:
-    linear-gradient(135deg, rgba(195, 244, 230, 0.38), rgba(255, 255, 255, 0) 58%),
+    linear-gradient(135deg, rgba(195, 244, 230, 0.56), rgba(0, 66, 255, 0.08) 58%),
     var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow: 0 18px 42px rgba(20, 198, 20, 0.14), var(--shadow);
 }
 
 [data-theme="dark"] .resume-work-card {
+  border-color: rgba(112, 231, 196, 0.48);
   background:
-    linear-gradient(135deg, rgba(112, 231, 196, 0.12), rgba(13, 27, 47, 0) 58%),
+    linear-gradient(135deg, rgba(112, 231, 196, 0.18), rgba(111, 147, 255, 0.12) 58%),
     var(--surface);
+  box-shadow: 0 18px 48px rgba(112, 231, 196, 0.1), var(--shadow);
+}
+
+.resume-work-badge {
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  min-height: 28px;
+  margin: 0 0 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #07111f;
+  background: var(--mint);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .resume-work-card h2 {
   margin: 6px 0 8px;
   color: var(--navy);
   font-family: Rubik, Arial, sans-serif;
-  font-size: clamp(1.2rem, 2vw, 1.72rem);
+  font-size: clamp(1.7rem, 3vw, 2.55rem);
+  line-height: 1.04;
 }
 
 .resume-work-card p {
@@ -520,6 +555,31 @@ button:active {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.resume-work-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.resume-work-track span {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 3px 9px;
+  border: 1px solid rgba(112, 231, 196, 0.42);
+  border-radius: 999px;
+  color: var(--navy);
+  background: rgba(195, 244, 230, 0.42);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+[data-theme="dark"] .resume-work-track span {
+  color: var(--ink);
+  background: rgba(112, 231, 196, 0.1);
 }
 
 [data-theme="dark"] .course-card {
