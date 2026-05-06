@@ -3366,13 +3366,13 @@ function getPortalHowToContent() {
         emphasis: true
       },
       {
-        title: "Use Codex and VS Code as tools",
-        body: "Codex and VS Code are separate lessons, but they support the same repo workflow instead of replacing it.",
-        command: "codex wizard mode"
+        title: "Use Getting Started only when needed",
+        body: "The right-side catalog holds optional Tools, Languages, and Concepts. Learners who know Codex, VS Code, or SQL can skip those and stay on the Git path.",
+        command: "Tools · Languages · Concepts"
       },
       {
         title: "Practice SQL in context",
-        body: "Use Oracle SQL Lab to inspect repo-shaped SQL files, run SELECT statements, and reason through filters, joins, and summaries.",
+        body: "Use Oracle SQL Lab only when SQL reasoning is part of the learner's gap. It starts with SELECT * and builds toward reviewable query logic.",
         command: "sql wizard mode"
       },
       {
@@ -3382,7 +3382,7 @@ function getPortalHowToContent() {
       }
     ],
     footerLabel: "Recommended path:",
-    footer: "Codex lesson -> VS Code Lab -> Oracle SQL Lab -> Ticket to First PR -> Practice Lab -> Project Capsule Workflow -> Repo Review Kit."
+    footer: "Primary path: Ticket to First PR -> Git Practice Lab -> Project Capsule Workflow -> Repo Review Kit. Getting Started modules are optional support."
   };
 }
 
@@ -7528,96 +7528,171 @@ function renderPortal() {
   const projectModule = modules.find((module) => module.id === "project-work");
   document.getElementById("portalView").innerHTML = `
     ${renderResumeWorkItemPanel(gitModule)}
-    <div class="course-stack">
-      ${renderCodexCourseCard()}
-      ${renderVSCodeCourseCard()}
-      ${renderSqlCourseCard()}
+    <div class="course-stack primary-course-stack">
+      <section class="path-section">
+        <div class="path-section-header">
+          <div>
+            <span class="section-kicker">Primary path</span>
+            <h2>Git workflow labs</h2>
+            <p>For users who already know Codex, VS Code, and SQL: start here and focus on ticket-to-branch-to-PR competence.</p>
+          </div>
+          <span class="path-count">4 Git-focused modules</span>
+        </div>
+      </section>
       ${renderCourseCard(gitModule)}
+      ${renderPracticeCourseCard()}
       ${projectModule ? renderCourseCard(projectModule) : ""}
       ${renderCapstoneCourseCard()}
     </div>
-    <aside class="course-side">
-      <section class="course-section">
-        <h3>Learning paths</h3>
-        <ol class="lab-steps">
-          <li><strong>${escapeHtml(codexLab.title)}</strong><span>Separate Codex lesson and official setup link.</span></li>
-          <li><strong>${escapeHtml(vscodeLab.title)}</strong><span>Brief editor orientation: Explorer, search, terminal, and Source Control.</span></li>
-          <li><strong>${escapeHtml(oracleSqlLab.title)}</strong><span>Interactive Oracle SQL worksheet using repo-shaped CCS files and result grids.</span></li>
-          <li><strong>${escapeHtml(gitModule.title)}</strong><span>Interactive ticket-to-PR mechanics: ADO context, branches, commits, diff review, publishing, and merge readiness.</span></li>
-          <li><strong>${escapeHtml(projectModule?.title || "Project Capsule Workflow")}</strong><span>Project capsule methodology: README, decision-index, workstreams, then branch-based execution.</span></li>
-          <li><strong>${escapeHtml(capstoneLab.title)}</strong><span>Codex-assisted repo review kit with durable notes, lineage, quality checks, and final diff review.</span></li>
-        </ol>
-      </section>
-      <section class="course-section">
-        <h3>Oracle SQL path</h3>
-        <ol class="lab-steps">
-          ${oracleSqlLab.sections.map((section) => `<li>${escapeHtml(section.title)}</li>`).join("")}
-        </ol>
-      </section>
-      <section class="course-section">
-        <h3>Git + ADO steps</h3>
-        <ol class="lab-steps">
-          ${gitModule.labSteps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-        </ol>
-      </section>
-      ${
-        projectModule
-          ? `<section class="course-section">
-              <h3>Longer project steps</h3>
-              <ol class="lab-steps">
-                ${projectModule.labSteps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-              </ol>
-            </section>`
-          : ""
-      }
-      <section class="course-section">
-        <h3>ADO methodologies</h3>
-        <ul class="context-list">
-          <li><strong>Use case 1:</strong> everyday work starts from an ADO ticket and happens on a focused branch.</li>
-          <li><strong>Use case 2:</strong> longer project work starts with a README and decision-index on main, then branches into workstreams.</li>
-          <li><strong>When needed:</strong> add <code>workstreams.md</code> for collaborators or parallel tracks.</li>
-        </ul>
-      </section>
-      <section class="course-section">
-        <h3>Repo review kit</h3>
-        <ul class="context-list">
-          ${capstoneLab.deliverables.map((item) => `<li><code>${escapeHtml(item)}</code></li>`).join("")}
-        </ul>
-      </section>
-      <section class="course-section">
-        <h3>VS Code basics</h3>
-        <ul class="context-list">
-          ${vscodeLab.shortcuts
-            .map(([label, value]) => `<li>${escapeHtml(label)}: <code>${escapeHtml(value)}</code></li>`)
-            .join("")}
-        </ul>
-      </section>
-      <section class="course-section">
-        <h3>Codex access</h3>
-        <ul class="context-list">
-          <li>Official setup page: <a href="${escapeAttribute(codexLab.setupUrl)}" target="_blank" rel="noreferrer">Get started with Codex</a></li>
-          <li>CLI install command: <code>${escapeHtml(codexLab.cliCommand)}</code></li>
-        </ul>
-      </section>
-      <section class="course-section">
-        <h3>Git glossary</h3>
-        ${renderGlossary()}
-      </section>
-      <section class="course-section">
-        <h3>Meeting context</h3>
-        <ul class="context-list">
-          ${(gitModule.meetingContext || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-        </ul>
-      </section>
-      <section class="course-section">
-        <h3>Resources</h3>
-        <ul class="resource-list">
-          ${gitModule.resources
-            .map(([label, href]) => `<li><a href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a></li>`)
-            .join("")}
-        </ul>
-      </section>
+    <aside class="course-side getting-started-side">
+      ${renderGettingStartedCatalog(gitModule, projectModule)}
     </aside>
+  `;
+}
+
+function renderGettingStartedCatalog(gitModule, projectModule) {
+  return `
+    <section class="course-section catalog-intro">
+      <span class="section-kicker">Optional support path</span>
+      <h3>Getting Started</h3>
+      <p>Use these if the learner needs tool or SQL context. Collapse this rail and start the Git path if they already know the basics.</p>
+    </section>
+    <details class="catalog-group" open>
+      <summary>
+        <span>Tools</span>
+        <strong>Codex and VS Code</strong>
+        <em>2 modules</em>
+      </summary>
+      <div class="catalog-card-grid">
+        ${renderCatalogCard({
+          label: "Codex",
+          title: codexLab.title,
+          description: "Setup, login, prompt discipline, safe repo inspection, and reviewable handoff notes.",
+          meta: `${codexLab.time} · ${codexLab.level}`,
+          action: "open-codex-lesson",
+          actionLabel: "Open lesson",
+          secondaryHref: codexLab.setupUrl,
+          secondaryLabel: "Download"
+        })}
+        ${renderCatalogCard({
+          label: "VS Code",
+          title: vscodeLab.title,
+          description: "Explorer, search, terminal, Source Control, diffs, commits, conflicts, and extensions.",
+          meta: `${vscodeLab.time} · ${vscodeLab.level}`,
+          action: "open-vscode-lab",
+          actionLabel: "Open lab",
+          secondaryHref: vscodeLab.setupUrl,
+          secondaryLabel: "Get VS Code"
+        })}
+      </div>
+    </details>
+    <details class="catalog-group" open>
+      <summary>
+        <span>Languages</span>
+        <strong>Oracle SQL</strong>
+        <em>1 module</em>
+      </summary>
+      <div class="catalog-card-grid">
+        ${renderCatalogCard({
+          label: "SQL",
+          title: oracleSqlLab.title,
+          description: "Start with SELECT *, then filter, aggregate, join, and build a review-ready query.",
+          meta: `${oracleSqlLab.time} · ${oracleSqlLab.level}`,
+          action: "open-sql-lab",
+          actionLabel: "Open SQL Lab"
+        })}
+      </div>
+    </details>
+    <details class="catalog-group" open>
+      <summary>
+        <span>Concepts</span>
+        <strong>ADO, Git terms, and repo habits</strong>
+        <em>Reference</em>
+      </summary>
+      <div class="concept-reference-grid">
+        <article>
+          <h4>Git + ADO steps</h4>
+          <ol class="compact-list">
+            ${gitModule.labSteps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ol>
+        </article>
+        ${
+          projectModule
+            ? `<article>
+                <h4>Project workflow</h4>
+                <ol class="compact-list">
+                  ${projectModule.labSteps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+                </ol>
+              </article>`
+            : ""
+        }
+        <article>
+          <h4>ADO methodologies</h4>
+          <ul class="compact-list">
+            <li>Use case 1: ticket -> branch -> PR.</li>
+            <li>Use case 2: project capsule on main, then workstream branches.</li>
+            <li>Add <code>workstreams.md</code> when work has parallel tracks.</li>
+          </ul>
+        </article>
+        <article>
+          <h4>Git glossary</h4>
+          ${renderCompactGlossary()}
+        </article>
+      </div>
+    </details>
+  `;
+}
+
+function renderCatalogCard({ label, title, description, meta, action, actionLabel, secondaryHref, secondaryLabel }) {
+  return `
+    <article class="catalog-card">
+      <div>
+        <span class="catalog-chip">${escapeHtml(label)}</span>
+        <h4>${escapeHtml(title)}</h4>
+        <p>${escapeHtml(description)}</p>
+        <small>${escapeHtml(meta)}</small>
+      </div>
+      <div class="catalog-actions">
+        <button class="text-button" type="button" data-action="${escapeAttribute(action)}">${escapeHtml(actionLabel)}</button>
+        ${
+          secondaryHref
+            ? `<a class="text-button catalog-link" href="${escapeAttribute(secondaryHref)}" target="_blank" rel="noreferrer">${escapeHtml(secondaryLabel)}</a>`
+            : ""
+        }
+      </div>
+    </article>
+  `;
+}
+
+function renderPracticeCourseCard() {
+  return `
+    <article class="course-card practice-course-card">
+      <span class="section-kicker">Practice lab</span>
+      <h2>Git Practice Lab</h2>
+      <p>Use missions, randomized recovery drills, command replay, branch publishing, and merge practice after the guided path is clear.</p>
+      <div class="course-meta">
+        <span class="pill blue">Practice</span>
+        <span class="pill green">30 min</span>
+        <span class="pill gray">Recovery drills</span>
+      </div>
+      <div class="portal-actions">
+        <button class="icon-button primary-button" type="button" data-action="open-simulator">
+          <span aria-hidden="true">P</span>
+          <span>Open practice lab</span>
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+function renderCompactGlossary() {
+  return `
+    <dl class="compact-glossary">
+      ${glossaryTerms
+        .slice(0, 6)
+        .map((item) => `<div><dt>${escapeHtml(item.term)}</dt><dd>${escapeHtml(item.meaning)}</dd></div>`)
+        .join("")}
+    </dl>
   `;
 }
 
@@ -7676,14 +7751,6 @@ function renderCourseCard(module) {
           <span aria-hidden="true">S</span>
           <span>${escapeHtml(module.startLabel || "Start Lesson")}</span>
         </button>
-        ${
-          module.id === "git-basics"
-            ? `<button class="icon-button secondary" type="button" data-action="open-simulator">
-                <span aria-hidden="true">L</span>
-                <span>Open Git practice lab</span>
-              </button>`
-            : ""
-        }
       </div>
     </article>
   `;

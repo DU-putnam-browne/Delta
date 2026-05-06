@@ -477,6 +477,52 @@ button:active {
   gap: 16px;
 }
 
+.primary-course-stack {
+  align-content: start;
+}
+
+.path-section {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.path-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.path-section-header h2 {
+  margin: 5px 0 7px;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+}
+
+.path-section-header p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.path-count {
+  flex: 0 0 auto;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #07111f;
+  background: var(--mint);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
 .course-card,
 .course-side {
   border: 1px solid var(--line);
@@ -610,6 +656,13 @@ button:active {
     var(--surface);
 }
 
+.practice-course-card {
+  border-top-color: var(--green);
+  background:
+    linear-gradient(135deg, rgba(195, 244, 230, 0.24), rgba(255, 179, 11, 0.08) 54%),
+    var(--surface);
+}
+
 .sql-course-card {
   border-top-color: var(--green);
   background:
@@ -676,6 +729,12 @@ button:active {
   border-top-color: var(--navy);
 }
 
+.getting-started-side {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
 .course-side h3 {
   margin: 0 0 10px;
   font-size: 1rem;
@@ -687,6 +746,166 @@ button:active {
   margin-top: 18px;
   padding-top: 18px;
   border-top: 1px solid var(--line);
+}
+
+.catalog-intro {
+  margin: 0;
+}
+
+.catalog-intro p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.catalog-group {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  overflow: hidden;
+}
+
+.catalog-group + .catalog-group {
+  margin: 0;
+}
+
+.catalog-group summary {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.25fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.catalog-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.catalog-group summary span {
+  color: var(--blue);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.catalog-group summary strong {
+  min-width: 0;
+  color: var(--ink);
+  font-family: Rubik, Arial, sans-serif;
+  line-height: 1.15;
+}
+
+.catalog-group summary em {
+  justify-self: end;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.catalog-card-grid,
+.concept-reference-grid {
+  display: grid;
+  gap: 10px;
+  padding: 0 10px 10px;
+}
+
+.catalog-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--surface);
+}
+
+.catalog-chip {
+  display: inline-flex;
+  width: max-content;
+  min-height: 22px;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #07111f;
+  background: var(--mint);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.catalog-card h4,
+.concept-reference-grid h4 {
+  margin: 6px 0 5px;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  font-size: 0.98rem;
+}
+
+.catalog-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.38;
+}
+
+.catalog-card small {
+  display: inline-block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.catalog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.catalog-link {
+  text-decoration: none;
+}
+
+.concept-reference-grid article {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--surface);
+}
+
+.compact-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.compact-glossary {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.compact-glossary div {
+  display: grid;
+  gap: 2px;
+}
+
+.compact-glossary dt {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.compact-glossary dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.32;
 }
 
 .outcome-list,
@@ -5302,6 +5521,20 @@ button.repo-tree-file {
 
   .section-header {
     display: grid;
+  }
+
+  .path-section-header,
+  .catalog-group summary {
+    grid-template-columns: 1fr;
+  }
+
+  .path-section-header {
+    display: grid;
+  }
+
+  .path-count,
+  .catalog-group summary em {
+    justify-self: start;
   }
 
   .practice-mission-header,
