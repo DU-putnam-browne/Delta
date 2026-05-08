@@ -1,0 +1,20 @@
+{
+  "name": "fabric-learning-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static Microsoft Fabric training lab for Delta Utilities analyst and IT users.",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "serve": "node scripts/serve.mjs",
+    "check": "node scripts/check-static-site.mjs"
+  },
+  "keywords": [
+    "fabric",
+    "training",
+    "delta-utilities",
+    "pyspark",
+    "static-site"
+  ],
+  "license": "UNLICENSED"
+}
