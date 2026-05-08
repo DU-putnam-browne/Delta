@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fabric Learning Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-title">
+          <img src="assets/delta-utilities-logo.png" alt="Delta Utilities" />
+          <div>
+            <p class="eyebrow">Data and Analytics Enablement</p>
+            <h1>Practice the Delta Utilities Fabric workflow</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-button secondary" type="button" data-action="home" title="Return to the course overview">
+            <span aria-hidden="true">H</span>
+            <span>Home</span>
+          </button>
+          <button class="theme-toggle" id="themeToggle" type="button" data-action="toggle-theme" aria-pressed="false" title="Switch to dark mode">
+            <span class="theme-switch" aria-hidden="true">
+              <span class="theme-switch-thumb"></span>
+            </span>
+            <span id="themeLabel">Dark</span>
+          </button>
+          <button class="icon-button secondary" type="button" data-action="reset" title="Reset the lab">
+            <span aria-hidden="true">R</span>
+            <span>Reset</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="portal-view" id="portalView" aria-label="Course overview"></section>
+
+      <section class="status-strip" id="statusStrip" aria-live="polite"></section>
+
+      <div class="main-grid" id="labView">
+        <aside class="lesson-panel" aria-label="Learning modules">
+          <div class="panel-heading">
+            <span class="section-kicker">Learning path</span>
+            <strong id="lessonProgress">0 of 6 complete</strong>
+          </div>
+          <nav class="lesson-list" id="lessonList"></nav>
+          <div class="lesson-detail" id="lessonDetail"></div>
+        </aside>
+
+        <main class="lab-panel">
+          <section class="workspace-panel" aria-label="Fabric workspace map">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Fabric workspace</span>
+                <h2 id="workspaceTitle">The Lake operating map</h2>
+              </div>
+              <span id="workspaceMeta" class="terminal-note">Static simulator</span>
+            </div>
+            <div class="workspace-map" id="workspaceMap"></div>
+          </section>
+
+          <section class="medallion-panel" aria-label="Lakehouse medallion flow">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Lakehouse flow</span>
+                <h2>Bronze to Silver to Gold</h2>
+              </div>
+              <button class="text-button" type="button" data-action="advance-flow">Advance flow</button>
+            </div>
+            <div class="medallion-flow" id="medallionFlow"></div>
+          </section>
+
+          <section class="notebook-panel" aria-label="Notebook simulator">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Notebook simulator</span>
+                <h2 id="notebookTitle">Run safe example cells</h2>
+              </div>
+              <span class="terminal-note" id="notebookStatus">No Fabric calls are made</span>
+            </div>
+            <div class="notebook-tabs" id="notebookTabs"></div>
+            <div class="notebook-card" id="notebookCard"></div>
+          </section>
+
+          <section class="scenario-panel" aria-label="Source and capstone scenarios">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Scenario builder</span>
+                <h2>Map source to governed output</h2>
+              </div>
+              <button class="text-button" type="button" data-action="complete-module">Mark module complete</button>
+            </div>
+            <div id="scenarioBoard"></div>
+          </section>
+        </main>
+
+        <aside class="quiz-panel" aria-label="Knowledge checks">
+          <div class="panel-heading">
+            <span class="section-kicker">Knowledge checks</span>
+            <strong id="quizScore" class="quiz-score" aria-live="polite">Correct 0 | Missed 0</strong>
+          </div>
+          <div id="quizList"></div>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>

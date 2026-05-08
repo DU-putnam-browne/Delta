@@ -1,0 +1,12 @@
+# Local dependency installs are not required for this static app.
+node_modules/
+
+# Local runtime noise.
+.DS_Store
+Thumbs.db
+*.log
+
+# Keep screenshots and scratch exports out of the training lab unless intentionally documented.
+screenshots/
+tmp/
+temp/

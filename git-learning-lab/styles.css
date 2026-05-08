@@ -886,6 +886,10 @@ button:active {
   display: none;
 }
 
+.git-workspace .repo-flow {
+  display: none;
+}
+
 .codex-workspace .repo-directory-panel {
   display: none;
 }
