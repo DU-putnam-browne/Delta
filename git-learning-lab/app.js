@@ -1,4 +1,4 @@
-const STORAGE_KEY = "git-learning-lab-state-v5";
+const STORAGE_KEY = "git-learning-lab-state-v6";
 const THEME_KEY = "git-learning-lab-theme";
 const PS_ROOT = "C:\\Training";
 const PS_PROMPT = "PS C:\\Training\\OracleGitLab>";
@@ -24,6 +24,8 @@ const oracleLab = {
   featureCommitMessage: "Add emergency orders ZIP report"
 };
 
+const ADO_REPO_URL = "https://dev.azure.com/deltautilities-it/Data%20and%20Analytics%20Projects/_git/Oracle";
+const CLONED_REPO_FOLDER = "Oracle";
 const ORACLE_REPO_ROOT = "C:\\Repositories\\Oracle";
 
 const projectLab = {
@@ -168,7 +170,9 @@ const modules = [
     description:
       "Start from an ADO-style request, make a scoped branch change, review the diff, publish the branch, and understand what the PR must prove.",
     outcomes: [
+      "Clone and inspect an ADO-hosted repo safely",
       "Anchor work to a ticket",
+      "Pull latest main before branching",
       "Use a safe task branch",
       "Read status and history",
       "Review the diff before committing",
@@ -182,20 +186,18 @@ const modules = [
     ],
     resources: [["Git Docs", "https://git-scm.com/docs"]],
     labTitle: "Ticket-to-PR scenario",
-    labSteps: ["Ticket context", "Init repo", "Commit context", "Branch", "Diff review", "Publish", "PR gate"],
+    labSteps: ["Clone repo", "Inspect remote", "Pull main", "Branch", "Diff review", "Publish", "PR gate"],
     meetingContext: [
-      "Default workflow: ticket -> branch -> diff review -> focused commit -> publish -> PR.",
+      "Default workflow: clone -> inspect remote -> pull main -> branch -> diff review -> focused commit -> publish -> PR.",
       "Demo request: CCS emergency orders by ZIP for the prior completed Monday-Sunday week.",
       "Good habits: small branch, honest validation notes, clear reviewer focus."
     ],
     commands: [
-      { cmd: `mkdir ${oracleLab.folder}`, desc: "Creates a training folder for the Oracle workflow demo" },
-      { cmd: `cd ${oracleLab.folder}`, desc: "Moves into the Oracle workflow demo folder" },
-      { cmd: "git init", desc: "Initializes a new Git repository" },
-      { cmd: `"${oracleLab.firstFileContent}" | Out-File README.md`, desc: "Captures the ADO ticket context in a README" },
+      { cmd: `git clone ${ADO_REPO_URL}`, desc: "Clones the Oracle repo from Azure DevOps" },
+      { cmd: `cd ${CLONED_REPO_FOLDER}`, desc: "Moves into the cloned Oracle repo" },
+      { cmd: "git remote -v", desc: "Confirms the origin remote points to Azure DevOps" },
       { cmd: "git status", desc: "Shows current file changes" },
-      { cmd: "git add README.md", desc: "Stages the ticket context for commit" },
-      { cmd: `git commit -m "${oracleLab.firstCommitMessage}"`, desc: "Creates the first traceable checkpoint on main" },
+      { cmd: "git pull", desc: "Confirms local main is current before branching" },
       { cmd: `git switch -c ${oracleLab.branchName}`, desc: "Creates and switches to the task branch" },
       { cmd: `edit ${oracleLab.featureFile}`, desc: "Adds the demo SQL file on the task branch" },
       { cmd: "git status", desc: "Shows the branch-specific SQL change" },
@@ -212,6 +214,12 @@ const modules = [
         options: ["ADO ticket", "Random local file", "Chat memory", "An unnamed branch"],
         answer: "ADO ticket",
         feedback: "The ticket keeps the business request and review context visible."
+      },
+      {
+        question: "What does git clone give you first?",
+        options: ["Files, history, and the origin remote", "Only an empty folder", "A pull request", "A merged main branch"],
+        answer: "Files, history, and the origin remote",
+        feedback: "git clone copies the repo content and history and wires the default remote named origin."
       },
       {
         question: "What does git add do?",
@@ -236,6 +244,12 @@ const modules = [
         options: ["Safer review", "Hide the work", "Skip validation", "Replace ADO"],
         answer: "Safer review",
         feedback: "Branches keep work isolated so review and handoff are easier."
+      },
+      {
+        question: "Why run git pull before creating the branch?",
+        options: ["Start from current main", "Delete the remote", "Skip the diff", "Create a merge conflict"],
+        answer: "Start from current main",
+        feedback: "Pulling first reduces stale-branch risk and keeps the new branch anchored to the latest main."
       },
       {
         question: "What happens in this lab's fast-forward merge?",
@@ -2357,45 +2371,33 @@ const conflictScenarios = [
 const commandProcessSteps = [
   {
     area: "workspace",
-    label: "Workspace",
-    title: "Create the project folder",
-    detail: "PowerShell creates a normal folder before Git is involved."
+    label: "Clone",
+    title: "Clone the ADO repo",
+    detail: "git clone brings down the current files, history, and default origin remote."
   },
   {
     area: "shell",
     label: "Shell location",
-    title: "Move into the folder",
-    detail: "The prompt changes so commands run inside the training project."
+    title: "Move into the repo",
+    detail: "The prompt changes so commands run inside the cloned Oracle repository."
   },
   {
-    area: "repository",
-    label: "Repository",
-    title: "Initialize Git metadata",
-    detail: "Git creates the hidden .git store that makes the folder a repository."
-  },
-  {
-    area: "working",
-    label: "Working tree",
-    title: "Capture ticket context",
-    detail: "The README records the ADO-style request before any SQL asset is added."
+    area: "remote",
+    label: "Remote",
+    title: "Inspect origin",
+    detail: "git remote -v shows where fetch and push traffic will go."
   },
   {
     area: "status",
     label: "Inspection",
-    title: "Inspect open changes",
-    detail: "git status compares the working tree, staging area, and latest commit."
+    title: "Check repo state",
+    detail: "git status confirms you started from a clean main branch."
   },
   {
-    area: "staging",
-    label: "Staging area",
-    title: "Stage the ticket context",
-    detail: "git add prepares the README snapshot for the first traceable commit."
-  },
-  {
-    area: "history",
-    label: "Commit history",
-    title: "Create a checkpoint",
-    detail: "git commit writes the staged snapshot into repository history."
+    area: "remote",
+    label: "Pull latest",
+    title: "Refresh main",
+    detail: "git pull confirms the branch is current before new work starts."
   },
   {
     area: "branch",
@@ -2443,7 +2445,7 @@ const commandProcessSteps = [
     area: "branch",
     label: "HEAD switch",
     title: "Return to main",
-    detail: "HEAD moves back to main, which still points at the first commit."
+    detail: "HEAD moves back to main, which still points at the baseline commit."
   },
   {
     area: "merge",
@@ -2592,7 +2594,7 @@ function createInitialState() {
 
 function createTrainingState(moduleId = "git-basics") {
   return {
-    schemaVersion: 5,
+    schemaVersion: 6,
     inLesson: true,
     viewMode: "guided",
     activeModuleId: moduleId,
@@ -2635,7 +2637,8 @@ function createTrainingState(moduleId = "git-basics") {
       }
     ],
     pendingMerge: null,
-    conflict: null
+    conflict: null,
+    remoteUrl: ADO_REPO_URL
   };
 }
 
@@ -2794,8 +2797,8 @@ function createTaskFlags() {
   };
 }
 
-function createAdvancedState() {
-  const baseFiles = {
+function getOracleRepoBaselineFiles() {
+  return {
     "README.md": "# Oracle repository\n\nTraining snapshot modeled on the Oracle repo structure.\n",
     "AGENTS.md": "# Oracle repo guidance\n\nUse repo-local conventions and keep changes reviewable.\n",
     ".azuredevops/pull_request_template.md": "# Pull Request\n\n## Summary\n## Validation\n## Reviewer focus\n",
@@ -2818,9 +2821,13 @@ function createAdvancedState() {
     "wacs/sql/work_orders/wacs_work_orders_open_work_orders.sql":
       "select work_order_id, project_number, status\nfrom wacs_work_orders.open_work_orders;\n"
   };
+}
+
+function createAdvancedState() {
+  const baseFiles = getOracleRepoBaselineFiles();
 
   return {
-    schemaVersion: 5,
+    schemaVersion: 6,
     inLesson: true,
     viewMode: "practice",
     activeModuleId: "git-basics",
@@ -3025,6 +3032,11 @@ function bindEvents() {
       return;
     }
 
+    if (event.key === "Tab" && isHowToModalOpen()) {
+      trapModalFocus(event);
+      return;
+    }
+
     if (event.key !== "Enter" && event.key !== " ") {
       return;
     }
@@ -3036,10 +3048,10 @@ function bindEvents() {
       return;
     }
 
-    const lessonButton = event.target.closest("[data-lesson][role='button']");
-    if (lessonButton) {
+    const roleButton = event.target.closest("[role='button']");
+    if (roleButton && !roleButton.closest("button")) {
       event.preventDefault();
-      handleLessonSelection(lessonButton);
+      roleButton.click();
     }
   });
 
@@ -3092,6 +3104,24 @@ function submitTerminalCommand() {
   input.focus();
 }
 
+function focusCommandInput() {
+  const input = document.getElementById("commandInput");
+  if (!input || input.closest("[hidden]")) {
+    return;
+  }
+  input.focus({ preventScroll: true });
+  input.setSelectionRange(input.value.length, input.value.length);
+}
+
+function queuePrimaryInputFocus() {
+  if (typeof window === "undefined" || isHowToModalOpen()) {
+    return;
+  }
+  window.setTimeout(() => {
+    focusCommandInput();
+  }, 0);
+}
+
 function handleLessonSelection(lessonButton) {
   const lessonIndex = Number(lessonButton.dataset.lesson);
   const expandedLessonIndex = getExpandedLessonIndex();
@@ -3100,6 +3130,7 @@ function handleLessonSelection(lessonButton) {
     lessonButton.dataset.lessonToggle === "true" && expandedLessonIndex === lessonIndex ? -1 : lessonIndex;
   saveState();
   render();
+  queuePrimaryInputFocus();
 }
 
 function navigateGuidedLesson(delta) {
@@ -3265,8 +3296,10 @@ function openHowToModal() {
   }
 
   renderHowToModalContent();
+  modal.dataset.lastFocus = document.activeElement?.id || document.activeElement?.dataset?.action || "";
   modal.hidden = false;
   document.body.classList.add("modal-open");
+  setAppShellModalState(true);
   modal.querySelector("button[data-action='close-how-to']")?.focus({ preventScroll: true });
   window.setTimeout(() => {
     modal.querySelector("button[data-action='close-how-to']")?.focus({ preventScroll: true });
@@ -3281,12 +3314,58 @@ function closeHowToModal() {
 
   modal.hidden = true;
   document.body.classList.remove("modal-open");
+  setAppShellModalState(false);
   document.querySelector("[data-action='open-how-to']")?.focus();
 }
 
 function isHowToModalOpen() {
   const modal = document.getElementById("howToModal");
   return Boolean(modal && !modal.hidden);
+}
+
+function setAppShellModalState(active) {
+  const shell = document.querySelector(".app-shell");
+  if (!shell) {
+    return;
+  }
+
+  if (active) {
+    shell.setAttribute("inert", "");
+    shell.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  shell.removeAttribute("inert");
+  shell.removeAttribute("aria-hidden");
+}
+
+function trapModalFocus(event) {
+  const modal = document.getElementById("howToModal");
+  if (!modal || modal.hidden) {
+    return;
+  }
+
+  const focusable = [...modal.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")]
+    .filter((node) => !node.disabled && !node.hidden);
+  if (!focusable.length) {
+    event.preventDefault();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const current = document.activeElement;
+
+  if (event.shiftKey && current === first) {
+    event.preventDefault();
+    last.focus();
+    return;
+  }
+
+  if (!event.shiftKey && current === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function renderHowToModalContent() {
@@ -3409,6 +3488,11 @@ function getGuidedGitHowToContent() {
           ? "Enter the next command in the PowerShell terminal. The repository graph, file explorer, and PR gate update from that command."
           : "The guided command list is complete. Use the graph and PR gate to explain what changed.",
         command: expected?.cmd || "git log --oneline"
+      },
+      {
+        title: "Start from the remote repo",
+        body: "This lesson now begins with clone, remote inspection, and pull-before-branching so the workflow mirrors Azure DevOps repo work.",
+        command: "git remote -v"
       },
       {
         title: "Use inspection commands",
@@ -3880,6 +3964,7 @@ function handleAction(button) {
     state = createTrainingState(button.dataset.moduleId || "git-basics");
     saveState();
     render();
+    queuePrimaryInputFocus();
     return;
   }
 
@@ -3887,6 +3972,7 @@ function handleAction(button) {
     state = createAdvancedState();
     saveState();
     render();
+    queuePrimaryInputFocus();
     return;
   }
 
@@ -3894,6 +3980,7 @@ function handleAction(button) {
     state = createCodexState();
     saveState();
     render();
+    queuePrimaryInputFocus();
     return;
   }
 
@@ -3908,6 +3995,7 @@ function handleAction(button) {
     state = createVSCodeState();
     saveState();
     render();
+    queuePrimaryInputFocus();
     return;
   }
 
@@ -3915,6 +4003,7 @@ function handleAction(button) {
     state = createSqlState();
     saveState();
     render();
+    queuePrimaryInputFocus();
     return;
   }
 
@@ -3942,6 +4031,7 @@ function handleAction(button) {
                 : createInitialState();
     saveState();
     render();
+    queuePrimaryInputFocus();
     return;
   }
 
@@ -4158,6 +4248,7 @@ function runCommand(rawCommand) {
     state.terminal = [];
     saveState();
     render();
+    announceStatus("Terminal cleared.");
     return;
   }
 
@@ -4185,6 +4276,7 @@ function runCommand(rawCommand) {
       appendTerminal("error", `Wrong command. Expected: ${expected.cmd}`);
       saveState();
       render();
+      announceStatus(`Incorrect command. Expected ${expected.cmd}.`);
       return;
     }
 
@@ -4193,6 +4285,7 @@ function runCommand(rawCommand) {
       appendTerminal(result.type, result.text);
       saveState();
       render();
+      announceStatus(result.text);
       return;
     }
 
@@ -4204,6 +4297,7 @@ function runCommand(rawCommand) {
     maybeAdvanceLesson();
     saveState();
     render();
+    announceStatus(result.text || expected.desc);
     return;
   }
 
@@ -4216,6 +4310,7 @@ function runCommand(rawCommand) {
   }
   saveState();
   render();
+  announceStatus(result.text);
 }
 
 function isWizardModeCommand(command) {
@@ -6541,6 +6636,8 @@ function executeCommand(command) {
       text:
         [
           "Supported commands:",
+          `  git clone ${ADO_REPO_URL}`,
+          "  git remote -v",
           "  git status",
           "  git diff | git diff --stat | git diff --staged",
           "  git add <file> | git add .",
@@ -6587,8 +6684,12 @@ function executeCommand(command) {
   }
 
   switch (lower[1]) {
+    case "clone":
+      return commandClone(tokens.slice(2));
     case "init":
       return commandInit();
+    case "remote":
+      return commandRemote(tokens.slice(2));
     case "status":
       return commandStatus();
     case "diff":
@@ -6664,6 +6765,64 @@ function commandInit() {
   state.nextCommit = 0;
 
   return { type: "success", text: "Initialized empty Git repository in .git/" };
+}
+
+function commandClone(args) {
+  const remoteUrl = args[0];
+  if (!remoteUrl) {
+    return { type: "error", text: "Specify the Azure DevOps clone URL." };
+  }
+
+  if (state.initialized) {
+    return { type: "note", text: `Repository already cloned. Use cd ${CLONED_REPO_FOLDER} and inspect the existing repo.` };
+  }
+
+  const baseFiles = getOracleRepoBaselineFiles();
+  const rootCommit = {
+    id: "c000",
+    message: "Oracle repo baseline snapshot",
+    parents: [],
+    files: clone(baseFiles),
+    branch: "main",
+    lane: 0,
+    order: 0
+  };
+
+  if (!state.folders.includes(CLONED_REPO_FOLDER)) {
+    state.folders.push(CLONED_REPO_FOLDER);
+  }
+
+  state.initialized = true;
+  state.currentBranch = "main";
+  state.branches = { main: rootCommit.id };
+  state.branchLanes = { main: 0 };
+  state.remoteBranches = { "origin/main": rootCommit.id };
+  state.remoteUrl = remoteUrl;
+  state.indexFiles = clone(baseFiles);
+  state.workingFiles = clone(baseFiles);
+  state.commits = [rootCommit];
+  state.nextCommit = 1;
+  state.selectedCommitId = rootCommit.id;
+  state.pendingMerge = null;
+  state.conflict = null;
+  return { type: "success", text: `Cloned Oracle into ${CLONED_REPO_FOLDER} and configured origin.` };
+}
+
+function commandRemote(args) {
+  if (!state.initialized) {
+    return { type: "error", text: "fatal: not a git repository. Clone or initialize a repo first." };
+  }
+
+  const subcommand = (args[0] || "-v").toLowerCase();
+  if (subcommand !== "-v") {
+    return { type: "error", text: "This lab supports git remote -v." };
+  }
+
+  const remoteUrl = state.remoteUrl || ADO_REPO_URL;
+  return {
+    type: "success",
+    text: [`origin\t${remoteUrl} (fetch)`, `origin\t${remoteUrl} (push)`].join("\n")
+  };
 }
 
 function commandOutFile(outFile) {
@@ -6782,7 +6941,12 @@ function commandAdd(paths) {
     return { type: "error", text: "No matching files found in the working tree." };
   }
 
-  selected.forEach((name) => {
+  const changed = selected.filter((name) => state.workingFiles[name] !== state.indexFiles[name]);
+  if (!changed.length) {
+    return { type: "note", text: "No changes to stage. The working tree already matches the index." };
+  }
+
+  changed.forEach((name) => {
     if (state.workingFiles[name] === undefined) {
       delete state.indexFiles[name];
     } else {
@@ -6793,7 +6957,7 @@ function commandAdd(paths) {
   state.taskFlags.staged = getStatus().staged.length > 0 || state.taskFlags.staged;
   return {
     type: "success",
-    text: `Staged ${selected.length} file${selected.length === 1 ? "" : "s"}: ${selected.join(", ")}`
+    text: `Staged ${changed.length} file${changed.length === 1 ? "" : "s"}: ${changed.join(", ")}`
   };
 }
 
@@ -7295,7 +7459,7 @@ function previewDiffLines(content, marker) {
 
 function expandPaths(paths) {
   if (paths.includes(".") || paths.includes("-A") || paths.includes("--all")) {
-    return uniqueSorted(Object.keys(state.workingFiles));
+    return uniqueSorted([...Object.keys(state.workingFiles), ...Object.keys(state.indexFiles)]);
   }
 
   return uniqueSorted(
@@ -7705,10 +7869,13 @@ function renderResumeWorkItemPanel(gitModule) {
         <span class="section-kicker">Recommended next work item</span>
         <h2>Build the core ticket-to-PR workflow first</h2>
         <p>
-          Start with the core job workflow: understand the ticket, branch safely, review the diff, publish the branch,
-          and know what belongs in the PR before merge.
+          Start with the core job workflow: clone the repo, confirm origin, pull latest main, branch safely, review the
+          diff, publish the branch, and know what belongs in the PR before merge.
         </p>
         <div class="resume-work-track" aria-label="Recommended sequence">
+          <span>Clone</span>
+          <span>Remote</span>
+          <span>Pull</span>
           <span>Ticket</span>
           <span>Branch</span>
           <span>Diff</span>
@@ -10874,8 +11041,13 @@ function renderTerminal() {
   const output = document.getElementById("terminalOutput");
   const history = document.getElementById("terminalHistory");
   const form = document.getElementById("commandForm");
+  const runButton = form?.querySelector('button[data-action="run-command"]');
   if (form) {
     form.hidden = false;
+  }
+  if (runButton) {
+    runButton.tabIndex = -1;
+    runButton.setAttribute("aria-hidden", "true");
   }
   renderTerminalHeader();
   document.getElementById("promptLabel").textContent = getPrompt();
@@ -11312,9 +11484,11 @@ function handleQuizAnswer(quizId, optionIndex) {
   render();
 
   if (!isCorrect) {
+    announceStatus(`Incorrect. ${getQuizHintText(quiz)}`);
     return;
   }
 
+  announceStatus(`Correct. ${quiz.feedback || "Keep going."}`);
   scheduleQuizCompletion(quizId);
 }
 
@@ -11336,6 +11510,7 @@ function showQuizHint(quizId) {
     typed: quiz.type !== "choice" && round === 2 && quiz.type === "fill" ? "" : attempt.typed || "",
     showHint: true
   };
+  announceStatus(`Hint shown. ${getQuizHintText(quiz)}`);
 }
 
 function handleQuizTextAnswer(quizId, value) {
@@ -11371,8 +11546,12 @@ function handleQuizTextAnswer(quizId, value) {
   render();
 
   if (isCorrect) {
+    announceStatus(`Correct. ${quiz.feedback || "Keep going."}`);
     scheduleQuizCompletion(quizId);
+    return;
   }
+
+  announceStatus(`Incorrect. ${getQuizHintText(quiz)}`);
 }
 
 function isQuizTextCorrect(quiz, value) {
@@ -11646,6 +11825,18 @@ function guidedCommandMatchesExpected(command, expected) {
     return true;
   }
 
+  if (expectedNormalized === "git pull" && normalized.startsWith("git pull")) {
+    return true;
+  }
+
+  if (expectedNormalized === "git remote -v" && normalized.startsWith("git remote")) {
+    return true;
+  }
+
+  if (expectedNormalized.startsWith("git clone ") && normalized.startsWith("git clone ")) {
+    return true;
+  }
+
   return false;
 }
 
@@ -11715,6 +11906,28 @@ function appendTerminal(type, text) {
   if (state.terminal.length > 80) {
     state.terminal = state.terminal.slice(-80);
   }
+}
+
+function announceStatus(text) {
+  const region = document.getElementById("appAnnouncement");
+  if (!region) {
+    return;
+  }
+
+  region.textContent = "";
+  const message = String(text || "").trim();
+  if (!message) {
+    return;
+  }
+
+  if (typeof window !== "undefined" && typeof window.setTimeout === "function") {
+    window.setTimeout(() => {
+      region.textContent = message;
+    }, 0);
+    return;
+  }
+
+  region.textContent = message;
 }
 
 function headId() {
@@ -11808,11 +12021,12 @@ function loadState() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (parsed.schemaVersion === 5 && parsed.commits && parsed.branches) {
+      if (parsed.schemaVersion === 6 && parsed.commits && parsed.branches) {
         parsed.taskFlags = parsed.taskFlags || createTaskFlags();
         parsed.cwd = parsed.cwd || PS_ROOT;
         parsed.folders = parsed.folders || [];
         parsed.initialized = Boolean(parsed.initialized);
+        parsed.remoteUrl = parsed.remoteUrl || ADO_REPO_URL;
         parsed.activeModuleId = parsed.activeModuleId || "git-basics";
         parsed.guidedStep = parsed.guidedStep || 0;
         parsed.inLesson = Boolean(parsed.inLesson);

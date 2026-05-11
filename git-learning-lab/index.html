@@ -8,6 +8,8 @@
     <script defer src="app.js?v=20260506-learning-catalog"></script>
   </head>
   <body>
+    <a class="skip-link" href="#labView">Skip to active lab</a>
+    <div id="appAnnouncement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
     <div class="app-shell">
       <header class="topbar">
         <div class="brand-title">
@@ -100,7 +102,7 @@
                 <label class="sr-only" for="commandInput">Git command</label>
                 <span aria-hidden="true" id="promptLabel">&gt;</span>
                 <input id="commandInput" name="command" autocomplete="off" spellcheck="false" placeholder='Try: git status' />
-                <button type="button" data-action="run-command">Run command</button>
+                <button type="button" data-action="run-command" tabindex="-1" aria-hidden="true">Run command</button>
               </form>
             </div>
           </section>
