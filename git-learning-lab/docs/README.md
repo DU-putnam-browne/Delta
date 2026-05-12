@@ -10,6 +10,7 @@ Use these docs to run, teach, maintain, and release the Git Learning Lab.
 | `REPO_SETUP.md` | The folder needs to become or move to a standalone GitHub repo |
 | `TROUBLESHOOTING.md` | The app does not open or local state behaves oddly |
 | `RELEASE_CHECKLIST.md` | The repo is being prepared for sharing or publishing |
+| `SESSION_HANDOFF.md` | The next work session needs current repo state, recent changes, and open priorities |
 
 ## Operating Principle
 

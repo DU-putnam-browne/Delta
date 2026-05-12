@@ -7693,20 +7693,27 @@ function renderPortal() {
   document.getElementById("portalView").innerHTML = `
     ${renderResumeWorkItemPanel(gitModule)}
     <div class="course-stack primary-course-stack">
-      <section class="path-section">
-        <div class="path-section-header">
-          <div>
-            <span class="section-kicker">Primary path</span>
-            <h2>Git workflow labs</h2>
-            <p>For users who already know Codex, VS Code, and SQL: start here and focus on ticket-to-branch-to-PR competence.</p>
+      <details class="git-learning-group" open>
+        <summary>
+          <div class="path-section-header">
+            <div>
+              <span class="section-kicker">Primary path</span>
+              <h2>Git workflow labs</h2>
+              <p>For users who already know Codex, VS Code, and SQL: start here and focus on ticket-to-branch-to-PR competence.</p>
+            </div>
+            <div class="git-learning-summary-meta">
+              <span class="path-count">4 Git-focused modules</span>
+              <span class="git-learning-toggle-label">Show labs</span>
+            </div>
           </div>
-          <span class="path-count">4 Git-focused modules</span>
+        </summary>
+        <div class="git-learning-panel">
+          ${renderCourseCard(gitModule)}
+          ${renderPracticeCourseCard()}
+          ${projectModule ? renderCourseCard(projectModule) : ""}
+          ${renderCapstoneCourseCard()}
         </div>
-      </section>
-      ${renderCourseCard(gitModule)}
-      ${renderPracticeCourseCard()}
-      ${projectModule ? renderCourseCard(projectModule) : ""}
-      ${renderCapstoneCourseCard()}
+      </details>
     </div>
     <aside class="course-side getting-started-side">
       ${renderGettingStartedCatalog(gitModule, projectModule)}

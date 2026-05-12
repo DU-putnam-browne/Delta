@@ -507,6 +507,60 @@ button:active {
   box-shadow: var(--shadow);
 }
 
+.git-learning-group {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.git-learning-group summary {
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.git-learning-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.git-learning-summary-meta {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.git-learning-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.git-learning-toggle-label::before {
+  content: "▾";
+  color: var(--blue);
+  font-size: 0.9rem;
+}
+
+.git-learning-group:not([open]) .git-learning-toggle-label::before {
+  content: "▸";
+}
+
+.git-learning-group:not([open]) .git-learning-toggle-label {
+  color: var(--blue);
+}
+
+.git-learning-panel {
+  display: grid;
+  gap: 16px;
+  padding: 0 16px 16px;
+}
+
 .path-section-header {
   display: flex;
   align-items: flex-start;
@@ -1055,6 +1109,7 @@ button:active {
 .main-grid {
   display: grid;
   grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
+  grid-template-areas: "lesson lab quiz";
   gap: clamp(10px, 1.1vw, 16px);
   align-items: start;
 }
@@ -1068,20 +1123,33 @@ button:active {
   grid-template-columns: 1fr;
 }
 
+.main-grid.git-workspace,
 .main-grid.codex-workspace {
-  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+  grid-template-areas:
+    "lab lab"
+    "lesson quiz";
 }
 
 .main-grid.vscode-workspace {
-  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+  grid-template-areas:
+    "lab lab"
+    "lesson quiz";
 }
 
 .main-grid.sql-workspace {
-  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+  grid-template-areas:
+    "lab lab"
+    "lesson quiz";
 }
 
 .main-grid.capstone-workspace {
-  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(260px, 340px);
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  grid-template-areas:
+    "lab lab"
+    "lesson quiz";
 }
 
 .practice-workspace .lesson-panel,
@@ -1133,12 +1201,51 @@ button:active {
   display: none;
 }
 
+.git-workspace .lab-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+  grid-template-areas:
+    "terminal repo"
+    "guided guided";
+  align-items: start;
+}
+
+.git-workspace .terminal-panel {
+  grid-area: terminal;
+}
+
+.git-workspace .repo-directory-panel {
+  grid-area: repo;
+}
+
+.git-workspace .guided-panel {
+  grid-area: guided;
+}
+
 .codex-workspace .repo-directory-panel {
   display: none;
 }
 
 .codex-workspace .repo-flow {
   display: none;
+}
+
+.codex-workspace .lab-panel,
+.capstone-workspace .lab-panel {
+  display: grid;
+  grid-template-areas:
+    "terminal"
+    "guided";
+}
+
+.codex-workspace .terminal-panel,
+.capstone-workspace .terminal-panel {
+  grid-area: terminal;
+}
+
+.codex-workspace .guided-panel,
+.capstone-workspace .guided-panel {
+  grid-area: guided;
 }
 
 .capstone-workspace .repo-directory-panel,
@@ -1167,6 +1274,18 @@ button:active {
 .quiz-panel,
 .lab-panel {
   border-top: 5px solid var(--navy);
+}
+
+.lesson-panel {
+  grid-area: lesson;
+}
+
+.lab-panel {
+  grid-area: lab;
+}
+
+.quiz-panel {
+  grid-area: quiz;
 }
 
 .lesson-panel,
@@ -5359,15 +5478,19 @@ button.repo-tree-file {
 
 @media (max-width: 1500px) {
   .main-grid,
+  .main-grid.git-workspace,
   .main-grid.codex-workspace,
   .main-grid.capstone-workspace,
   .main-grid.vscode-workspace,
   .main-grid.sql-workspace {
-    grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "lab"
+      "lesson"
+      "quiz";
   }
 
   .quiz-panel {
-    grid-column: 1 / -1;
     position: static;
   }
 
@@ -5474,6 +5597,7 @@ button.repo-tree-file {
   }
 
   .main-grid,
+  .main-grid.git-workspace,
   .main-grid.codex-workspace,
   .main-grid.capstone-workspace,
   .main-grid.vscode-workspace,
@@ -5524,6 +5648,14 @@ button.repo-tree-file {
       "files"
       "explorer"
       "terminal";
+  }
+
+  .git-workspace .lab-panel {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "terminal"
+      "repo"
+      "guided";
   }
 
   .course-side {
