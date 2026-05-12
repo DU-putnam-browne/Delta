@@ -45,7 +45,7 @@ Then open the URL printed in the terminal, usually `http://localhost:5173`.
 1. Download the repository ZIP or clone it.
 2. Open the folder.
 3. Double-click `index.html`.
-4. Use **Start lesson** for the guided path or **Open full lab** for the simulator workspace.
+4. Use **Ticket to First PR** for the guided path or **Open practice lab** for the simulator workspace.
 5. Type commands into the PowerShell-style terminal and press Enter.
 
 The guided cards show what to type. The app does not run real shell commands for the learner.
@@ -66,13 +66,13 @@ The guided cards show what to type. The app does not run real shell commands for
 
 The guided lab includes a live branch-builder diagram that shows the repository forming as commands run:
 
-- folder creation
-- Git initialization
-- ticket-context README
+- ADO-style clone
+- remote inspection
+- pull-before-branching
 - staging
-- first `main` commit
 - task branch creation
 - SQL asset commit
+- branch publish
 - fast-forward merge back into `main`
 
 The second workflow covers longer project work using a small project capsule: README, decision index, and workstream tracker.
@@ -80,6 +80,8 @@ The second workflow covers longer project work using a small project capsule: RE
 ## Useful Simulator Commands
 
 ```text
+git clone <url>
+git remote -v
 mkdir oracle-git-lab
 cd oracle-git-lab
 git init
@@ -105,6 +107,16 @@ The guided branch uses:
 
 ```text
 feature/ccs-emergency-orders-zip-prior-week-demo
+```
+
+The guided ADO-style start uses:
+
+```text
+git clone https://dev.azure.com/deltautilities-it/Data%20and%20Analytics%20Projects/_git/Oracle
+cd Oracle
+git remote -v
+git status
+git pull
 ```
 
 The demo SQL path is:

@@ -70,6 +70,21 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+[data-theme="dark"] button:focus-visible,
+[data-theme="dark"] a:focus-visible,
+[data-theme="dark"] summary:focus-visible,
+[data-theme="dark"] [role="button"]:focus-visible {
+  outline-color: var(--amber);
+}
+
 .app-shell {
   width: min(1600px, 100%);
   margin: 0 auto;

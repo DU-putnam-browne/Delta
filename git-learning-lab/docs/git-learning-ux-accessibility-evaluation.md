@@ -1,5 +1,7 @@
 # Git Learning Environment UX & Accessibility Evaluation
 
+> Historical note: this May 6 evaluation is kept as evidence, not as the current presentation checklist. Several items below have since been addressed, including the stale `git add .` behavior, modal/focus improvements, clearer Git-first entry, and clone/remote/pull practice. Use `docs/RELEASE_CHECKLIST.md` for current go/no-go validation.
+
 ## Executive Summary
 
 The prototype is a useful and credible Git learning environment for a Delta Utilities / Oracle / Azure DevOps workflow. It does more than explain Git: learners can type simulated commands, see repository state change, complete a ticket-to-PR path, practice conflict recovery, and use Codex / VS Code / SQL modules in the same learning surface.

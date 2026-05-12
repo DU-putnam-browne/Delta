@@ -3461,7 +3461,7 @@ function getPortalHowToContent() {
       }
     ],
     footerLabel: "Recommended path:",
-    footer: "Primary path: Ticket to First PR -> Git Practice Lab -> Project Capsule Workflow -> Repo Review Kit. Getting Started modules are optional support."
+    footer: "Primary path: Ticket to First PR -> Git Practice Lab -> Project Capsule Workflow -> Repo Review Kit. Reset clears only this browser simulator state."
   };
 }
 
@@ -4032,6 +4032,7 @@ function handleAction(button) {
     saveState();
     render();
     queuePrimaryInputFocus();
+    announceStatus("Lab reset. Start again at step 1.");
     return;
   }
 
@@ -7699,7 +7700,7 @@ function renderPortal() {
             <div>
               <span class="section-kicker">Primary path</span>
               <h2>Git workflow labs</h2>
-              <p>For users who already know Codex, VS Code, and SQL: start here and focus on ticket-to-branch-to-PR competence.</p>
+              <p>Start here for the core Git/ADO workflow. Use Codex, VS Code, and SQL modules only as support.</p>
             </div>
             <div class="git-learning-summary-meta">
               <span class="path-count">4 Git-focused modules</span>
@@ -11128,10 +11129,11 @@ function renderQuiz() {
       const selected = attempt.selected;
       const isExiting = attempt.status === "exiting";
       const isMissed = attempt.status === "missed";
+      const questionId = `quiz-question-${quiz.id}`;
       return `
-        <article class="quiz-card ${isExiting ? "is-exiting" : ""} ${isMissed ? "is-missed" : ""}">
-          <h3>${escapeHtml(quiz.question)}</h3>
-          ${renderQuizAnswerControl(quiz, session, attempt, selected, isExiting)}
+        <article class="quiz-card ${isExiting ? "is-exiting" : ""} ${isMissed ? "is-missed" : ""}" aria-labelledby="${escapeAttribute(questionId)}">
+          <h3 id="${escapeAttribute(questionId)}">${escapeHtml(quiz.question)}</h3>
+          ${renderQuizAnswerControl(quiz, session, attempt, selected, isExiting, questionId)}
           ${
             isExiting
               ? `<p class="quiz-feedback">${escapeHtml(quiz.feedback)}</p>`
@@ -11165,7 +11167,7 @@ function renderQuizEmptyState(round, correctCount, missedCount) {
   `;
 }
 
-function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting) {
+function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting, questionId) {
   if (quiz.type !== "choice") {
     const typedValue = attempt.typed || "";
     const round = clampQuizRound(session.round);
@@ -11177,13 +11179,14 @@ function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting) {
     );
     const placeholder = showGhostAnswer ? quiz.answerLabel : quiz.placeholder || "Type your answer";
     return `
-      <form class="quiz-text-form" data-quiz-form="${escapeAttribute(quiz.id)}">
+      <form class="quiz-text-form" data-quiz-form="${escapeAttribute(quiz.id)}" aria-labelledby="${escapeAttribute(questionId)}">
         <input
           class="${showGhostAnswer ? "quiz-ghost-answer" : ""}"
           type="text"
           name="quiz-answer"
           value="${escapeAttribute(typedValue)}"
           placeholder="${escapeAttribute(placeholder)}"
+          aria-label="${escapeAttribute(`Answer for: ${quiz.question}`)}"
           autocomplete="off"
           ${isExiting ? "disabled" : ""}
         />
@@ -11194,7 +11197,7 @@ function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting) {
 
   const optionOrder = getQuizOptionOrder(session, quiz);
   return `
-    <div class="quiz-options">
+    <div class="quiz-options" role="group" aria-labelledby="${escapeAttribute(questionId)}">
       ${optionOrder
         .map((optionIndex) => {
           const option = quiz.options[optionIndex];

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Git Learning Lab</title>
     <link rel="stylesheet" href="styles.css" />
-    <script defer src="app.js?v=20260506-learning-catalog"></script>
+    <script defer src="app.js?v=20260512-presentation-hardening"></script>
   </head>
   <body>
     <a class="skip-link" href="#labView">Skip to active lab</a>
@@ -35,7 +35,7 @@
               </span>
               <span id="themeLabel">Dark</span>
             </button>
-            <button class="icon-button secondary" type="button" data-action="reset" title="Reset the lab">
+            <button class="icon-button secondary" type="button" data-action="reset" title="Reset browser simulator state only">
               <span aria-hidden="true">R</span>
               <span>Reset</span>
             </button>
@@ -96,7 +96,7 @@
               </div>
               <span class="terminal-note">Type <code>help</code> for supported commands</span>
             </div>
-            <div class="terminal-output" id="terminalOutput" aria-live="polite">
+            <div class="terminal-output" id="terminalOutput">
               <div id="terminalHistory"></div>
               <form class="command-form" id="commandForm">
                 <label class="sr-only" for="commandInput">Git command</label>
@@ -136,38 +136,38 @@
         <div class="how-to-grid" id="howToGrid">
           <article>
             <span>1</span>
-            <strong>Start with Codex</strong>
-            <p>Open the Codex lesson to practice setup, login, safe repo inspection, and prompt examples.</p>
-            <code>codex wizard mode</code>
+            <strong>Start with Git</strong>
+            <p>Open Ticket to First PR to practice clone, remote check, pull, branch, diff, commit, publish, and PR handoff.</p>
+            <code>git clone</code>
           </article>
           <article>
             <span>2</span>
-            <strong>Use VS Code Lab next</strong>
-            <p>Practice required extensions, opening the repo folder, search, Source Control, diffs, commits, and conflicts.</p>
-            <code>code --wizard mode</code>
+            <strong>Practice recovery</strong>
+            <p>Use the Git practice lab for wrong-branch, unstaged-file, dirty-switch, conflict, publish, and merge drills.</p>
+            <code>git wizard mode</code>
           </article>
           <article>
             <span>3</span>
-            <strong>Practice Oracle SQL</strong>
-            <p>Open the SQL Lab to start with SELECT *, then filter, aggregate, join, and build a review-ready query from repo-shaped files.</p>
-            <code>sql wizard mode</code>
+            <strong>Add project context</strong>
+            <p>Use the project capsule workflow for longer work that needs README, decision-index, and workstream notes.</p>
+            <code>workstreams.md</code>
           </article>
           <article>
             <span>4</span>
-            <strong>Run the Git lessons</strong>
-            <p>Type the highlighted PowerShell/Git commands into the terminal. The graph and explorer update as you go.</p>
-            <code>git status</code>
+            <strong>Use tool modules as needed</strong>
+            <p>Open Codex, VS Code, or Oracle SQL only when the learner needs supporting tool or query practice.</p>
+            <code>codex wizard mode</code>
           </article>
           <article>
             <span>5</span>
-            <strong>Practice freely</strong>
-            <p>Open the Practice Lab for missions, randomized recovery drills, badges, PR readiness, and command replay.</p>
-            <code>git wizard mode</code>
+            <strong>Keep it simulated</strong>
+            <p>Type commands into the lab terminal. The app models Git behavior but does not run real shell commands.</p>
+            <code>help</code>
           </article>
         </div>
         <div class="how-to-footer" id="howToFooter">
-          <strong>Good path:</strong>
-          <span>Codex lesson -> VS Code Lab -> Oracle SQL Lab -> Git Lab 1 -> Practice Lab -> Git Lab 2 -> Git Lab 3.</span>
+          <strong>Recommended path:</strong>
+          <span>Ticket to First PR -> Git Practice Lab -> Project Capsule Workflow -> Repo Review Kit. Reset clears only this browser simulator state.</span>
         </div>
       </section>
     </div>

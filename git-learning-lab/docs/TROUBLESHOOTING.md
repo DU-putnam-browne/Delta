@@ -25,12 +25,12 @@ If the file was renamed, update the image path in `index.html`.
 
 ## Progress or Quiz State Looks Wrong
 
-Use the **Reset** button in the app header.
+Use the **Reset** button in the app header. It clears only this browser simulator state; it does not touch real Git files or ADO.
 
 Manual browser-console fallback:
 
 ```js
-localStorage.removeItem("git-learning-lab-state-v5");
+localStorage.removeItem("git-learning-lab-state-v6");
 localStorage.removeItem("git-learning-lab-theme");
 ```
 

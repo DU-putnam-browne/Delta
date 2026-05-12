@@ -16,8 +16,10 @@ Use these to create the simulated repo folder and add or edit training files.
 ## Core Git Commands
 
 ```text
+git clone <url>
 git init
 git status
+git remote -v
 git add <file>
 git add .
 git restore --staged <file>
@@ -41,7 +43,7 @@ git push
 git pull
 ```
 
-These model the concept of sharing and receiving changes. They do not connect to a real remote.
+These model cloning, inspecting, sharing, and receiving changes. They do not connect to a real remote.
 
 ## Conflict Commands
 

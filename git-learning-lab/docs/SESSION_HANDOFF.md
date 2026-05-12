@@ -8,7 +8,11 @@ This document is the working handoff for the Analyst Engineering Enablement Lab.
 
 ## Primary repo location
 
-Canonical repo location:
+Current working repo location for this presentation hardening pass:
+
+- `C:\Repositories\Delta\git-learning-lab`
+
+Historical/alternate repo location from earlier sessions:
 
 - `C:\Users\PutnamBrowne\OneDrive - Delta Utilities\Documents\GitHub\DU-putnam-browne-Delta\git-learning-lab`
 
