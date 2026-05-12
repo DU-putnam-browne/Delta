@@ -1,4 +1,4 @@
-# Git Learning Lab
+﻿# Git Learning Lab
 
 ## BLUF
 
@@ -9,12 +9,12 @@ This is a static, browser-based Git training lab for the Delta Utilities Oracle 
 The lab teaches the minimum useful Git workflow for analyst and IT work:
 
 - connect a request to an ADO-style ticket
-- create a repo or project capsule
-- understand working tree, staging area, and committed history
-- create task branches
+- clone and inspect an existing repo safely
+- understand working tree, staging area, committed history, and remotes
+- create task branches from current `main`
 - add SQL or documentation assets
-- merge focused work back to `main`
-- recognize basic conflict and remote-publish workflows
+- publish a reviewable branch for PR handoff
+- recognize merge, conflict, and remote-sync workflows without touching a live repo
 
 ## Fastest Start
 
@@ -45,7 +45,7 @@ Then open the URL printed in the terminal, usually `http://localhost:5173`.
 1. Download the repository ZIP or clone it.
 2. Open the folder.
 3. Double-click `index.html`.
-4. Use **Start lesson** for the guided path or **Open full lab** for the simulator workspace.
+4. Start with the Git path in **How to** or open the guided lesson directly.
 5. Type commands into the PowerShell-style terminal and press Enter.
 
 The guided cards show what to type. The app does not run real shell commands for the learner.
@@ -64,42 +64,52 @@ The guided cards show what to type. The app does not run real shell commands for
 
 ## Lab Flow
 
-The guided lab includes a live branch-builder diagram that shows the repository forming as commands run:
+The first guided lab models the normal ADO ticket workflow:
 
-- folder creation
-- Git initialization
-- ticket-context README
-- staging
-- first `main` commit
-- task branch creation
-- SQL asset commit
-- fast-forward merge back into `main`
+- clone the Oracle repo
+- inspect `origin`
+- confirm local `main` is current
+- create a task branch
+- edit and review a scoped SQL change
+- commit it with a clear message
+- publish the branch for PR review
 
-The second workflow covers longer project work using a small project capsule: README, decision index, and workstream tracker.
+Later modules cover longer project work, conflicts, and merge concepts.
 
 ## Useful Simulator Commands
 
 ```text
-mkdir oracle-git-lab
-cd oracle-git-lab
-git init
-"Emergency Orders by ZIP - Prior Week" | Out-File README.md
+git clone <ado-url>
+cd Oracle
+git remote -v
 git status
+git pull
+git diff
 git add <file>
 git add .
+git restore --staged <file>
 git commit -m "message"
 git branch
 git switch -c <branch>
 git switch <branch>
 git merge <branch>
 git log --oneline
-git push
-git pull
-git restore --staged <file>
-edit <file>
-resolve <file>
+git push -u origin <branch>
+help
 clear
 ```
+
+Simulator-only helper commands:
+
+```text
+edit <file>
+resolve <file>
+mkdir <folder>
+"Text" | Out-File <file>
+git init
+```
+
+Use the helper commands only inside the training lab. For real repo work, the default path is clone -> inspect remote -> pull -> branch -> diff -> commit -> push.
 
 The guided branch uses:
 

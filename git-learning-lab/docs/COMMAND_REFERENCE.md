@@ -1,55 +1,49 @@
-# Command Reference
+﻿# Command Reference
 
 This page lists the simulator commands that are intentionally supported by the lab.
 
-## Folder and File Setup
+## Core Git Path
 
 ```text
-mkdir <folder>
-cd <folder>
-"Text" | Out-File <file>
-edit <file>
-```
-
-Use these to create the simulated repo folder and add or edit training files.
-
-## Core Git Commands
-
-```text
-git init
+git clone <ado-url>
+cd Oracle
+git remote -v
 git status
+git pull
+git diff
 git add <file>
 git add .
 git restore --staged <file>
 git commit -m "message"
-git log --oneline
-```
-
-## Branch Commands
-
-```text
 git branch
 git switch -c <branch>
 git switch <branch>
-git merge <branch>
-```
-
-## Remote Workflow Commands
-
-```text
 git push
-git pull
+git push -u origin <branch>
+git log --oneline
 ```
 
-These model the concept of sharing and receiving changes. They do not connect to a real remote.
+These are the main commands learners should use for the default ticket-to-PR workflow.
 
-## Conflict Commands
+## Merge And Recovery Commands
 
 ```text
+git merge <branch>
 resolve <file>
 ```
 
-Use this after loading a conflict drill. The goal is to practice the sequence: identify conflict, inspect the file, resolve it, stage it, and commit.
+Use these for conflict drills, merge concepts, and later-stage practice.
+
+## Simulator-Only Helper Commands
+
+```text
+edit <file>
+mkdir <folder>
+"Text" | Out-File <file>
+git init
+```
+
+These are training helpers. They make the simulated environment usable, but they are not the recommended starting path for real repo work.
 
 ## Utility Commands
 

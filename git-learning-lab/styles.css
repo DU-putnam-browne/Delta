@@ -70,6 +70,21 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+[data-theme="dark"] button:focus-visible,
+[data-theme="dark"] a:focus-visible,
+[data-theme="dark"] summary:focus-visible,
+[data-theme="dark"] [role="button"]:focus-visible {
+  outline-color: var(--amber);
+}
+
 .app-shell {
   width: min(1600px, 100%);
   margin: 0 auto;
@@ -158,6 +173,20 @@ button {
   padding-top: 2px;
 }
 
+.topbar-action-secondary .icon-button.active {
+  color: #07111f;
+  border-color: rgba(112, 231, 196, 0.78);
+  background: var(--mint);
+}
+
+.topbar-actions .icon-button {
+  padding: 0 14px;
+}
+
+.topbar-actions .icon-button > span:first-child {
+  display: none;
+}
+
 .icon-button,
 .text-button,
 .command-form button,
@@ -174,10 +203,28 @@ button {
     background-color 120ms ease;
 }
 
-.icon-button {
-  min-height: 40px;
+.icon-button,
+.text-button,
+.command-form button,
+.file-actions button,
+.portal-actions button,
+.portal-actions a,
+.copy-prompt-button,
+.cli-fill-button,
+.quiz-round-button,
+.quiz-hint-button,
+.vscode-command-form button,
+.sql-worksheet-toolbar button,
+.sql-terminal-panel .command-form button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.icon-button {
+  min-height: 40px;
   gap: 8px;
   padding: 0 12px;
   font-weight: 700;
@@ -247,9 +294,11 @@ button {
   z-index: 1;
   display: grid;
   gap: 14px;
-  width: min(920px, 100%);
+  width: min(920px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
   max-height: min(760px, calc(100vh - 32px));
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: clamp(16px, 2.2vw, 24px);
   border: 1px solid var(--line);
   border-top: 5px solid var(--blue);
@@ -263,6 +312,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  min-width: 0;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
@@ -282,8 +332,9 @@ button {
 
 .how-to-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 12px;
+  min-width: 0;
 }
 
 .how-to-grid article {
@@ -291,6 +342,7 @@ button {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 6px 10px;
   align-items: start;
+  min-width: 0;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -312,6 +364,7 @@ button {
 
 .how-to-grid article > span {
   display: inline-grid;
+  grid-row: 1 / span 3;
   width: 28px;
   height: 28px;
   place-items: center;
@@ -323,13 +376,16 @@ button {
 
 .how-to-grid strong {
   align-self: center;
+  min-width: 0;
   color: var(--ink);
   font-family: Rubik, Arial, sans-serif;
+  overflow-wrap: anywhere;
 }
 
-.how-to-grid p,
-.how-to-grid code {
+.how-to-grid article > p {
   grid-column: 2;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .how-to-grid code,
@@ -351,6 +407,7 @@ button {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 8px;
+  min-width: 0;
   padding: 12px;
   border: 1px solid rgba(112, 231, 196, 0.45);
   border-radius: var(--radius);
@@ -360,6 +417,11 @@ button {
 
 .how-to-footer strong {
   color: var(--navy);
+}
+
+.how-to-footer span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .theme-toggle {
@@ -507,59 +569,58 @@ button:active {
   box-shadow: var(--shadow);
 }
 
-.git-learning-group {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
+.path-section-group {
+  padding: 0;
   overflow: hidden;
 }
 
-.git-learning-group summary {
+.path-section-group summary {
+  list-style: none;
   padding: 16px;
   cursor: pointer;
-  list-style: none;
 }
 
-.git-learning-group summary::-webkit-details-marker {
+.path-section-group summary::-webkit-details-marker {
   display: none;
 }
 
-.git-learning-summary-meta {
+.path-section-group:not([open]) .path-section-body {
+  display: none;
+}
+
+.path-section-meta {
   display: grid;
   justify-items: end;
   gap: 8px;
   flex: 0 0 auto;
 }
 
-.git-learning-toggle-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.path-section-meta em {
   color: var(--muted);
   font-size: 0.78rem;
+  font-style: normal;
   font-weight: 800;
 }
 
-.git-learning-toggle-label::before {
-  content: "▾";
-  color: var(--blue);
-  font-size: 0.9rem;
+.path-section-group:not([open]) .path-section-meta em::before {
+  content: "Show path";
 }
 
-.git-learning-group:not([open]) .git-learning-toggle-label::before {
-  content: "▸";
+.path-section-group[open] .path-section-meta em::before {
+  content: "Hide path";
 }
 
-.git-learning-group:not([open]) .git-learning-toggle-label {
-  color: var(--blue);
+.path-section-group .path-section-meta em {
+  color: transparent;
 }
 
-.git-learning-panel {
+.path-section-body {
   display: grid;
   gap: 16px;
   padding: 0 16px 16px;
+  border-top: 1px solid var(--line);
 }
+
 
 .path-section-header {
   display: flex;
@@ -609,6 +670,11 @@ button:active {
   background:
     linear-gradient(135deg, rgba(195, 244, 230, 0.52), rgba(255, 255, 255, 0) 48%),
     var(--surface);
+}
+
+.course-card.complete {
+  border-top-color: var(--green);
+  box-shadow: 0 14px 34px rgba(20, 198, 20, 0.14), var(--shadow);
 }
 
 .resume-work-card {
@@ -728,10 +794,40 @@ button:active {
 }
 
 .capstone-course-card {
-  border-top-color: var(--amber);
+  border-top-color: var(--green);
   background:
-    linear-gradient(135deg, rgba(255, 201, 92, 0.18), rgba(255, 255, 255, 0) 54%),
+    linear-gradient(135deg, rgba(195, 244, 230, 0.22), rgba(255, 179, 11, 0.1) 58%),
     var(--surface);
+}
+
+.course-card-topline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.capstone-deliverable-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+.capstone-deliverable-strip span {
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface-alt);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .practice-course-card {
@@ -739,6 +835,36 @@ button:active {
   background:
     linear-gradient(135deg, rgba(195, 244, 230, 0.24), rgba(255, 179, 11, 0.08) 54%),
     var(--surface);
+}
+
+.visual-branching-course-card {
+  border-top-color: var(--amber);
+  background:
+    linear-gradient(135deg, rgba(255, 201, 92, 0.18), rgba(111, 147, 255, 0.13) 56%),
+    var(--surface);
+}
+
+.visual-branching-note {
+  display: grid;
+  gap: 5px;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 179, 11, 0.38);
+  border-radius: 10px;
+  color: var(--ink);
+  background: rgba(255, 201, 92, 0.14);
+}
+
+.visual-branching-note strong {
+  color: var(--navy);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.visual-branching-note span {
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 .sql-course-card {
@@ -1123,33 +1249,28 @@ button:active {
   grid-template-columns: 1fr;
 }
 
-.main-grid.git-workspace,
-.main-grid.codex-workspace {
-  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
-  grid-template-areas:
-    "lab lab"
-    "lesson quiz";
-}
-
-.main-grid.vscode-workspace {
-  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
-  grid-template-areas:
-    "lab lab"
-    "lesson quiz";
-}
-
-.main-grid.sql-workspace {
-  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
-  grid-template-areas:
-    "lab lab"
-    "lesson quiz";
-}
-
 .main-grid.capstone-workspace {
   grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
   grid-template-areas:
     "lab lab"
     "lesson quiz";
+}
+
+.main-grid.codex-workspace {
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
+  grid-template-areas: "lesson lab quiz";
+}
+
+.main-grid.vscode-workspace {
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(250px, 340px);
+  grid-template-areas: "lesson lab quiz";
+}
+
+.main-grid.sql-workspace {
+  grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+  grid-template-areas:
+    "lesson lab"
+    "quiz quiz";
 }
 
 .practice-workspace .lesson-panel,
@@ -1159,10 +1280,12 @@ button:active {
 
 .practice-workspace .lab-panel {
   display: grid;
-  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr) minmax(280px, 420px);
+  position: relative;
+  grid-template-columns: 1fr;
   grid-template-areas:
-    "graph graph files"
-    "explorer terminal terminal";
+    "graph"
+    "terminal"
+    "explorer";
   align-items: stretch;
 }
 
@@ -1178,10 +1301,15 @@ button:active {
 
 .practice-workspace .guided-panel {
   grid-area: graph;
+  padding: 10px 14px 14px;
 }
 
 .practice-workspace .repo-flow {
-  grid-area: files;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 6;
+  grid-area: unset;
 }
 
 .practice-workspace .terminal-panel {
@@ -1190,7 +1318,27 @@ button:active {
 
 .practice-workspace .guided-current-command {
   display: block;
-  margin-top: 12px;
+  margin-top: 8px;
+}
+
+.practice-workspace .guided-panel .section-header {
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.practice-workspace .guided-panel .section-header h2 {
+  margin: 2px 0 0;
+  font-size: 1.05rem;
+}
+
+.practice-workspace .guided-panel-hint {
+  display: none;
+}
+
+.practice-workspace .process-map {
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 0;
 }
 
 .git-workspace .repo-flow {
@@ -1203,10 +1351,10 @@ button:active {
 
 .git-workspace .lab-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
   grid-template-areas:
-    "terminal repo"
-    "guided guided";
+    "guided"
+    "terminal"
+    "repo";
   align-items: start;
 }
 
@@ -1238,9 +1386,17 @@ button:active {
     "guided";
 }
 
+.capstone-workspace .lab-panel {
+  grid-template-areas: "guided";
+}
+
 .codex-workspace .terminal-panel,
 .capstone-workspace .terminal-panel {
   grid-area: terminal;
+}
+
+.capstone-workspace .terminal-panel {
+  display: none;
 }
 
 .codex-workspace .guided-panel,
@@ -1488,23 +1644,148 @@ button:active {
   background: #0b1728;
 }
 
+.lesson-first-move {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(0, 66, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(0, 66, 255, 0.04);
+}
+
+.lesson-first-move strong {
+  color: var(--navy);
+  font-size: 0.8rem;
+}
+
+.lesson-first-move span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.lesson-surface-card {
+  display: grid;
+  grid-template-columns: minmax(200px, 0.9fr) minmax(0, 1.1fr);
+  gap: 14px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(0, 66, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(195, 244, 230, 0.2);
+}
+
+.lesson-surface-card strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--navy);
+  font-size: 0.92rem;
+}
+
+.lesson-surface-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.lesson-surface-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.lesson-surface-list li + li {
+  margin-top: 5px;
+}
+
+.lesson-panel .lesson-surface-card {
+  grid-template-columns: 1fr;
+}
+
+.lesson-panel .lesson-surface-list {
+  margin-top: 2px;
+}
+
+.lesson-glossary-drawer,
+.quiz-drawer {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.lesson-glossary-drawer summary,
+.quiz-drawer summary {
+  list-style: none;
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.lesson-glossary-drawer summary::-webkit-details-marker,
+.quiz-drawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.lesson-glossary-drawer summary strong,
+.quiz-drawer summary strong {
+  color: var(--navy);
+  font-size: 0.9rem;
+}
+
+.lesson-glossary-drawer[open] summary,
+.quiz-drawer[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.howto-command {
+  display: grid;
+  grid-column: 2;
+  gap: 4px;
+  min-width: 0;
+  margin-top: 8px;
+}
+
+.howto-command span {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.howto-command code {
+  grid-column: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.howto-command-real span {
+  color: var(--navy);
+}
+
+.howto-command-simulator span {
+  color: #9a4d00;
+}
+
+.howto-command-ui span,
+.howto-command-navigation span {
+  color: #146b4d;
+}
+
 .lesson-controls {
   justify-content: space-between;
   margin-top: 14px;
 }
 
 .lesson-glossary {
-  margin-top: 14px;
-}
-
-.lesson-glossary-header {
-  display: grid;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.lesson-glossary-header strong {
-  font-size: 0.9rem;
+  margin-top: 0;
+  padding: 12px;
 }
 
 .lesson-glossary .glossary-row {
@@ -1567,8 +1848,13 @@ button:active {
 
 .repo-flow.practice-reference-panel {
   display: block;
-  max-height: clamp(420px, 68vh, 720px);
-  overflow: auto;
+  width: min(420px, calc(100% - 32px));
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .repo-flow.codex-flow {
@@ -1626,6 +1912,73 @@ button:active {
 .powershell-reference {
   display: grid;
   gap: 14px;
+}
+
+.practice-reference-drawer {
+  display: grid;
+  justify-items: end;
+}
+
+.practice-reference-toggle {
+  display: none;
+}
+
+.practice-reference-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.practice-reference-shell {
+  width: min(420px, calc(100vw - 80px));
+  max-height: clamp(360px, 72vh, 760px);
+  margin-top: 10px;
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(195, 244, 230, 0.22), rgba(122, 162, 255, 0.1)),
+    var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.practice-graph-drawer {
+  display: grid;
+  gap: 8px;
+}
+
+.practice-graph-drawer summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  cursor: pointer;
+}
+
+.practice-graph-drawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.practice-graph-drawer summary strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--navy);
+  font-size: 0.86rem;
+}
+
+.practice-graph-drawer summary em {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.practice-graph-body {
+  display: grid;
 }
 
 .reference-heading {
@@ -1983,6 +2336,47 @@ button:active {
   box-shadow: none;
 }
 
+.guided-panel-drawer {
+  display: grid;
+}
+
+.guided-panel-summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.guided-panel-summary::-webkit-details-marker {
+  display: none;
+}
+
+.guided-panel-summary::after {
+  content: "Open";
+  align-self: center;
+  padding: 5px 9px;
+  border: 1px solid rgba(111, 147, 255, 0.32);
+  border-radius: 999px;
+  color: var(--navy);
+  background: rgba(195, 244, 230, 0.22);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.guided-panel-drawer[open] .guided-panel-summary::after {
+  content: "Hide";
+}
+
+.guided-panel-hint {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.guided-panel-body {
+  display: grid;
+}
+
 .repo-directory-panel {
   padding: 0;
   overflow: hidden;
@@ -2001,6 +2395,14 @@ button:active {
   background: linear-gradient(135deg, rgba(112, 231, 196, 0.08), rgba(111, 147, 255, 0.08));
 }
 
+.scenario-panel.sidebar {
+  grid-template-columns: 1fr;
+}
+
+.quiz-panel .scenario-panel {
+  border-bottom: 1px solid var(--line);
+}
+
 .scenario-card {
   min-width: 0;
   display: grid;
@@ -2009,6 +2411,52 @@ button:active {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
+}
+
+.scenario-drawer {
+  padding: 0;
+  overflow: hidden;
+}
+
+.scenario-card-summary {
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.scenario-card-summary::-webkit-details-marker {
+  display: none;
+}
+
+.scenario-card-summary::after {
+  content: "Open";
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 4px 8px;
+  border: 1px solid rgba(111, 147, 255, 0.32);
+  border-radius: 999px;
+  color: var(--navy);
+  background: rgba(195, 244, 230, 0.22);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.scenario-drawer[open] .scenario-card-summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.scenario-drawer[open] .scenario-card-summary::after {
+  content: "Hide";
+}
+
+.scenario-drawer-body {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
 }
 
 .scenario-card h3 {
@@ -2070,6 +2518,18 @@ button:active {
   font-size: 0.7rem;
 }
 
+.scenario-card-summary strong {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--mint);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
 .scenario-progress-track {
   height: 8px;
   overflow: hidden;
@@ -2111,7 +2571,8 @@ button:active {
 }
 
 [data-theme="dark"] .scenario-check.complete,
-[data-theme="dark"] .scenario-card-head strong {
+[data-theme="dark"] .scenario-card-head strong,
+[data-theme="dark"] .scenario-card-summary strong {
   color: #07111f;
 }
 
@@ -2485,6 +2946,37 @@ button.repo-tree-file {
   line-height: 1.35;
 }
 
+.recommended-commands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  margin-top: 9px;
+}
+
+.recommended-commands > span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.recommended-commands button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+}
+
+[data-theme="dark"] .recommended-commands button {
+  background: rgba(13, 28, 48, 0.86);
+}
+
 .current-command-card code {
   overflow-wrap: anywhere;
   padding: 7px 9px;
@@ -2646,13 +3138,154 @@ button.repo-tree-file {
 .practice-readiness-panel {
   display: grid;
   gap: 12px;
-  padding: 12px;
+  padding: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface-alt);
 }
 
+.practice-control-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.practice-run-story {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid rgba(112, 231, 196, 0.42);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(195, 244, 230, 0.18), rgba(0, 66, 255, 0.08)),
+    var(--surface-alt);
+}
+
+.practice-run-story h3 {
+  margin: 3px 0 0;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  line-height: 1.12;
+}
+
+.practice-run-story p {
+  max-width: 78ch;
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.38;
+}
+
+.practice-run-story ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.practice-run-story li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px 9px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.practice-run-story li span {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--mint);
+  font-weight: 900;
+}
+
+.practice-run-story li strong {
+  color: var(--ink);
+}
+
+.practice-run-story li em {
+  grid-column: 2;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.76rem;
+  font-style: normal;
+}
+
+.practice-drawer {
+  padding: 0;
+  overflow: hidden;
+}
+
+.practice-drawer-summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.practice-drawer-summary::-webkit-details-marker {
+  display: none;
+}
+
+.practice-drawer-summary::after {
+  content: "Open";
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 4px 8px;
+  border: 1px solid rgba(111, 147, 255, 0.32);
+  border-radius: 999px;
+  color: var(--navy);
+  background: rgba(195, 244, 230, 0.22);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.practice-drawer[open] .practice-drawer-summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.practice-drawer[open] .practice-drawer-summary::after {
+  content: "Hide";
+}
+
+.practice-drawer-summary strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  line-height: 1.15;
+}
+
+.practice-drawer-summary small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.practice-drawer-body {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
 .practice-mission-header,
+.practice-mission-toolbar,
 .practice-readiness-score,
 .practice-replay-header,
 .vscode-mission-header {
@@ -2677,9 +3310,15 @@ button.repo-tree-file {
   line-height: 1.35;
 }
 
+.practice-mission-toolbar p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 .practice-mission-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
 }
 
@@ -2687,7 +3326,7 @@ button.repo-tree-file {
   display: grid;
   gap: 5px;
   min-width: 0;
-  padding: 9px 10px;
+  padding: 8px 9px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   color: var(--ink);
@@ -2770,7 +3409,7 @@ button.repo-tree-file {
 
 .practice-readiness-score strong {
   display: block;
-  font-size: 2.1rem;
+  font-size: 1.75rem;
 }
 
 .practice-readiness-score small {
@@ -2882,15 +3521,6 @@ button.repo-tree-file {
   font-style: normal;
 }
 
-.challenge-panel {
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface-alt);
-}
-
 .challenge-header,
 .challenge-card-copy,
 .challenge-actions {
@@ -2995,6 +3625,25 @@ button.repo-tree-file {
   margin: 3px 0 0;
   color: var(--muted);
   line-height: 1.35;
+}
+
+.challenge-scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.challenge-scenario-grid section {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.challenge-scenario-grid p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 .challenge-steps {
@@ -3147,6 +3796,7 @@ button.repo-tree-file {
 }
 
 .codex-stage.complete span {
+  color: #07111f;
   background: var(--green);
 }
 
@@ -3758,19 +4408,79 @@ button.repo-tree-file {
   color: #eaf1ff;
 }
 
-.vscode-lesson-content {
+.vscode-lesson-section {
+  display: grid;
   gap: 14px;
 }
 
-.vscode-lesson-section {
-  align-items: start;
+.vscode-step-brief {
+  display: grid;
+  gap: 8px;
+  max-width: 78ch;
+}
+
+.vscode-step-brief h3 {
+  margin: 0;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+  font-size: 1.15rem;
+}
+
+.vscode-step-brief p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.vscode-step-brief ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vscode-step-brief li {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface-alt);
+  font-size: 0.82rem;
+}
+
+.vscode-user-story {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(112, 231, 196, 0.42);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(112, 231, 196, 0.12), rgba(111, 147, 255, 0.1)),
+    var(--surface);
+}
+
+.vscode-user-story h3 {
+  margin: 0;
+  color: var(--navy);
+  font-family: Rubik, Arial, sans-serif;
+}
+
+.vscode-user-story p {
+  max-width: 78ch;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.vscode-user-story strong {
+  color: var(--ink);
 }
 
 .vscode-workspace .lab-panel {
   display: grid;
-  grid-template-areas:
-    "guided"
-    "terminal";
+  grid-template-areas: "guided";
 }
 
 .vscode-workspace .guided-panel {
@@ -3778,11 +4488,7 @@ button.repo-tree-file {
 }
 
 .vscode-workspace .terminal-panel {
-  grid-area: terminal;
-  overflow: hidden;
-  border-color: #333842;
-  background: #1e1e1e;
-  color: #d4d4d4;
+  display: none;
 }
 
 .vscode-workspace .terminal-panel .section-header {
@@ -3815,32 +4521,54 @@ button.repo-tree-file {
 
 .vscode-mock {
   overflow: hidden;
-  min-height: 360px;
+  min-height: 620px;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 8px;
   background: #1e1e1e;
   color: #d4d4d4;
   box-shadow: 0 18px 42px rgba(15, 23, 42, 0.2);
 }
 
 .vscode-titlebar {
-  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 34px;
+  padding: 0 12px;
   border-bottom: 1px solid #333;
-  background: #252526;
+  background: #3c3c3c;
   color: #c8c8c8;
   font-size: 0.8rem;
 }
 
+.vscode-titlebar strong {
+  min-width: 0;
+  margin-left: auto;
+  padding: 4px 12px;
+  border: 1px solid #5a5a5a;
+  border-radius: 6px;
+  color: #e6e6e6;
+  background: #474747;
+  font-size: 0.76rem;
+}
+
+.vscode-logo {
+  color: #47a8ff;
+  font-weight: 900;
+}
+
 .vscode-body {
   display: grid;
-  grid-template-columns: 42px minmax(150px, 0.7fr) minmax(220px, 1fr);
-  min-height: 292px;
+  grid-template-columns: 40px minmax(280px, 420px) minmax(0, 1fr) minmax(190px, 260px);
+  grid-template-rows: minmax(300px, 0.58fr) minmax(240px, 0.42fr);
+  min-height: 550px;
 }
 
 .vscode-activity {
   display: grid;
   align-content: start;
   gap: 8px;
+  grid-row: 1 / 3;
   padding: 10px 7px;
   background: #333333;
 }
@@ -3865,6 +4593,7 @@ button.repo-tree-file {
   display: grid;
   align-content: start;
   gap: 7px;
+  grid-row: 1 / 3;
   padding: 12px;
   border-right: 1px solid #333;
   background: #252526;
@@ -3892,8 +4621,28 @@ button.repo-tree-file {
   font-size: 0.78rem;
 }
 
+.vscode-explorer p.indent {
+  padding-left: 16px;
+}
+
+.vscode-explorer p.indent-2 {
+  padding-left: 28px;
+}
+
+.vscode-explorer p.indent-3 {
+  padding-left: 40px;
+}
+
 .vscode-explorer p.active {
   background: #094771;
+  color: #ffffff;
+}
+
+.vscode-tree-folder {
+  color: #cccccc;
+}
+
+.vscode-tree-folder.active-folder {
   color: #ffffff;
 }
 
@@ -3913,9 +4662,110 @@ button.repo-tree-file {
   border-left-color: #3794ff;
 }
 
+.vscode-source-control {
+  display: grid;
+  gap: 8px;
+}
+
+.vscode-source-repo {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #333;
+}
+
+.vscode-source-repo p {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  padding: 0;
+}
+
+.vscode-source-repo strong {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.vscode-source-repo small {
+  color: #bdbdbd;
+  font-size: 0.68rem;
+}
+
+.vscode-source-repo button {
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  color: #d7d7d7;
+  background: #2d4b6d;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.vscode-source-change {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+  padding: 5px 6px;
+  border-radius: 4px;
+  background: #37373d;
+  color: #f0f0f0;
+  font-size: 0.76rem;
+}
+
+.vscode-source-change small {
+  color: #f0c674;
+  font-weight: 900;
+}
+
+.vscode-source-change.staged small {
+  color: #89d185;
+}
+
+.vscode-source-change span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vscode-graph {
+  display: grid;
+  gap: 7px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+}
+
+.vscode-graph strong {
+  color: #c8c8c8;
+}
+
+.vscode-graph p {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  gap: 7px;
+  padding: 0;
+  color: #cfcfcf;
+}
+
+.vscode-graph p span {
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: #c586c0;
+  box-shadow: 0 12px 0 #c586c0, 0 24px 0 #d7ba7d;
+}
+
 .vscode-editor {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto minmax(0, 1fr);
   min-width: 0;
   background: #1e1e1e;
 }
@@ -3941,6 +4791,22 @@ button.repo-tree-file {
   background: #1e1e1e;
 }
 
+.vscode-breadcrumbs {
+  overflow: hidden;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2f2f2f;
+  color: #bdbdbd;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+
+.vscode-editor-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 82px;
+  min-height: 0;
+}
+
 .vscode-editor pre {
   margin: 0;
   overflow: auto;
@@ -3949,6 +4815,115 @@ button.repo-tree-file {
   font-size: 0.78rem;
   line-height: 1.45;
   white-space: pre-wrap;
+}
+
+.vscode-minimap {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  padding: 12px 8px;
+  border-left: 1px solid #2d2d2d;
+  background: #202020;
+}
+
+.vscode-minimap i {
+  display: block;
+  height: 3px;
+  background: #587188;
+}
+
+.vscode-minimap i:nth-child(4n) {
+  background: #9c3d3d;
+}
+
+.vscode-chat-panel {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  padding: 16px;
+  border-left: 1px solid #333;
+  background: #1f1f1f;
+  text-align: center;
+}
+
+.vscode-chat-panel strong {
+  display: block;
+  margin-top: 6px;
+  color: #f0f0f0;
+}
+
+.vscode-chat-panel p {
+  margin: 0;
+  color: #bdbdbd;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.vscode-bottom-panel {
+  grid-column: 3 / 5;
+  border-top: 1px solid #333;
+  background: #181818;
+}
+
+.vscode-panel-tabs {
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  color: #bbbbbb;
+  font-size: 0.72rem;
+}
+
+.vscode-panel-tabs .active {
+  color: #ffffff;
+  border-bottom: 2px solid #3794ff;
+}
+
+.vscode-terminal-output {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  height: 205px;
+  overflow: auto;
+  padding: 10px 12px;
+  color: #d4d4d4;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.vscode-command-form {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.vscode-command-form span {
+  color: #d4d4d4;
+}
+
+.vscode-command-form input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #ffffff;
+  background: transparent;
+  font: inherit;
+}
+
+.vscode-command-form input::placeholder {
+  color: #8d8d8d;
+}
+
+.vscode-command-form button {
+  padding: 4px 8px;
+  border: 1px solid #3f3f46;
+  border-radius: 4px;
+  color: #cccccc;
+  background: #252526;
+  font: inherit;
+  font-size: 0.72rem;
 }
 
 .vscode-status {
@@ -5004,7 +5979,7 @@ button.repo-tree-file {
 
 .process-step.complete .process-dot {
   border-color: var(--green);
-  color: #fff;
+  color: #07111f;
   background: var(--green);
 }
 
@@ -5185,16 +6160,16 @@ button.repo-tree-file {
   color: rgba(255, 255, 255, 0.45);
 }
 
-.command-form input.wizard-typing {
+.command-form input.dev-playback-typing {
   color: #b7fbe7;
   text-shadow: 0 0 10px rgba(112, 231, 196, 0.42);
 }
 
-.terminal-panel.wizard-running .command-form span {
+.terminal-panel.dev-playback-running .command-form span {
   color: var(--mint);
 }
 
-.terminal-panel.wizard-running .terminal-output {
+.terminal-panel.dev-playback-running .terminal-output {
   box-shadow: inset 0 0 0 1px rgba(112, 231, 196, 0.26), inset 0 0 28px rgba(112, 231, 196, 0.08);
 }
 
@@ -5436,6 +6411,12 @@ button.repo-tree-file {
   color: var(--ink);
 }
 
+.quiz-drawer-body {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
 @keyframes quiz-enter {
   from {
     opacity: 0;
@@ -5478,11 +6459,22 @@ button.repo-tree-file {
 
 @media (max-width: 1500px) {
   .main-grid,
-  .main-grid.git-workspace,
   .main-grid.codex-workspace,
   .main-grid.capstone-workspace,
-  .main-grid.vscode-workspace,
   .main-grid.sql-workspace {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "lab"
+      "lesson"
+      "quiz";
+  }
+
+  .main-grid.vscode-workspace {
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(220px, 280px);
+    grid-template-areas: "lesson lab quiz";
+  }
+
+  .main-grid.git-workspace {
     grid-template-columns: 1fr;
     grid-template-areas:
       "lab"
@@ -5496,6 +6488,18 @@ button.repo-tree-file {
 
   #quizList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vscode-body {
+    grid-template-columns: 40px minmax(220px, 300px) minmax(0, 1fr);
+  }
+
+  .vscode-chat-panel {
+    display: none;
+  }
+
+  .vscode-bottom-panel {
+    grid-column: 3;
   }
 }
 
@@ -5536,11 +6540,24 @@ button.repo-tree-file {
   }
 
   .practice-workspace .lab-panel {
-    grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+    grid-template-columns: 1fr;
     grid-template-areas:
-      "graph graph"
-      "files files"
-      "explorer terminal";
+      "graph"
+      "terminal"
+      "explorer";
+  }
+
+  .practice-workspace .repo-flow {
+    position: static;
+    width: 100%;
+  }
+
+  .practice-reference-drawer {
+    justify-items: stretch;
+  }
+
+  .practice-reference-shell {
+    width: 100%;
   }
 
   .sql-ide-body {
@@ -5610,6 +6627,54 @@ button.repo-tree-file {
     grid-template-columns: 1fr;
   }
 
+  .vscode-mock {
+    min-height: auto;
+  }
+
+  .vscode-titlebar {
+    gap: 10px;
+    overflow-x: auto;
+  }
+
+  .vscode-body {
+    grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+
+  .vscode-activity {
+    grid-row: 1 / 4;
+  }
+
+  .vscode-explorer {
+    grid-row: auto;
+    max-height: 260px;
+    overflow: auto;
+    border-right: 0;
+    border-bottom: 1px solid #333;
+  }
+
+  .vscode-editor {
+    min-height: 340px;
+  }
+
+  .vscode-editor-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vscode-minimap {
+    display: none;
+  }
+
+  .vscode-bottom-panel {
+    grid-column: 2;
+  }
+
+  .practice-workspace .repo-flow {
+    position: static;
+    top: auto;
+    right: auto;
+  }
+
   .resume-work-actions {
     justify-content: flex-start;
   }
@@ -5653,9 +6718,9 @@ button.repo-tree-file {
   .git-workspace .lab-panel {
     grid-template-columns: 1fr;
     grid-template-areas:
+      "guided"
       "terminal"
-      "repo"
-      "guided";
+      "repo";
   }
 
   .course-side {
@@ -5708,9 +6773,11 @@ button.repo-tree-file {
   .practice-replay-header,
   .vscode-mission-header,
   .challenge-header,
-  .challenge-card-copy {
+  .challenge-card-copy,
+  .challenge-scenario-grid {
     display: grid;
     align-items: start;
+    grid-template-columns: 1fr;
   }
 
   .readiness-checks {
@@ -5723,6 +6790,14 @@ button.repo-tree-file {
 
   .process-summary {
     grid-template-columns: 1fr;
+  }
+
+  .lesson-surface-card {
+    grid-template-columns: 1fr;
+  }
+
+  .capstone-deliverable-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .process-summary code {
@@ -5812,7 +6887,8 @@ button.repo-tree-file {
   }
 
   .how-to-grid p,
-  .how-to-grid code {
+  .how-to-grid article > code,
+  .howto-command {
     grid-column: 1 / -1;
   }
 

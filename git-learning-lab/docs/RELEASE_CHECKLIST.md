@@ -8,15 +8,17 @@ Use this before pushing, sharing, or hosting the lab.
 - [ ] Logo loads.
 - [ ] Styles load.
 - [ ] Portal view displays.
-- [ ] **Start lesson** opens the guided path.
-- [ ] **Open full lab** opens the simulator workspace.
+- [ ] **Ticket to First PR** opens the guided path.
+- [ ] **Open practice lab** opens the simulator workspace.
 - [ ] Terminal accepts commands.
+- [ ] `git clone`, `git remote -v`, and `git pull` complete the ADO-style start path.
 - [ ] `git status`, `git add`, and `git commit` update the simulated state.
 - [ ] Branch builder updates as the guided branch progresses.
 - [ ] Quiz responses work.
 - [ ] Reset clears progress.
 - [ ] Dark mode toggle works.
 - [ ] Layout is usable on a narrow browser width.
+- [ ] How-to and Reset copy make clear that the lab is simulated and does not touch real Git files or ADO.
 
 ## Documentation
 

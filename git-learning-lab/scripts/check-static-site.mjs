@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+﻿import { existsSync, readFileSync, statSync } from "node:fs";
 import { extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -57,7 +57,7 @@ const appPath = localPath("app.js");
 if (existsSync(appPath)) {
   const app = readFileSync(appPath, "utf8");
   const expectedMarkers = [
-    "git-learning-lab-state-v5",
+    "git-learning-lab-state-v6",
     "function render",
     "function handleCommand",
     "addEventListener",

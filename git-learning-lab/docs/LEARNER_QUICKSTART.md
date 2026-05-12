@@ -1,4 +1,4 @@
-# Learner Quickstart
+﻿# Learner Quickstart
 
 ## Goal
 
@@ -12,14 +12,11 @@ Open:
 index.html
 ```
 
-Then choose:
-
-- **Start lesson** for the guided course path
-- **Open full lab** for the simulator workspace
+Then choose the Git-first path from **How to**, or open the guided Git lesson directly.
 
 ## How the Simulator Works
 
-Type commands into the PowerShell-style prompt and press Enter. The app updates a simulated repository state, including files, staging, commits, branches, and merges.
+Type commands into the PowerShell-style prompt and press Enter. The app updates a simulated repository state, including files, staging, commits, branches, remotes, and merge readiness.
 
 The simulator does not run real shell or Git commands. It is safe to experiment.
 
@@ -28,30 +25,32 @@ The simulator does not run real shell or Git commands. It is safe to experiment.
 Use this sequence:
 
 ```text
-mkdir oracle-git-lab
-cd oracle-git-lab
-git init
-"Emergency Orders by ZIP - Prior Week" | Out-File README.md
+git clone https://dev.azure.com/deltautilities-it/Data%20and%20Analytics%20Projects/_git/Oracle
+cd Oracle
+git remote -v
 git status
-git add README.md
-git commit -m "Add ticket context"
+git pull
 git switch -c feature/ccs-emergency-orders-zip-prior-week-demo
 edit ccs/sql/meters/ccs_emergency_response_activity_by_zip_prior_week.sql
 git status
+git diff
 git add ccs/sql/meters/ccs_emergency_response_activity_by_zip_prior_week.sql
 git commit -m "Add emergency orders ZIP report"
-git switch main
-git merge feature/ccs-emergency-orders-zip-prior-week-demo
+git push -u origin feature/ccs-emergency-orders-zip-prior-week-demo
 git log --oneline
 ```
 
+Stop there on the first run. In the real workflow, the next step is a pull request, not a local merge back to `main`.
+
 ## What to Notice
 
+- `git remote -v` confirms where fetch and push traffic would go.
+- `git pull` confirms the branch starts from current `main`.
 - `git status` tells you what changed.
+- `git diff` shows the exact change before you stage it.
 - `git add` chooses what goes into the next checkpoint.
 - `git commit` saves that checkpoint with a message.
-- `git switch -c` creates a branch and moves you onto it.
-- `git merge` brings branch work back to `main`.
+- `git push -u origin ...` publishes the reviewable branch.
 
 ## Reset
 

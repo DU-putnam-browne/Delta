@@ -31,10 +31,10 @@ Main module groups:
 
 Git workflow path currently includes:
 
-- `Ticket to First PR`
+- `Git Workflow 1: Ticket to PR`
 - `Git Practice Lab`
-- `Project Capsule Workflow`
-- `Git Lab 3: Repo Review Kit`
+- `Git Workflow 3: Project Capsule and Workstreams`
+- `Git Workflow 4: Repo Review and Handoff`
 
 ## Recent implemented changes
 

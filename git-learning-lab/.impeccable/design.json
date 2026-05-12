@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-12T00:00:00Z",
+  "title": "Design System: Analyst Engineering Enablement Lab",
+  "extensions": {
+    "colorMeta": {
+      "electric-blue": {
+        "role": "primary",
+        "displayName": "Electric Blue",
+        "canonical": "#0042FF",
+        "tonalRamp": [
+          "#07133A",
+          "#082652",
+          "#0030BD",
+          "#0042FF",
+          "#3B68FF",
+          "#6F93FF",
+          "#B8CCFF",
+          "#EAF1FF"
+        ]
+      },
+      "midnight-navy": {
+        "role": "primary",
+        "displayName": "Midnight Navy",
+        "canonical": "#082652",
+        "tonalRamp": [
+          "#040B16",
+          "#07111F",
+          "#082652",
+          "#123A76",
+          "#46699A",
+          "#7C96B8",
+          "#AEBBD0",
+          "#EAF1FF"
+        ]
+      },
+      "crisp-mint": {
+        "role": "secondary",
+        "displayName": "Crisp Mint",
+        "canonical": "#C3F4E6",
+        "tonalRamp": [
+          "#16372E",
+          "#205446",
+          "#2D7963",
+          "#43A98A",
+          "#70E7C4",
+          "#9EF0D8",
+          "#C3F4E6",
+          "#EDFDF8"
+        ]
+      },
+      "spring-green": {
+        "role": "secondary",
+        "displayName": "Spring Green",
+        "canonical": "#14C614",
+        "tonalRamp": [
+          "#0B2B0B",
+          "#0E4B0E",
+          "#117D11",
+          "#14C614",
+          "#43D96D",
+          "#7DE89A",
+          "#B5F1C0",
+          "#EAFBEF"
+        ]
+      },
+      "golden-yellow": {
+        "role": "tertiary",
+        "displayName": "Golden Yellow",
+        "canonical": "#FFB30B",
+        "tonalRamp": [
+          "#2F1E00",
+          "#694400",
+          "#9F6D00",
+          "#D89300",
+          "#FFB30B",
+          "#FFC95C",
+          "#FFE2A9",
+          "#FFF6DE"
+        ]
+      },
+      "graphite-ink": {
+        "role": "neutral",
+        "displayName": "Graphite Ink",
+        "canonical": "#333333",
+        "tonalRamp": [
+          "#111111",
+          "#1C1C1C",
+          "#333333",
+          "#5F6875",
+          "#888F99",
+          "#B5BAC1",
+          "#DDDDDD",
+          "#F7F8FB"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Major course and resume banners."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Primary page and module headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section and panel titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Instructional and explanatory copy."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Kickers, pills, and compact navigation signals."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-panel",
+        "value": "0 14px 34px rgba(8, 38, 82, 0.09)",
+        "purpose": "Default panel separation in light mode."
+      },
+      {
+        "name": "deep-modal",
+        "value": "0 24px 70px rgba(7, 17, 31, 0.32)",
+        "purpose": "Blocking modal emphasis only."
+      },
+      {
+        "name": "dark-ambient",
+        "value": "0 18px 44px rgba(0, 0, 0, 0.34)",
+        "purpose": "Panel separation in dark mode."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-fast",
+        "value": "120ms ease",
+        "purpose": "Default button and control response."
+      },
+      {
+        "name": "ease-state",
+        "value": "160ms ease-out",
+        "purpose": "Card and quiz entrance transitions."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xl",
+        "value": "1500px"
+      },
+      {
+        "name": "lg",
+        "value": "1180px"
+      },
+      {
+        "name": "md",
+        "value": "960px"
+      },
+      {
+        "name": "sm",
+        "value": "520px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Use for the main commitment on a screen, such as starting a path or continuing a guided action.",
+      "html": "<button class=\"ds-btn-primary\">Start guided path</button>",
+      "css": ".ds-btn-primary { background: #0042FF; color: #FFFFFF; padding: 0 14px; min-height: 42px; border: 1px solid #0042FF; border-radius: 8px; font-family: Rubik, Arial, sans-serif; font-weight: 800; transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease; } .ds-btn-primary:hover { transform: translateY(-1px); background: #0030BD; border-color: #0030BD; } .ds-btn-primary:focus-visible { outline: 2px solid #FFB30B; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Action Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Use for optional or supporting actions that should not outrank the primary path.",
+      "html": "<button class=\"ds-btn-secondary\">How to</button>",
+      "css": ".ds-btn-secondary { background: #FFFFFF; color: #333333; padding: 0 12px; min-height: 40px; border: 1px solid #DDDDDD; border-radius: 8px; font-family: Arial, system-ui, sans-serif; font-weight: 700; transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease; } .ds-btn-secondary:hover { transform: translateY(-1px); border-color: #9EB4D3; background: #EEF6FF; } .ds-btn-secondary:focus-visible { outline: 2px solid #0042FF; outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Pill",
+      "kind": "chip",
+      "refersTo": "status-pill",
+      "description": "Use for compact progress or recommendation metadata.",
+      "html": "<span class=\"ds-status-pill\">4 Git-focused modules</span>",
+      "css": ".ds-status-pill { display: inline-flex; align-items: center; min-height: 28px; padding: 4px 10px; border-radius: 999px; background: #C3F4E6; color: #082652; font-family: Rubik, Arial, sans-serif; font-size: 0.76rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }"
+    },
+    {
+      "name": "Course Card",
+      "kind": "card",
+      "refersTo": "course-card",
+      "description": "Use for major path cards and structured learning modules.",
+      "html": "<article class=\"ds-course-card\"><span class=\"ds-course-kicker\">Primary path</span><h3>Git workflow labs</h3><p>Build the ticket-to-branch-to-PR loop before using support modules.</p></article>",
+      "css": ".ds-course-card { padding: 20px; border: 1px solid #DDDDDD; border-top: 5px solid #0042FF; border-radius: 8px; background: linear-gradient(135deg, rgba(195, 244, 230, 0.52), rgba(255, 255, 255, 0) 48%), #FFFFFF; box-shadow: 0 14px 34px rgba(8, 38, 82, 0.09); } .ds-course-card h3 { margin: 6px 0 8px; color: #082652; font-family: Rubik, Arial, sans-serif; font-size: 1.6rem; line-height: 1.08; } .ds-course-card p { margin: 0; color: #5F6875; font-family: Arial, system-ui, sans-serif; line-height: 1.45; } .ds-course-kicker { color: #0042FF; font-family: Rubik, Arial, sans-serif; font-size: 0.76rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }"
+    },
+    {
+      "name": "Terminal Surface",
+      "kind": "custom",
+      "refersTo": "terminal-surface",
+      "description": "Use for guided command practice and simulator action surfaces.",
+      "html": "<section class=\"ds-terminal\"><div class=\"ds-terminal-line ds-terminal-prompt\">PS C:\\\\Training\\\\OracleGitLab&gt; git status</div><div class=\"ds-terminal-line ds-terminal-success\">On branch feature/demo</div></section>",
+      "css": ".ds-terminal { padding: 12px; border: 1px solid #082652; border-radius: 8px; background: #082652; box-shadow: 0 14px 34px rgba(8, 38, 82, 0.09); font-family: 'Cascadia Mono', Consolas, monospace; } .ds-terminal-line { margin: 0 0 8px; color: #C3F4E6; white-space: pre-wrap; } .ds-terminal-prompt { color: #FFFFFF; } .ds-terminal-success { color: #C3F4E6; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Grid Control With Electric Pulse",
+    "overview": "This system is a product interface first, not a campaign site, but it should still feel unmistakably Delta Utilities. The official brand gives us the core posture: reliable, knowledgeable, clear, confident, and helpful. The current lab already hints at a useful visual twist, Delta Utilities meets vaporwave, and that is worth keeping as long as it stays disciplined. The result should feel electric, not chaotic. Operational, not sterile.\n\nThe system should read like a calm internal control surface energized by sharp blue signal, mint confirmation, and selective yellow urgency. It should never feel like compliance training and never feel like startup theater. The learner should sense competence and motion without being overloaded. That means product-grade hierarchy, strong wayfinding, and a few high-voltage color moments used intentionally rather than everywhere at once.\n\nThis system explicitly rejects generic LMS dashboards, flashy bootcamp marketing pages, terminal cosplay, dense documentation walls, and playful or patronizing onboarding. The lab exists to get learners to the next real move fast, with enough visual personality to stay memorable.",
+    "keyCharacteristics": [
+      "Electric blue and midnight navy carry the system identity.",
+      "Mint and green signal progress, readiness, and safety.",
+      "Yellow is scarce and used for attention, not decoration.",
+      "Rubik handles direction and hierarchy, Arial keeps body copy universally readable.",
+      "Panels feel structured and product-like, with light gradients and subtle atmosphere instead of decorative noise.",
+      "The interface favors task clarity over symmetry, and sequence over spectacle."
+    ],
+    "rules": [
+      {
+        "name": "The Electric Discipline Rule",
+        "body": "Electric Blue is the voice, not the wallpaper. It leads actions, status, and hierarchy. It does not flood the entire screen.",
+        "section": "colors"
+      },
+      {
+        "name": "The Yellow Scarcity Rule",
+        "body": "Golden Yellow is reserved for look here now moments: active steps, warnings, and guided emphasis. If yellow becomes ambient, it stops teaching.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mint Means Progress Rule",
+        "body": "Crisp Mint and Spring Green represent support, success, readiness, and recovery. They should calm the interface, not compete with primary action.",
+        "section": "colors"
+      },
+      {
+        "name": "The Utility First Rule",
+        "body": "Use typography to direct, not to decorate. If the learner cannot tell what to read first, the hierarchy failed.",
+        "section": "typography"
+      },
+      {
+        "name": "The Plain Body Rule",
+        "body": "Body text stays in Arial. Do not get clever with body typography. The lab teaches unfamiliar technical concepts, and readability wins.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat By Default Rule",
+        "body": "A panel earns lift only when it needs separation or focus. If everything floats, nothing does.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Terminal Contrast Rule",
+        "body": "Deep navy and near-black terminal surfaces provide their own sense of depth. Do not stack extra elevation tricks on top.",
+        "section": "elevation"
+      },
+      {
+        "name": "The First Move Rule",
+        "body": "In guided modes, the current step and next command outrank every secondary surface, including repo explorer, glossary, and quiz.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do lead with task clarity: where am I, what do I do now, what does success look like.",
+      "Do use Electric Blue (#0042FF) and Midnight Navy (#082652) as the main identity pair.",
+      "Do keep body copy in Arial and use Rubik for headings, labels, and directional emphasis.",
+      "Do use Mint and Green to reinforce progress, safety, and successful learning moments.",
+      "Do keep secondary reference content collapsible so the primary learning path remains dominant.",
+      "Do distinguish real commands from simulator-only actions visually and verbally.",
+      "Do keep gradients atmospheric and sparse. Light blue-mint wash is acceptable. Decorative gradient theater is not.",
+      "Do maintain WCAG-conscious color pairings in line with the brand guide’s accessibility standard."
+    ],
+    "donts": [
+      "Don't make the product feel like a generic LMS dashboard that feels like compliance training.",
+      "Don't make it feel like a flashy bootcamp marketing site that over-promises mastery.",
+      "Don't make it look like terminal cosplay interfaces that look technical but do not teach real habits.",
+      "Don't make it feel like a dense documentation portal that expects learners to read everything before acting.",
+      "Don't use playful or patronizing onboarding that undercuts the seriousness of the work.",
+      "Don't flood the interface with blue, mint, and yellow at the same time. That kills hierarchy.",
+      "Don't use yellow as decoration. Yellow is for urgency, current move, and guided emphasis only.",
+      "Don't let cards, quizzes, glossaries, and support modules compete equally with the current lesson action.",
+      "Don't use purple-forward vaporwave cues. The lab can feel electric, but it still belongs to Delta Utilities."
+    ]
+  }
+}

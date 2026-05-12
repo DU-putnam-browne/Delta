@@ -2,11 +2,20 @@ const STORAGE_KEY = "git-learning-lab-state-v6";
 const THEME_KEY = "git-learning-lab-theme";
 const PS_ROOT = "C:\\Training";
 const PS_PROMPT = "PS C:\\Training\\OracleGitLab>";
-const CODEX_DEFAULT_CWD = "C:\\Users\\Analyst";
+const CODEX_DEFAULT_CWD = "C:\\Users\\PutnamBrowne";
+const CODEX_OLD_DEFAULT_CWD = "C:\\Users\\Analyst";
+const LOCAL_WINDOWS_USER = "azuread\\putnambrowne";
+const LOCAL_NODE_VERSION = "v24.14.1";
+const LOCAL_NPM_VERSION = "11.11.0";
+const LOCAL_CODEX_VERSION = "codex-cli 0.118.0";
+const POWERSHELL_CODEX_SHIM_BLOCKER =
+  "PowerShell tried to run codex.ps1, but this workstation blocks scripts by policy. Use codex.cmd for this lesson.";
+const POWERSHELL_NPM_SHIM_BLOCKER =
+  "PowerShell tried to run npm.ps1, but this workstation blocks scripts by policy. Use npm.cmd for this lesson.";
 const QUIZ_VISIBLE_COUNT = 3;
 const QUIZ_EXIT_DELAY_MS = 360;
 const QUIZ_OPTION_ORDER_VERSION = 2;
-const QUIZ_SESSION_VERSION = 2;
+const QUIZ_SESSION_VERSION = 3;
 const QUIZ_ROUND_COUNT = 3;
 const QUIZ_ROUND_UNLOCK_SCORE = 10;
 
@@ -27,6 +36,9 @@ const oracleLab = {
 const ADO_REPO_URL = "https://dev.azure.com/deltautilities-it/Data%20and%20Analytics%20Projects/_git/Oracle";
 const CLONED_REPO_FOLDER = "Oracle";
 const ORACLE_REPO_ROOT = "C:\\Repositories\\Oracle";
+const LEARN_GIT_BRANCHING_URL = "file:///C:/Repositories/learnGitBranching/index.html";
+const LEARN_GIT_BRANCHING_REPO_URL = "https://github.com/pcottle/learnGitBranching";
+const VISUAL_BRANCHING_LAB_ID = "visual-branching";
 
 const projectLab = {
   folder: "longer-oracle-project",
@@ -164,16 +176,17 @@ const oracleRepoMap = [
 const modules = [
   {
     id: "git-basics",
-    title: "Ticket to First PR",
+    title: "Git Workflow 1: Ticket to PR",
     level: "Beginner",
     time: "60 min",
     description:
       "Start from an ADO-style request, make a scoped branch change, review the diff, publish the branch, and understand what the PR must prove.",
     outcomes: [
+      "Understand Git identity versus Azure DevOps sign-in",
       "Clone and inspect an ADO-hosted repo safely",
       "Anchor work to a ticket",
       "Pull latest main before branching",
-      "Use a safe task branch",
+      "Create a safe task branch from current main",
       "Read status and history",
       "Review the diff before committing",
       "Publish a branch for PR review",
@@ -181,26 +194,36 @@ const modules = [
     ],
     lessons: [
       ["Why Git is here", "Traceability, safer review, and easier handoff."],
+      ["Identity and access", "Git config names your commits; Azure DevOps sign-in controls clone, fetch, push, and PR access."],
       ["Why ADO matters", "The ticket anchors the business request and review context."],
       ["Why review discipline matters", "Branches and PR notes make the handoff easier to audit."]
     ],
     resources: [["Git Docs", "https://git-scm.com/docs"]],
     labTitle: "Ticket-to-PR scenario",
-    labSteps: ["Clone repo", "Inspect remote", "Pull main", "Branch", "Diff review", "Publish", "PR gate"],
+    labSteps: ["Identity", "Clone repo", "Inspect remote", "Pull main", "Branch", "Diff review", "Publish", "PR gate"],
     meetingContext: [
-      "Default workflow: clone -> inspect remote -> pull main -> branch -> diff review -> focused commit -> publish -> PR.",
+      "Access workflow: Git identity labels your commits; Azure DevOps sign-in authorizes clone, fetch, push, and PR actions.",
+      "Default workflow: identify -> clone -> inspect remote -> pull main -> branch from current main -> diff review -> focused commit -> publish -> PR.",
       "Demo request: CCS emergency orders by ZIP for the prior completed Monday-Sunday week.",
-      "Good habits: small branch, honest validation notes, clear reviewer focus."
+      "Good habits: know who you are committing as, use a small branch, write honest validation notes, and give reviewers a clear focus."
     ],
     commands: [
+      { cmd: "git config --global user.name", desc: "Shows the name Git will stamp on local commits" },
+      { cmd: "git config --global user.email", desc: "Shows the email Git will stamp on local commits" },
       { cmd: `git clone ${ADO_REPO_URL}`, desc: "Clones the Oracle repo from Azure DevOps" },
       { cmd: `cd ${CLONED_REPO_FOLDER}`, desc: "Moves into the cloned Oracle repo" },
-      { cmd: "git remote -v", desc: "Confirms the origin remote points to Azure DevOps" },
-      { cmd: "git status", desc: "Shows current file changes" },
+      {
+        cmd: "git remote -v",
+        desc: "Confirms the origin remote points to Azure DevOps",
+        recommended: [{ cmd: "git status", desc: "Optional checkpoint: confirm the working tree before pulling" }]
+      },
       { cmd: "git pull", desc: "Confirms local main is current before branching" },
-      { cmd: `git switch -c ${oracleLab.branchName}`, desc: "Creates and switches to the task branch" },
-      { cmd: `edit ${oracleLab.featureFile}`, desc: "Adds the demo SQL file on the task branch" },
-      { cmd: "git status", desc: "Shows the branch-specific SQL change" },
+      { cmd: `git switch -c ${oracleLab.branchName}`, desc: "Creates a new task branch from current main and switches to it" },
+      {
+        cmd: `edit ${oracleLab.featureFile}`,
+        desc: "Adds the demo SQL file on the task branch",
+        recommended: [{ cmd: "git status", desc: "Optional checkpoint: confirm Git sees the branch change" }]
+      },
       { cmd: "git diff", desc: "Reviews the SQL change before staging" },
       { cmd: `git add ${oracleLab.featureFile}`, desc: "Stages the SQL asset for review" },
       { cmd: `git commit -m "${oracleLab.featureCommitMessage}"`, desc: "Creates a branch commit for the report asset" },
@@ -209,6 +232,18 @@ const modules = [
       { cmd: `git merge ${oracleLab.branchName}`, desc: "Completes the simulated PR merge back to main" }
     ],
     quiz: [
+      {
+        question: "What does Git commit identity control?",
+        options: ["The name and email stamped on commits", "ADO sign-in permissions", "SQL query runtime", "The branch merge strategy"],
+        answer: "The name and email stamped on commits",
+        feedback: "Git config identity labels commits. Azure DevOps sign-in controls remote access."
+      },
+      {
+        question: "When does Azure DevOps sign-in matter?",
+        options: ["Clone, fetch, push, and PR access", "Only when typing git status", "Only after merging locally", "Only inside SQL files"],
+        answer: "Clone, fetch, push, and PR access",
+        feedback: "Remote operations and PR work require ADO access; local status and diff do not."
+      },
       {
         question: "In the team workflow, what should anchor the work?",
         options: ["ADO ticket", "Random local file", "Chat memory", "An unnamed branch"],
@@ -246,6 +281,12 @@ const modules = [
         feedback: "Branches keep work isolated so review and handoff are easier."
       },
       {
+        question: "What does creating a task branch from main mean?",
+        options: ["Make a new branch pointer at current main", "Copy the whole remote server", "Delete main", "Log in to ADO"],
+        answer: "Make a new branch pointer at current main",
+        feedback: "People may say fork off a branch, but in Git this workflow creates a branch pointer from the current main commit."
+      },
+      {
         question: "Why run git pull before creating the branch?",
         options: ["Start from current main", "Delete the remote", "Skip the diff", "Create a merge conflict"],
         answer: "Start from current main",
@@ -261,7 +302,7 @@ const modules = [
   },
   {
     id: "project-work",
-    title: "Project Capsule Workflow",
+    title: "Git Workflow 4: Project Capsule and Workstreams",
     level: "Beginner",
     time: "45 min",
     description:
@@ -303,16 +344,22 @@ const modules = [
       { cmd: "git init", desc: "Initializes a new Git repository" },
       { cmd: `"${projectLab.readmeContent}" | Out-File ${projectLab.readmeFile}`, desc: "Creates the brief project README on main" },
       { cmd: `"${projectLab.decisionContent}" | Out-File ${projectLab.decisionFile}`, desc: "Creates the decision index on main" },
-      { cmd: `"${projectLab.workstreamsContent}" | Out-File ${projectLab.workstreamsFile}`, desc: "Creates the workstream tracker for parallel work" },
-      { cmd: "git status", desc: "Shows the project capsule files before staging" },
+      {
+        cmd: `"${projectLab.workstreamsContent}" | Out-File ${projectLab.workstreamsFile}`,
+        desc: "Creates the workstream tracker for parallel work",
+        recommended: [{ cmd: "git status", desc: "Optional checkpoint: review the project capsule files before staging" }]
+      },
       {
         cmd: `git add ${projectLab.readmeFile} ${projectLab.decisionFile} ${projectLab.workstreamsFile}`,
         desc: "Stages the project capsule files together"
       },
       { cmd: `git commit -m "${projectLab.capsuleCommitMessage}"`, desc: "Commits the project capsule on main" },
       { cmd: `git switch -c ${projectLab.branchName}`, desc: "Creates a focused branch for one workstream" },
-      { cmd: `edit ${projectLab.workstreamsFile}`, desc: "Updates workstream notes on the branch" },
-      { cmd: "git status", desc: "Shows the branch-specific workstream change" },
+      {
+        cmd: `edit ${projectLab.workstreamsFile}`,
+        desc: "Updates workstream notes on the branch",
+        recommended: [{ cmd: "git status", desc: "Optional checkpoint: confirm the workstream update is the only open change" }]
+      },
       { cmd: "git diff", desc: "Reviews the workstream note before staging" },
       { cmd: `git add ${projectLab.workstreamsFile}`, desc: "Stages the workstream update" },
       { cmd: `git commit -m "${projectLab.workstreamCommitMessage}"`, desc: "Commits the focused workstream update" },
@@ -344,12 +391,13 @@ const modules = [
 ];
 
 const lessonCommandGroups = [
-  [0, 1, 2, 3, 4],
-  [5],
+  [0, 1],
+  [2, 3, 4, 5],
   [6],
-  [7, 8, 9, 10],
-  [11, 12, 13],
-  [14, 15]
+  [7],
+  [8, 9, 10],
+  [11],
+  [12, 13]
 ];
 
 const projectLessons = [
@@ -365,9 +413,9 @@ const projectLessons = [
     title: "Project Capsule on Main",
     concept:
       "README and decision-index are the required starting point for longer work. workstreams.md is added when collaborators or parallel tracks are involved.",
-    task: "Create README, decision-index, and workstreams files under the project folder.",
+    task: "Create README, decision-index, and workstreams files under the project folder. Use git status as an optional checkpoint.",
     hint: "These files are intentionally brief. They prevent the project from depending on chat memory.",
-    complete: (state) => state.guidedStep >= 7
+    complete: (state) => state.guidedStep >= 6
   },
   {
     title: "Commit Project Context",
@@ -375,15 +423,15 @@ const projectLessons = [
       "The project capsule belongs on main because it is shared context, not one person's feature work.",
     task: "Stage and commit the project context files on main.",
     hint: "This makes decisions and next steps visible before workstreams branch out.",
-    complete: (state) => state.guidedStep >= 9
+    complete: (state) => state.guidedStep >= 8
   },
   {
     title: "Branch a Workstream",
     concept:
       "Once the capsule exists, everyday work returns to the normal branch model.",
-    task: "Create a focused branch, update the workstream tracker, and review the diff.",
+    task: "Create a focused branch, update the workstream tracker, and review the diff. Use git status as an optional checkpoint.",
     hint: "The branch carries one workstream while main keeps the project map.",
-    complete: (state) => state.guidedStep >= 13
+    complete: (state) => state.guidedStep >= 11
   },
   {
     title: "Commit Workstream Progress",
@@ -391,7 +439,7 @@ const projectLessons = [
       "A workstream commit should explain what moved, what remains open, and what reviewers should inspect.",
     task: "Stage, commit, and publish the workstream update.",
     hint: "Small commits and published branches keep longer projects reviewable even when the project is broad.",
-    complete: (state) => state.guidedStep >= 16 || (state.taskFlags.branchCommitted && state.taskFlags.pushed)
+    complete: (state) => state.guidedStep >= 14 || (state.taskFlags.branchCommitted && state.taskFlags.pushed)
   },
   {
     title: "Merge and Continue",
@@ -405,11 +453,11 @@ const projectLessons = [
 
 const projectLessonCommandGroups = [
   [0, 1, 2],
-  [3, 4, 5, 6],
-  [7, 8],
-  [9, 10, 11, 12],
-  [13, 14, 15],
-  [16, 17]
+  [3, 4, 5],
+  [6, 7],
+  [8, 9, 10],
+  [11, 12, 13],
+  [14, 15]
 ];
 
 const codexLab = {
@@ -437,18 +485,18 @@ const codexLab = {
       steps: [
         {
           label: "Check Node and npm",
-          command: "node --version; npm --version",
+          command: "node --version; npm.cmd --version",
           detail: "Confirms the JavaScript runtime and package manager are available before installing Codex."
         },
         {
           label: "Install Codex CLI",
-          command: "npm install -g @openai/codex",
+          command: "npm.cmd install -g @openai/codex",
           detail: "Installs the Codex command globally so PowerShell can run it from any repo folder."
         },
         {
           label: "Sign in",
-          command: "codex login",
-          detail: "Starts the sign-in flow. Use the company-approved OpenAI account or API-key workflow."
+          command: "codex.cmd login",
+          detail: "Starts the sign-in flow. In Windows PowerShell, codex.cmd avoids the blocked codex.ps1 shim."
         },
         {
           label: "Open the repo",
@@ -457,12 +505,12 @@ const codexLab = {
         },
         {
           label: "Start Codex",
-          command: "codex",
+          command: "codex.cmd",
           detail: "Launches Codex in the current repo. Start in the default review-oriented mode until learners are comfortable."
         }
       ],
       notes: [
-        "Run install and login once per workstation, then run codex from the project root when you need help.",
+        "Run install and login once per workstation, then run codex.cmd from the project root when you need help.",
         "If the CLI has trouble on Windows, use the official setup page and follow the current Windows or WSL guidance.",
         "Use git status before and after a Codex session so changes stay visible and reviewable."
       ],
@@ -471,7 +519,7 @@ const codexLab = {
         "I know to launch Codex from the repo root, not a random folder.",
         "I can explain why git status belongs before and after a Codex session."
       ],
-      updateCommand: "codex --upgrade"
+      updateCommand: "codex.cmd --upgrade"
     },
     {
       type: "workflow",
@@ -484,7 +532,7 @@ const codexLab = {
       cards: [
         {
           label: "Access and setup",
-          command: "codex login",
+          command: "codex.cmd login",
           detail: "Confirm the CLI opens and the learner knows which approved account or key workflow to use."
         },
         {
@@ -509,7 +557,7 @@ const codexLab = {
         }
       ],
       readyChecklist: [
-        "I can launch Codex from the repo root.",
+        "I can launch Codex from the repo root with the Windows-safe command.",
         "I can run read-only orientation commands before edits.",
         "I can ask for inspection and a plan before implementation."
       ],
@@ -680,16 +728,16 @@ const codexLab = {
     },
     {
       type: "workflow",
-      title: "Automation With codex exec",
+      title: "Automation With codex.cmd exec",
       kicker: "Repeatable, reviewable output",
       intro:
-        "Use codex exec for stable, repeatable tasks with a clear output file. Keep judgment-heavy or risky work interactive.",
+        "Use codex.cmd exec for stable, repeatable tasks with a clear output file. Keep judgment-heavy or risky work interactive.",
       task: "Decide whether a task belongs in interactive Codex or a repeatable exec command.",
-      reference: "codex exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
+      reference: "codex.cmd exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
       cards: [
         {
           label: "Good fit",
-          command: "codex exec \"Summarize this repo in markdown\" > REPO_NOTES.md",
+          command: "codex.cmd exec \"Summarize this repo in markdown\" > REPO_NOTES.md",
           detail: "Works well when the prompt, output file, and review step are stable."
         },
         {
@@ -709,7 +757,7 @@ const codexLab = {
         }
       ],
       readyChecklist: [
-        "I can identify tasks that are stable enough for codex exec.",
+        "I can identify tasks that are stable enough for codex.cmd exec.",
         "I can write output to a reviewable file.",
         "I can name the manual checkpoint that remains after automation."
       ],
@@ -717,7 +765,7 @@ const codexLab = {
     }
   ],
   setupUrl: "https://openai.com/codex/get-started/",
-  cliCommand: "npm install -g @openai/codex"
+  cliCommand: "npm.cmd install -g @openai/codex"
 };
 
 const codexSectionOrder = [
@@ -729,7 +777,7 @@ const codexSectionOrder = [
   "Using Codex for ADO Ticket Orientation",
   "First Codex Sessions",
   "Analyst Workflows With Codex",
-  "Automation With codex exec"
+  "Automation With codex.cmd exec"
 ];
 const codexSectionOrderSet = new Set(codexSectionOrder);
 codexLab.sections = [
@@ -837,16 +885,16 @@ const codexPracticePacks = [
 
 const capstoneLab = {
   id: "repo-review-kit",
-  title: "GIT Lab 3: Repo Review Kit",
-  level: "Capstone",
-  time: "Self-paced",
-  labTitle: "Analyst repo review kit",
+  title: "Git Workflow 5: Repo Review and Handoff",
+  level: "Advanced",
+  time: "45 min",
+  labTitle: "Handoff package",
   description:
-    "A capstone workflow for turning Codex-assisted repo inspection into durable files that support review, handoff, and PR readiness.",
+    "Turn repo inspection into durable review notes, SQL lineage, data-quality checks, and a final handoff summary.",
   section: {
     type: "workflow",
-    title: "Analyst Repo Review Kit",
-    kicker: "GIT Lab 3",
+    title: "Repo Review and Handoff",
+    kicker: "Git Workflow 5",
     intro:
       "Use Git discipline and Codex prompts together: inspect the repo, create one reviewable artifact at a time, then review the diff before committing.",
     task: "Simulate a small repo-review package that could support a PR or handoff.",
@@ -963,9 +1011,9 @@ const codexPromptLibrary = [
           "Before making any change, tell me the main risks, the commands you plan to run, whether any command is destructive, what assumptions you are making, and how you will keep the diff small and reversible."
       },
       {
-        label: "codex exec design",
+        label: "codex.cmd exec design",
         text:
-          "Design a safe codex exec workflow for this repo. Define the exact prompt, output file, validation step, and the parts that should remain manual. Optimize for repeatability, not cleverness."
+          "Design a safe codex.cmd exec workflow for this repo. Define the exact prompt, output file, validation step, and the parts that should remain manual. Optimize for repeatability, not cleverness."
       }
     ]
   },
@@ -985,111 +1033,105 @@ const vscodeLab = {
   labTitle: "Editor workflow",
   setupUrl: "https://code.visualstudio.com/download",
   description:
-    "A hands-on bridge from Codex and Git concepts into the editor: setup extensions, open the repo, find files, review diffs, stage commits, and recognize conflicts.",
+    "Learn the real editor loop: configure VS Code, open the Oracle repo folder, navigate to a SQL file, make a scoped edit, review the change, and commit.",
+  story: {
+    role: "Analyst on the Data Analytics team",
+    need: "Finance needs the arrearage detail export to carry clear handoff metadata before the next refresh.",
+    background:
+      "A recurring arrearage detail SQL asset exists in the Oracle repo, but the file header does not clearly say what export it produces or how downstream refresh owners should validate it. You are not rebuilding the query. Your job is to open the repo in VS Code, find the right SQL file, add a small reviewable header update, inspect the diff, and save a local commit.",
+    outcome:
+      "By the end, the learner should understand the editor loop: repository folder context first, file navigation second, focused edit third, Source Control review fourth, commit last."
+  },
   extensions: [
     {
       name: "PowerShell",
       id: "ms-vscode.PowerShell",
-      command: "code --install-extension ms-vscode.PowerShell",
+      command: "code.cmd --install-extension ms-vscode.PowerShell",
       reason: "PowerShell syntax, IntelliSense, script help, and a familiar terminal experience."
     },
     {
       name: "GitLens",
       id: "eamodio.gitlens",
-      command: "code --install-extension eamodio.gitlens",
+      command: "code.cmd --install-extension eamodio.gitlens",
       reason: "Commit history, branch context, blame, and easier review of who changed what."
     },
     {
       name: "Oracle SQL Developer",
       id: "Oracle.sql-developer",
-      command: "code --install-extension Oracle.sql-developer",
+      command: "code.cmd --install-extension Oracle.sql-developer",
       reason: "Oracle SQL editing, schema navigation, worksheets, and database-focused SQL support."
     }
   ],
   sections: [
     {
-      title: "Install Required Extensions",
+      title: "Configure the Editor",
       kicker: "Tool setup",
       intro:
-        "Start with a lean, required extension set so everyone sees the same PowerShell, Git, and Oracle SQL affordances in VS Code.",
+        "Start with a lean, required setup so VS Code has PowerShell, Git context, and Oracle SQL support before repo work begins.",
       checklist: [
         "Install the PowerShell extension",
         "Install GitLens",
         "Install Oracle SQL Developer for VS Code",
-        "Confirm Extensions shows the three tools as installed"
+        "Confirm the integrated terminal uses PowerShell"
       ],
       callout: "Keep this list required and small. Extra extensions can wait until the core workflow is understood.",
-      command: "code --install-extension ms-vscode.PowerShell"
+      command: "code.cmd --install-extension ms-vscode.PowerShell"
     },
     {
-      title: "Open the Workspace",
+      title: "Open the Oracle Repository",
       kicker: "Repo context",
       intro:
-        "Open the repo folder, not a single loose file. Explorer, search, terminal, Source Control, and Codex all depend on folder context.",
+        "Open the repository folder, not a single loose file. Explorer, Search, Source Control, terminal, and Codex all depend on folder context.",
       checklist: [
-        "Open VS Code",
         `Open folder: ${ORACLE_REPO_ROOT}`,
         "Confirm the Explorer shows the Oracle working tree",
-        "Confirm the status bar shows the current Git branch"
+        "Confirm the terminal prompt starts inside C:\\Repositories\\Oracle",
+        "Confirm the status bar shows the current branch"
       ],
       callout: "If VS Code is opened on one loose file, Git context and repo search will feel broken.",
-      command: `code ${ORACLE_REPO_ROOT}`
+      command: `code.cmd ${ORACLE_REPO_ROOT}`
     },
     {
-      title: "Navigate the Oracle Repo",
+      title: "Navigate and Open a SQL File",
       kicker: "File discovery",
       intro:
-        "Use Explorer for known folders, Quick Open for known file names, and Search when you only know a term, table, or ticket phrase.",
+        "Use Explorer when you know the repo path, Quick Open when you know the file name, and Search when you only know a table or ticket phrase.",
       checklist: [
-        "Use Explorer to expand ccs/sql/meters",
-        "Use Ctrl+P to jump to a file by name",
-        "Use Ctrl+Shift+F to search across the repo",
-        "Open related SQL files side by side before changing anything"
+        "Expand Oracle > ccs > sql > accounts",
+        "Open ccs_arrearage_detail_report.sql",
+        "Use Ctrl+P to jump by file name when needed",
+        "Read neighboring SQL before editing"
       ],
-      callout: "For this lab, the target area is ccs/sql/meters. Similar neighboring SQL files are your pattern library.",
-      command: "rg --files -g \"*.sql\""
+      callout: "For this lab, the target area is ccs/sql/accounts. Neighboring reports are the pattern library.",
+      command: `code.cmd --goto ${vscodeTargetSqlFile()}:1`
     },
     {
-      title: "Edit, Diff, Stage, Commit",
+      title: "Edit and Review the Change",
       kicker: "Reviewable change",
       intro:
-        "The editor, integrated terminal, and Source Control panel are three views of the same repo state. Make the change visible before saving a checkpoint.",
+        "Make one small SQL edit, then use Source Control and the integrated terminal to inspect exactly what changed.",
       checklist: [
         "Open the target SQL file",
-        "Use the diff view to inspect exactly what changed",
-        "Stage only the intended file",
-        "Commit with a message tied to the work request"
+        "Add a small export header comment",
+        "Use Source Control to see the changed file",
+        "Use git diff before staging"
       ],
-      callout: "Source Control is the safety rail: changed files, staged files, and commit history should all agree.",
-      command: `git add ${oracleLab.featureFile}`
+      callout: "Source Control is the safety rail: changed files, editor tabs, and terminal diff should all agree.",
+      command: `edit ${vscodeTargetSqlFile()}`
     },
     {
-      title: "Branch and PR Readiness",
-      kicker: "Review prep",
+      title: "Stage and Commit",
+      kicker: "Local checkpoint",
       intro:
-        "Create the task branch, keep work scoped, and gather the details reviewers need before opening a pull request.",
+        "Stage only the intended SQL file, commit with a clear message, and confirm the working tree is clean.",
       checklist: [
-        "Run git status before editing",
-        "Create or switch to the task branch",
-        "Confirm the branch name maps to the work request",
-        "Prepare summary, validation, assumptions, and reviewer focus"
+        "Run git status",
+        "Stage the edited SQL file",
+        "Commit with a work-focused message",
+        "Confirm status is clean after commit"
       ],
-      callout: "Branch, changed files, and PR notes should tell the same story.",
-      command: `git switch -c ${oracleLab.branchName}`
-    },
-    {
-      title: "Conflict Awareness",
-      kicker: "Merge safety",
-      intro:
-        "Conflicts are not magic. VS Code shows both sides, lets you choose the correct result, and still requires a staged commit afterward.",
-      checklist: [
-        "Recognize conflict markers",
-        "Use the VS Code conflict actions to compare incoming and current changes",
-        "Resolve the final file content intentionally",
-        "Stage and commit the resolution"
-      ],
-      callout: "A resolved file is not finished until Git status is clean or the resolution is staged for commit.",
-      command: "git status"
+      callout: "The aha moment is seeing Explorer, editor, Source Control, terminal, and Git status all describe the same repo state.",
+      command: `git add ${vscodeTargetSqlFile()}`
     }
   ],
   shortcuts: [
@@ -1169,7 +1211,7 @@ const oracleSqlTables = {
         ZIP_CODE: "70112",
         ACTIVITY_STATUS: "OPEN",
         ACTIVITY_TYPE: "EMERGENCY",
-        ORDER_DATE: "2026-04-28",
+        ORDER_DATE: "2026-05-06",
         COMPLETED_DATE: ""
       },
       {
@@ -1180,8 +1222,8 @@ const oracleSqlTables = {
         ZIP_CODE: "70112",
         ACTIVITY_STATUS: "CLOSED",
         ACTIVITY_TYPE: "EMERGENCY",
-        ORDER_DATE: "2026-04-29",
-        COMPLETED_DATE: "2026-04-30"
+        ORDER_DATE: "2026-05-07",
+        COMPLETED_DATE: "2026-05-08"
       },
       {
         ACTIVITY_ID: "ER-1003",
@@ -1191,7 +1233,7 @@ const oracleSqlTables = {
         ZIP_CODE: "70001",
         ACTIVITY_STATUS: "PENDING",
         ACTIVITY_TYPE: "FIELD_CHECK",
-        ORDER_DATE: "2026-04-30",
+        ORDER_DATE: "2026-05-08",
         COMPLETED_DATE: ""
       },
       {
@@ -1202,8 +1244,8 @@ const oracleSqlTables = {
         ZIP_CODE: "70123",
         ACTIVITY_STATUS: "CLOSED",
         ACTIVITY_TYPE: "EMERGENCY",
-        ORDER_DATE: "2026-05-01",
-        COMPLETED_DATE: "2026-05-02"
+        ORDER_DATE: "2026-05-09",
+        COMPLETED_DATE: "2026-05-10"
       },
       {
         ACTIVITY_ID: "ER-1005",
@@ -1213,7 +1255,7 @@ const oracleSqlTables = {
         ZIP_CODE: "70115",
         ACTIVITY_STATUS: "OPEN",
         ACTIVITY_TYPE: "EMERGENCY",
-        ORDER_DATE: "2026-05-02",
+        ORDER_DATE: "2026-05-10",
         COMPLETED_DATE: ""
       },
       {
@@ -1224,7 +1266,7 @@ const oracleSqlTables = {
         ZIP_CODE: "70001",
         ACTIVITY_STATUS: "CLOSED",
         ACTIVITY_TYPE: "FIELD_CHECK",
-        ORDER_DATE: "2026-05-03",
+        ORDER_DATE: "2026-05-02",
         COMPLETED_DATE: "2026-05-03"
       }
     ]
@@ -1399,17 +1441,17 @@ const oracleSqlLab = {
       kicker: "WHERE",
       intro:
         "WHERE turns a broad extract into the rows that matter. Start with readable filters before adding complexity.",
-      task: "Filter to open or pending emergency response activity.",
+      task: "Filter to open or pending emergency response rows only.",
       query:
-        "SELECT activity_id, zip_code, activity_status, order_date\nFROM ccs_emergency_response_activity_extract\nWHERE activity_status IN ('OPEN', 'PENDING');",
-      objectives: ["Use WHERE", "Use IN for multiple values", "Validate which statuses survive the filter"]
+        "SELECT activity_id, zip_code, activity_status, order_date\nFROM ccs_emergency_response_activity_extract\nWHERE activity_type = 'EMERGENCY'\n  AND activity_status IN ('OPEN', 'PENDING');",
+      objectives: ["Use WHERE", "Use IN for multiple values", "Validate which rows survive the filter"]
     },
     {
       id: "date-window",
       title: "Add a Date Window",
       kicker: "Oracle dates",
       intro:
-        "Oracle date filters should be explicit. TRUNC(SYSDATE) - 7 is a common rolling-window pattern for recent activity checks.",
+        "Oracle date filters should be explicit. In this lab, treat SYSDATE as 2026-05-12 so TRUNC(SYSDATE) - 7 means 2026-05-05.",
       task: "Limit the extract to the recent order window and sort newest first.",
       query:
         "SELECT activity_id, zip_code, activity_status, order_date\nFROM ccs_emergency_response_activity_extract\nWHERE order_date >= TRUNC(SYSDATE) - 7\nORDER BY order_date DESC;",
@@ -1423,7 +1465,7 @@ const oracleSqlLab = {
         "Aggregation changes the grain. The result is no longer one row per activity; it becomes one row per ZIP code.",
       task: "Count recent emergency response rows by ZIP code.",
       query:
-        "SELECT zip_code, COUNT(*) AS order_count\nFROM ccs_emergency_response_activity_extract\nWHERE order_date >= TRUNC(SYSDATE) - 7\nGROUP BY zip_code\nORDER BY order_count DESC;",
+        "SELECT zip_code, COUNT(*) AS order_count\nFROM ccs_emergency_response_activity_extract\nWHERE activity_type = 'EMERGENCY'\n  AND order_date >= TRUNC(SYSDATE) - 7\nGROUP BY zip_code\nORDER BY order_count DESC;",
       objectives: ["Use COUNT(*)", "Use GROUP BY", "State the output grain plainly"]
     },
     {
@@ -1445,7 +1487,7 @@ const oracleSqlLab = {
         "A CTE makes the final query readable: one named step for row filtering, one final step for the report output.",
       task: "Create the prior-week ZIP summary as a reviewable query.",
       query:
-        "WITH prior_week AS (\n  SELECT activity_id, zip_code, activity_status, order_date\n  FROM ccs_emergency_response_activity_extract\n  WHERE order_date >= TRUNC(SYSDATE) - 7\n)\nSELECT zip_code, COUNT(*) AS order_count\nFROM prior_week\nGROUP BY zip_code\nORDER BY order_count DESC;",
+        "WITH prior_week AS (\n  SELECT activity_id, zip_code, activity_status, order_date\n  FROM ccs_emergency_response_activity_extract\n  WHERE activity_type = 'EMERGENCY'\n    AND order_date >= TRUNC(SYSDATE) - 7\n)\nSELECT zip_code, COUNT(*) AS order_count\nFROM prior_week\nGROUP BY zip_code\nORDER BY order_count DESC;",
       objectives: ["Use WITH for readability", "Separate filtering from reporting", "Produce the ZIP summary reviewers asked for"]
     }
   ]
@@ -1453,50 +1495,58 @@ const oracleSqlLab = {
 
 const lessons = [
   {
+    title: "Access and Identity",
+    concept:
+      "Git needs a local commit identity, and Azure DevOps sign-in authorizes remote actions. These are related but not the same thing.",
+    task: "Confirm the name and email Git will stamp on commits before cloning or publishing branch work.",
+    hint: "If clone or push opens a browser or credential prompt, that is Azure DevOps authentication, not git config.",
+    complete: (state) => state.guidedStep >= 2
+  },
+  {
     title: "Setup and Context",
     concept:
-      "Start from the work request, create a local repo space, and capture the ADO-style ticket context before code changes.",
-    task: "Create the training folder, initialize Git, capture ticket context, and inspect status.",
-    hint: "This mirrors the meeting workflow: ticket first, then Git and ADO context.",
-    complete: (state) => state.guidedStep >= 5 || state.taskFlags.status
-  },
-  {
-    title: "Stage Context",
-    concept:
-      "The staging area is the review buffer between local edits and committed history.",
-    task: "Stage the README ticket context so the first checkpoint is intentional.",
-    hint: "Staging lets you choose exactly what the next commit includes.",
-    complete: (state) => state.guidedStep >= 6 || state.taskFlags.staged
-  },
-  {
-    title: "Commit Checkpoint",
-    concept:
-      "A commit is a durable checkpoint with a message and file snapshot.",
-    task: "Commit the ticket context on main before branching into task work.",
-    hint: "A clean starting checkpoint makes later review easier.",
-    complete: (state) => state.guidedStep >= 7 || state.taskFlags.committed
+      "Start from the work request, clone the repo, confirm the remote, and inspect the current baseline before making changes.",
+    task: "Clone the Oracle repo, move into it, inspect origin, and pull latest main. Run git status as an optional checkpoint.",
+    hint: "This mirrors the real ADO workflow: start from the current shared repo before branching.",
+    complete: (state) => state.guidedStep >= 6
   },
   {
     title: "Task Branch",
     concept:
-      "A branch is a safe working copy for a specific change. HEAD shows which branch you are on.",
-    task: "Create the emergency-orders task branch and add the demo SQL asset there.",
-    hint: "This is the branch reviewers would inspect in a pull request.",
-    complete: (state) => state.guidedStep >= 10 || state.taskFlags.branchCreated
+      "A branch is a safe working copy for one change. People may call this forking off main, but the Git action is creating a branch pointer at current main.",
+    task: "Create the emergency-orders feature branch from current main, then move HEAD onto it.",
+    hint: "This is the branch reviewers would inspect in a pull request. It starts from the exact main commit you just pulled.",
+    complete: (state) => state.guidedStep >= 7 || state.taskFlags.branchCreated
+  },
+  {
+    title: "Working Tree",
+    concept:
+      "The working tree holds branch-only changes until they are reviewed and committed.",
+    task: "Create the demo SQL asset on the feature branch. Use git status if you want a checkpoint before diff review.",
+    hint: "You should be able to explain what changed before you stage anything.",
+    complete: (state) => state.guidedStep >= 8 || Boolean(state.workingFiles?.[oracleLab.featureFile])
   },
   {
     title: "Reviewable Commit",
     concept:
-      "A focused branch commit makes the review surface smaller and easier to explain. Review the diff before the checkpoint.",
-    task: "Review the SQL diff, stage the file, commit it, and publish the branch.",
-    hint: "A reviewer should be able to see what changed before reading the PR summary.",
-    complete: (state) => state.guidedStep >= 14 || (state.taskFlags.branchCommitted && state.taskFlags.pushed)
+      "A focused branch commit keeps the review surface small. Diff first, then stage, then commit.",
+    task: "Review the SQL diff, stage the file, and save a focused branch commit.",
+    hint: "A reviewer should be able to understand the change before reading the PR summary.",
+    complete: (state) => state.guidedStep >= 11 || state.taskFlags.branchCommitted
+  },
+  {
+    title: "Publish and PR Readiness",
+    concept:
+      "Publishing the branch is what makes review possible outside your workstation. No branch on origin, no PR.",
+    task: "Push the feature branch to origin so the simulated PR can exist.",
+    hint: "Branch published is the point where the review loop becomes real.",
+    complete: (state) => state.guidedStep >= 12 || state.taskFlags.pushed
   },
   {
     title: "Merge and PR Readiness",
     concept:
       "A merge combines branch work back into the baseline after review. In ADO, publishing the branch is what makes the PR possible.",
-    task: "Return to main and complete the simulated PR merge.",
+    task: "Return to main and complete the simulated PR merge back to main.",
     hint: "Real completion means the branch is published, the diff is understood, and validation notes are ready for reviewers.",
     complete: (state) => state.guidedStep >= getActiveModule().commands.length || state.taskFlags.merged
   }
@@ -1504,12 +1554,24 @@ const lessons = [
 
 const glossaryTerms = [
   {
+    term: "Authentication",
+    meaning: "Signing in so Azure DevOps allows clone, fetch, push, and PR actions"
+  },
+  {
+    term: "Commit identity",
+    meaning: "The Git name and email stamped onto commits; this is not the same as ADO sign-in"
+  },
+  {
     term: "Repo",
     meaning: "The shared project folder where work is tracked"
   },
   {
     term: "Branch",
     meaning: "Your safe working copy for a specific change"
+  },
+  {
+    term: "Branch from main",
+    meaning: "Create a new branch pointer at the current main commit, then work there instead of directly on main"
   },
   {
     term: "Main",
@@ -1549,10 +1611,31 @@ const powershellReferenceTerms = [
   {
     term: "HEAD",
     meaning: "Git's pointer to the branch or commit you currently have checked out."
+  },
+  {
+    term: "Commit identity",
+    meaning: "Your configured Git name and email. It labels commits; it does not prove ADO access."
+  },
+  {
+    term: "ADO sign-in",
+    meaning: "The browser or credential prompt that authorizes clone, fetch, push, and PR access."
+  },
+  {
+    term: "Branch from main",
+    meaning: "Create a feature branch at the current main commit with git switch -c <branch>."
   }
 ];
 
 const powershellReferenceCommands = [
+  {
+    group: "Access and identity",
+    commands: [
+      { cmd: "git config --global user.name", desc: "Show the name Git stamps on commits" },
+      { cmd: "git config --global user.email", desc: "Show the email Git stamps on commits" },
+      { cmd: `git clone ${ADO_REPO_URL}`, desc: "ADO may prompt sign-in before cloning" },
+      { cmd: `git push -u origin ${oracleLab.branchName}`, desc: "ADO may prompt sign-in before publishing" }
+    ]
+  },
   {
     group: "PowerShell basics",
     commands: [
@@ -1583,6 +1666,10 @@ const practiceChallenges = [
     title: "Baseline Scout",
     level: "Warm-up",
     prompt: "Map the repository before touching files.",
+    scenario:
+      "You have just opened the Oracle repo for a ticket. Before editing anything, you need to prove you know where you are and whether the working tree is safe.",
+    expected:
+      "Run the basic inspection commands and confirm the branch, working tree state, and recent commit history.",
     success: "Baseline inspected. The learner knows branch, status, and recent history before editing.",
     hint: "Run git status, git branch, and git log --oneline.",
     steps: [
@@ -1596,6 +1683,10 @@ const practiceChallenges = [
     title: "Branch Builder",
     level: "Core",
     prompt: "Create a safe task branch from main.",
+    scenario:
+      "The ticket work should not happen directly on main. You need a task branch that isolates the change and gives reviewers a clean branch to inspect.",
+    expected:
+      "Create a new branch from main and confirm HEAD moved to that branch before any file edits happen.",
     success: "Task branch created. HEAD is no longer on main.",
     hint: "Use git switch -c followed by a branch name.",
     steps: [
@@ -1608,6 +1699,10 @@ const practiceChallenges = [
     title: "Reviewable Change",
     level: "Core",
     prompt: "Make one file change, inspect it, stage it, and save it as a branch commit.",
+    scenario:
+      "The SQL asset needs one focused update. The risk is accidentally staging unrelated files or committing without reviewing the diff.",
+    expected:
+      "Edit the SQL file, inspect the diff, stage only the intended file, and create one clear branch commit.",
     success: "Reviewable branch commit created.",
     hint: `Try edit ${oracleLab.featureFile}, git diff, git add, and git commit -m "...".`,
     steps: [
@@ -1622,6 +1717,10 @@ const practiceChallenges = [
     title: "Publish Ready",
     level: "PR prep",
     prompt: "Publish the branch so a pull request can exist outside your workstation.",
+    scenario:
+      "Your local commit is not visible to teammates yet. Azure DevOps cannot open a useful PR until the branch exists on origin.",
+    expected:
+      "Push the task branch and confirm the remote branch is available for review.",
     success: "Branch published. The remote now has the reviewable branch head.",
     hint: "Run git push from the task branch before returning to main.",
     steps: [
@@ -1633,6 +1732,10 @@ const practiceChallenges = [
     title: "Merge Ready",
     level: "Finish",
     prompt: "Return to main, merge the branch, and verify the story.",
+    scenario:
+      "The review is complete and the branch work needs to land back on the baseline. You still need to verify history after the merge.",
+    expected:
+      "Switch back to main, merge the task branch, and use compact history to confirm the workflow story is visible.",
     success: "main includes the branch work and the history is visible.",
     hint: "Switch to main, merge the feature branch, then run git log --oneline.",
     steps: [
@@ -1780,68 +1883,65 @@ const quizzes = [
 
 const roundTwoQuizzes = [
   {
+    question: "Fill in the command that shows the Git commit author name.",
+    acceptedAnswers: ["git config --global user.name", "git config user.name"],
+    answerLabel: "git config --global user.name",
+    placeholder: "git config ...",
+    feedback: "This shows commit identity, not Azure DevOps authentication."
+  },
+  {
     question: "Fill in the command to initialize a new Git repository.",
-    answer: "git init",
+    acceptedAnswers: ["git init"],
+    answerLabel: "git init",
     placeholder: "git ...",
     feedback: "git init creates the local .git repository metadata."
   },
   {
-    question: "Fill in the command to inspect working tree and staged changes.",
-    answer: "git status",
+    question: "Fill in the command to inspect the current Git state.",
+    acceptedAnswers: ["git status"],
+    answerLabel: "git status",
     placeholder: "git ...",
     feedback: "git status is the safest first inspection command."
   },
   {
-    question: "Fill in the command to stage the ticket context file.",
-    answer: "git add README.md",
-    placeholder: "git add ...",
-    feedback: "Stage only the file you want included in the next checkpoint."
-  },
-  {
-    question: "Fill in the command to commit the ticket context with the expected message.",
-    answer: `git commit -m "${oracleLab.firstCommitMessage}"`,
-    placeholder: "git commit -m ...",
-    feedback: "A clear commit message keeps the baseline checkpoint traceable."
-  },
-  {
-    question: "Fill in the command to create and switch to the task branch.",
-    answer: `git switch -c ${oracleLab.branchName}`,
-    placeholder: "git switch -c ...",
-    feedback: "git switch -c creates the branch and moves HEAD to it."
-  },
-  {
-    question: "Fill in the command to add the SQL asset on the task branch.",
-    answer: `git add ${oracleLab.featureFile}`,
-    placeholder: "git add ccs/sql/...",
-    feedback: "Stage the SQL file directly so the next commit stays focused."
-  },
-  {
-    question: "Fill in the command to commit the emergency orders SQL report.",
-    answer: `git commit -m "${oracleLab.featureCommitMessage}"`,
-    placeholder: "git commit -m ...",
-    feedback: "This creates the reviewable branch checkpoint."
+    question: "Fill in the base command used to switch branches.",
+    acceptedAnswers: ["git switch"],
+    answerLabel: "git switch",
+    placeholder: "git ...",
+    feedback: "git switch moves HEAD to another branch. Add -c when you need to create the branch too."
   },
   {
     question: "Fill in the command to return to main.",
-    answer: "git switch main",
+    acceptedAnswers: ["git switch main", "git checkout main"],
+    answerLabel: "git switch main",
     placeholder: "git switch ...",
-    feedback: "Switch back to main before merging the feature branch."
+    feedback: "git switch main moves HEAD back to the main branch."
   },
   {
-    question: "Fill in the command to fast-forward main with the task branch.",
-    answer: `git merge ${oracleLab.branchName}`,
-    placeholder: "git merge ...",
-    feedback: "Because main has not diverged, the merge can fast-forward."
+    question: "Fill in the base command that saves staged changes as a commit.",
+    acceptedAnswers: ["git commit"],
+    answerLabel: "git commit",
+    placeholder: "git ...",
+    feedback: "git commit saves the staged snapshot. In real work, add -m with a short message or use the editor prompt."
   },
   {
-    question: "Fill in the command to inspect compact commit history.",
-    answer: "git log --oneline",
-    placeholder: "git log ...",
-    feedback: "git log --oneline is a concise way to explain the branch story."
+    question: "Fill in the command pattern to stage one file.",
+    acceptedAnswers: ["git add README.md"],
+    acceptedPrefixes: ["git add "],
+    answerLabel: "git add README.md",
+    placeholder: "git add ...",
+    feedback: "git add stages the file snapshot for the next commit."
   }
 ];
 
 const roundThreeQuizzes = [
+  {
+    question: "You need to confirm the email Git will stamp on commits. Type the command.",
+    acceptedAnswers: ["git config --global user.email", "git config user.email"],
+    answerLabel: "git config --global user.email",
+    placeholder: "Inspect Git identity",
+    feedback: "Commit identity and ADO login are separate checks."
+  },
   {
     question: "You are on main with a clean working tree. Type the command that creates and moves to the task branch.",
     acceptedAnswers: [`git switch -c ${oracleLab.branchName}`, `git checkout -b ${oracleLab.branchName}`],
@@ -1923,7 +2023,7 @@ const codexChoiceQuizzes = [
   },
   {
     question: "Which command shows the current folder in PowerShell?",
-    options: ["Get-Location", "git branch", "npm install", "codex exec"],
+    options: ["Get-Location", "git branch", "npm.cmd install", "codex.cmd exec"],
     answer: "Get-Location",
     feedback: "Get-Location answers the first safety question: where am I?"
   },
@@ -1970,13 +2070,13 @@ const codexChoiceQuizzes = [
     feedback: "Generated docs can still contain unsupported assumptions. Review them before committing."
   },
   {
-    question: "What is codex exec best suited for?",
+    question: "What is codex.cmd exec best suited for?",
     options: ["Repeatable tasks with stable output", "Unclear exploratory work with changing scope", "Sensitive judgment with no review", "Deleting old branches"],
     answer: "Repeatable tasks with stable output",
-    feedback: "codex exec is strongest when the prompt, output, and validation step are predictable."
+    feedback: "codex.cmd exec is strongest when the prompt, output, and validation step are predictable."
   },
   {
-    question: "When should work stay interactive instead of codex exec?",
+    question: "When should work stay interactive instead of codex.cmd exec?",
     options: ["When scope is unclear or risk is high", "When the output is a fixed markdown report", "When the command is read-only", "When the prompt is already tested"],
     answer: "When scope is unclear or risk is high",
     feedback: "Interactive sessions let the user steer judgment-heavy or changing work."
@@ -2000,7 +2100,7 @@ const codexChoiceQuizzes = [
     feedback: "Milestones reduce scope drift and make artifacts easier to validate."
   },
   {
-    question: "Which artifact set best matches the capstone repo review kit?",
+    question: "Which artifact set best matches the handoff workflow?",
     options: ["REPO_NOTES.md, SQL_LINEAGE.md, DATA_QUALITY_REPORT.md, CODEX_REVIEW.md", "Only a commit hash", "A private chat summary", "A screenshot with no notes"],
     answer: "REPO_NOTES.md, SQL_LINEAGE.md, DATA_QUALITY_REPORT.md, CODEX_REVIEW.md",
     feedback: "The capstone turns a Codex session into durable notes that can support a PR, review, or handoff."
@@ -2046,27 +2146,27 @@ const codexRoundTwoQuizzes = [
   },
   {
     question: "Fill in the command that launches interactive Codex from the current folder.",
-    answer: "codex",
-    placeholder: "codex...",
-    feedback: "Run codex from the repo root so local context is correct."
+    answer: "codex.cmd",
+    placeholder: "codex.cmd...",
+    feedback: "Run codex.cmd from the repo root in Windows PowerShell so local context is correct."
   },
   {
     question: "Fill in the command that signs in to Codex CLI.",
-    answer: "codex login",
-    placeholder: "codex ...",
-    feedback: "codex login starts the CLI authentication flow."
+    answer: "codex.cmd login",
+    placeholder: "codex.cmd ...",
+    feedback: "codex.cmd login starts the CLI authentication flow without hitting the blocked PowerShell shim."
   },
   {
     question: "Fill in the install command for the Codex CLI.",
-    answer: "npm install -g @openai/codex",
-    placeholder: "npm install ...",
-    feedback: "Install once per workstation, then launch Codex from the target repo."
+    answer: "npm.cmd install -g @openai/codex",
+    placeholder: "npm.cmd install ...",
+    feedback: "Use npm.cmd in Windows PowerShell when npm.ps1 is blocked by execution policy."
   },
   {
     question: "Fill in the command pattern for a one-shot Codex run.",
-    answer: "codex exec",
-    placeholder: "codex ...",
-    feedback: "codex exec is the one-shot mode for stable, repeatable tasks."
+    answer: "codex.cmd exec",
+    placeholder: "codex.cmd ...",
+    feedback: "codex.cmd exec is the one-shot mode for stable, repeatable tasks in Windows PowerShell."
   }
 ];
 
@@ -2119,11 +2219,11 @@ const codexRoundThreeQuizzes = [
   {
     question: "Type a one-shot command that writes a repo review to CODEX_REVIEW.md.",
     acceptedAnswers: [
-      "codex exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
-      "codex exec 'Review this repo for docs gaps and SQL risks' > CODEX_REVIEW.md"
+      "codex.cmd exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
+      "codex.cmd exec 'Review this repo for docs gaps and SQL risks' > CODEX_REVIEW.md"
     ],
-    answerLabel: "codex exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
-    placeholder: "codex exec ... > CODEX_REVIEW.md",
+    answerLabel: "codex.cmd exec \"Review this repo for docs gaps and SQL risks\" > CODEX_REVIEW.md",
+    placeholder: "codex.cmd exec ... > CODEX_REVIEW.md",
     feedback: "One-shot output should still be reviewed manually before commit or sharing."
   },
   {
@@ -2370,10 +2470,22 @@ const conflictScenarios = [
 
 const commandProcessSteps = [
   {
+    area: "identity",
+    label: "Git identity",
+    title: "Check commit author name",
+    detail: "git config user.name shows the name Git will stamp on local commits."
+  },
+  {
+    area: "identity",
+    label: "Git identity",
+    title: "Check commit author email",
+    detail: "git config user.email shows the email Git will stamp on local commits. Azure DevOps sign-in is separate."
+  },
+  {
     area: "workspace",
     label: "Clone",
     title: "Clone the ADO repo",
-    detail: "git clone brings down the current files, history, and default origin remote."
+    detail: "git clone may prompt Azure DevOps sign-in, then brings down files, history, and the origin remote."
   },
   {
     area: "shell",
@@ -2385,13 +2497,7 @@ const commandProcessSteps = [
     area: "remote",
     label: "Remote",
     title: "Inspect origin",
-    detail: "git remote -v shows where fetch and push traffic will go."
-  },
-  {
-    area: "status",
-    label: "Inspection",
-    title: "Check repo state",
-    detail: "git status confirms you started from a clean main branch."
+    detail: "git remote -v shows where fetch and push traffic will go. git status is a recommended checkpoint here, not a required path step."
   },
   {
     area: "remote",
@@ -2402,20 +2508,14 @@ const commandProcessSteps = [
   {
     area: "branch",
     label: "Branch pointer",
-    title: "Create a feature branch",
-    detail: "Git adds a new branch label at the current commit and moves HEAD to it."
+    title: "Create a feature branch from main",
+    detail: "Git adds a new branch pointer at current main and moves HEAD to it. Some teams call this forking off main."
   },
   {
     area: "working",
     label: "Working tree",
     title: "Add SQL on the task branch",
-    detail: "The report SQL belongs to the current branch until it is committed."
-  },
-  {
-    area: "status",
-    label: "Inspection",
-    title: "Inspect branch changes",
-    detail: "git status shows the new SQL asset while HEAD is on the task branch."
+    detail: "The report SQL belongs to the current branch until it is committed. git status is recommended here when the learner wants a checkpoint."
   },
   {
     area: "diff",
@@ -2490,13 +2590,7 @@ const projectProcessSteps = [
     area: "working",
     label: "Workstreams",
     title: "Create workstreams.md",
-    detail: "Workstreams keep collaborators and parallel tracks coordinated."
-  },
-  {
-    area: "status",
-    label: "Inspection",
-    title: "Inspect capsule files",
-    detail: "git status shows the capsule files before they are staged."
+    detail: "Workstreams keep collaborators and parallel tracks coordinated. git status is a recommended checkpoint before staging."
   },
   {
     area: "staging",
@@ -2520,13 +2614,7 @@ const projectProcessSteps = [
     area: "working",
     label: "Workstream note",
     title: "Update workstreams.md",
-    detail: "The branch records progress for one workstream without muddying main."
-  },
-  {
-    area: "status",
-    label: "Inspection",
-    title: "Inspect branch change",
-    detail: "git status confirms the workstream update is the only open change."
+    detail: "The branch records progress for one workstream without muddying main. git status is recommended before diff review."
   },
   {
     area: "diff",
@@ -2570,13 +2658,17 @@ let state;
 let flowPointerDrag = null;
 let flowNativeDragActive = false;
 let suppressNextFlowClick = false;
-let wizardPlayback = null;
-let wizardPlaybackTimer = null;
+let devPlayback = null;
+let devPlaybackTimer = null;
 let practiceReplayActive = false;
-const GIT_WIZARD_COMMAND = "git wizard mode";
-const CODEX_WIZARD_COMMAND = "codex wizard mode";
-const VSCODE_WIZARD_COMMAND = "code --wizard mode";
-const SQL_WIZARD_COMMAND = "sql wizard mode";
+const DEV_PLAYBACK_GIT_COMMAND = "__dev_playback_git__";
+const DEV_PLAYBACK_CODEX_COMMAND = "__dev_playback_codex__";
+const DEV_PLAYBACK_VSCODE_COMMAND = "__dev_playback_vscode__";
+const DEV_PLAYBACK_SQL_COMMAND = "__dev_playback_sql__";
+const WIZARD_GIT_COMMAND = "git wizard mode";
+const WIZARD_CODEX_COMMAND = "codex wizard mode";
+const WIZARD_VSCODE_COMMAND = "code --wizard mode";
+const WIZARD_SQL_COMMAND = "sql wizard mode";
 
 document.addEventListener("DOMContentLoaded", () => {
   applyTheme(loadTheme());
@@ -2625,7 +2717,7 @@ function createTrainingState(moduleId = "git-basics") {
     commandReplay: [],
     practiceMission: "orientation-path",
     practiceDifficulty: "guided",
-    learnerProgress: createLearnerProgressState(),
+    learnerProgress: normalizeLearnerProgress(state?.learnerProgress),
     taskFlags: createTaskFlags(),
     readyChecks: {},
     quizAnswers: {},
@@ -2655,11 +2747,11 @@ function createCodexState() {
     terminal: [
       {
         type: "note",
-        text: "Codex CLI simulator ready. Try: node --version; npm --version"
+        text: `Windows PowerShell practice terminal. Profile: ${LOCAL_WINDOWS_USER}; Node ${LOCAL_NODE_VERSION}; npm ${LOCAL_NPM_VERSION}.`
       },
       {
         type: "note",
-        text: `Practice path: ${codexLab.cliCommand} -> codex login -> cd ${ORACLE_REPO_ROOT} -> codex`
+        text: `Practice path: ${codexLab.cliCommand} -> codex.cmd login -> cd ${ORACLE_REPO_ROOT} -> codex.cmd`
       }
     ]
   };
@@ -2723,7 +2815,7 @@ function createSqlState() {
       },
       {
         type: "note",
-        text: "Use show files, describe <table>, SELECT statements, or sql wizard mode."
+        text: "Use show files, describe <table>, or SELECT statements. Open How to for the worked simulator example."
       }
     ]
   };
@@ -2748,9 +2840,10 @@ function createSqlWorksheetState() {
 
 function createVSCodeCliState() {
   return {
-    openedWorkspace: true,
+    openedWorkspace: false,
     installedExtensions: [],
     branch: "main",
+    activeFile: "",
     edited: false,
     staged: false,
     committed: false,
@@ -2763,6 +2856,7 @@ function createVSCodeCliState() {
 function createLearnerProgressState() {
   return {
     badges: [],
+    completedLabs: [],
     completedMissions: [],
     bestReadiness: 0,
     lastReadiness: 0,
@@ -2806,9 +2900,9 @@ function getOracleRepoBaselineFiles() {
     "ccs/sql/meters/ccs_device_channel_multiplier_audit.sql":
       "select device_id, channel_id, multiplier\nfrom ccs_meter.channel_multiplier_audit;\n",
     "ccs/sql/meters/ccs_device_service_agreement_extract.sql":
-      "select device_id, service_agreement_id, start_date, end_date\nfrom ccs_meter.device_service_agreement;\n",
+      "select service_point_id, service_agreement_id, customer_class, start_date, end_date\nfrom ccs_meter.device_service_agreement;\n",
     "ccs/sql/meters/ccs_emergency_response_activity_extract.sql":
-      "select activity_id, premise_id, meter_id, activity_status\nfrom ccs_meter.emergency_response_activity;\n",
+      "select activity_id, premise_id, service_point_id, meter_id, zip_code, activity_status, activity_type, order_date, completed_date\nfrom ccs_meter.emergency_response_activity;\n",
     "ccs/sql/meters/ccs_field_activity_appointment_performance.sql":
       "select appointment_id, activity_type, scheduled_date, completion_status\nfrom ccs_meter.field_activity_appointment;\n",
     "ccs/sql/meters/ccs_open_field_activity_extract.sql":
@@ -3084,6 +3178,32 @@ function bindEvents() {
     submitTerminalCommand();
   });
 
+  document.addEventListener("submit", (event) => {
+    if (!event.target.closest("#vscodeCommandForm")) {
+      return;
+    }
+
+    event.preventDefault();
+    submitVSCodeCommand();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.target.id !== "vscodeCommandInput" || event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    submitVSCodeCommand();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (event.target.closest("button") || !event.target.closest("#vscodeTerminalOutput")) {
+      return;
+    }
+
+    document.getElementById("vscodeCommandInput")?.focus();
+  });
+
   document.getElementById("terminalOutput").addEventListener("click", (event) => {
     if (event.target.closest("button")) {
       return;
@@ -3104,8 +3224,21 @@ function submitTerminalCommand() {
   input.focus();
 }
 
+function submitVSCodeCommand() {
+  const input = document.getElementById("vscodeCommandInput");
+  if (!input) {
+    return;
+  }
+
+  runCommand(input.value);
+  input.value = "";
+  queuePrimaryInputFocus();
+}
+
 function focusCommandInput() {
-  const input = document.getElementById("commandInput");
+  const input = isVSCodeMode()
+    ? document.getElementById("vscodeCommandInput") || document.getElementById("commandInput")
+    : document.getElementById("commandInput");
   if (!input || input.closest("[hidden]")) {
     return;
   }
@@ -3296,7 +3429,14 @@ function openHowToModal() {
   }
 
   renderHowToModalContent();
-  modal.dataset.lastFocus = document.activeElement?.id || document.activeElement?.dataset?.action || "";
+  const activeElement = document.activeElement;
+  if (activeElement?.id) {
+    modal.dataset.lastFocusSelector = `#${cssEscape(activeElement.id)}`;
+  } else if (activeElement?.dataset?.action) {
+    modal.dataset.lastFocusSelector = `[data-action="${cssEscape(activeElement.dataset.action)}"]`;
+  } else {
+    modal.dataset.lastFocusSelector = "";
+  }
   modal.hidden = false;
   document.body.classList.add("modal-open");
   setAppShellModalState(true);
@@ -3315,7 +3455,10 @@ function closeHowToModal() {
   modal.hidden = true;
   document.body.classList.remove("modal-open");
   setAppShellModalState(false);
-  document.querySelector("[data-action='open-how-to']")?.focus();
+  const lastFocusSelector = modal.dataset.lastFocusSelector;
+  const fallback = document.querySelector("[data-action='open-how-to']");
+  const target = lastFocusSelector ? document.querySelector(lastFocusSelector) : fallback;
+  (target || fallback)?.focus?.({ preventScroll: true });
 }
 
 function isHowToModalOpen() {
@@ -3337,6 +3480,13 @@ function setAppShellModalState(active) {
 
   shell.removeAttribute("inert");
   shell.removeAttribute("aria-hidden");
+}
+
+function cssEscape(value) {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+    return CSS.escape(String(value));
+  }
+  return String(value).replace(/["\\]/g, "\\$&");
 }
 
 function trapModalFocus(event) {
@@ -3393,7 +3543,7 @@ function renderHowToModalContent() {
             <span>${index + 1}</span>
             <strong>${escapeHtml(step.title)}</strong>
             <p>${escapeHtml(step.body)}</p>
-            ${step.command ? `<code>${escapeHtml(step.command)}</code>` : ""}
+            ${renderHowToStepCommand(step)}
           </article>
         `
       )
@@ -3405,6 +3555,29 @@ function renderHowToModalContent() {
       <span>${escapeHtml(content.footer)}</span>
     `;
   }
+}
+
+function renderHowToStepCommand(step) {
+  if (!step.command) {
+    return "";
+  }
+
+  const type = step.commandType || "real";
+  const label =
+    type === "simulator"
+      ? "Simulator action"
+      : type === "ui"
+        ? "UI action"
+        : type === "navigation"
+          ? "Module or tab"
+          : "Real command";
+
+  return `
+    <div class="howto-command howto-command-${type}">
+      <span>${label}</span>
+      <code>${escapeHtml(step.command)}</code>
+    </div>
+  `;
 }
 
 function getHowToContent() {
@@ -3440,28 +3613,39 @@ function getPortalHowToContent() {
     steps: [
       {
         title: "Start with the banner",
-        body: "Use Ticket to First PR first. It teaches the core work unit: ticket, branch, diff, commit, publish, PR.",
-        command: "Ticket to First PR",
+        body: "Use Git Workflow 1 first. It teaches the core work unit: ticket, branch, diff, commit, publish, PR.",
+        command: "Git Workflow 1",
+        commandType: "navigation",
         emphasis: true
       },
       {
         title: "Use Getting Started only when needed",
         body: "The right-side catalog holds optional Tools, Languages, and Concepts. Learners who know Codex, VS Code, or SQL can skip those and stay on the Git path.",
-        command: "Tools · Languages · Concepts"
+        command: "Tools / Languages / Concepts",
+        commandType: "navigation"
       },
       {
         title: "Practice SQL in context",
         body: "Use Oracle SQL Lab only when SQL reasoning is part of the learner's gap. It starts with SELECT * and builds toward reviewable query logic.",
-        command: "sql wizard mode"
+        command: "Oracle SQL Lab",
+        commandType: "navigation"
+      },
+      {
+        title: "Build the graph mental model",
+        body: "Open Learn Git Branching after Workflow 1. It is better than this app for seeing commits, branches, merge, rebase, and remote pointers move.",
+        command: "Git Workflow 2: Visual Branching Gym",
+        commandType: "navigation"
       },
       {
         title: "Move to recovery practice",
-        body: "Open the Git practice lab when the basics are clear. It adds wrong-branch, unstaged, dirty-switch, and conflict states.",
-        command: "git wizard mode"
+        body: "Open the Git practice lab after the visual trainer. It covers wrong-branch, unstaged, dirty-switch, and conflict states against local file workflow.",
+        command: "Git Workflow 3: Recovery and Real-File Drills",
+        commandType: "navigation"
       }
     ],
     footerLabel: "Recommended path:",
-    footer: "Primary path: Ticket to First PR -> Git Practice Lab -> Project Capsule Workflow -> Repo Review Kit. Getting Started modules are optional support."
+    footer:
+      "Primary path: Workflow 1 Ticket-to-PR -> Workflow 2 Visual Branching Gym -> Workflow 3 Recovery Drills -> Workflow 4 Project Capsule -> Workflow 5 Handoff. Getting Started modules are optional support."
   };
 }
 
@@ -3480,6 +3664,7 @@ function getGuidedGitHowToContent() {
         title: "Follow the left learning path",
         body: "Open the current section to see the exact commands. Clicking a command fills it into the PowerShell prompt.",
         command: `${done}/${active.commands.length} commands complete`,
+        commandType: "ui",
         emphasis: true
       },
       {
@@ -3487,28 +3672,27 @@ function getGuidedGitHowToContent() {
         body: expected
           ? "Enter the next command in the PowerShell terminal. The repository graph, file explorer, and PR gate update from that command."
           : "The guided command list is complete. Use the graph and PR gate to explain what changed.",
-        command: expected?.cmd || "git log --oneline"
+        command: expected?.cmd || "git log --oneline",
+        commandType: "real"
       },
       {
         title: "Start from the remote repo",
         body: "This lesson now begins with clone, remote inspection, and pull-before-branching so the workflow mirrors Azure DevOps repo work.",
-        command: "git remote -v"
+        command: "git remote -v",
+        commandType: "real"
       },
       {
         title: "Use inspection commands",
         body: "You can run status, branch, log, or diff commands during the lesson without losing your place.",
-        command: "git status"
+        command: "git status",
+        commandType: "real"
       },
       {
         title: "Watch the PR gate",
         body: "The right-side ADO/PR panel shows whether context, branch, diff review, commit, publish, clean state, and merge are ready.",
-        command: "git push"
+        command: "git push",
+        commandType: "real"
       },
-      {
-        title: "Let wizard mode demonstrate",
-        body: "Wizard mode types the remaining commands so learners can watch the whole workflow before trying it manually.",
-        command: GIT_WIZARD_COMMAND
-      }
     ],
     footerLabel: "Current goal:",
     footer: expected ? expected.desc : "Explain the branch, commit, publish, and merge story from the final graph."
@@ -3527,27 +3711,32 @@ function getPracticeHowToContent() {
         title: "Choose a mission",
         body: `Current mission: ${mission.title}. Read the objective, then decide which Git command proves the next state.`,
         command: mission.target,
+        commandType: "ui",
         emphasis: true
       },
       {
         title: "Use the terminal as the source of truth",
         body: "Type commands into the PowerShell prompt. The graph, file explorer, command replay, and readiness panel all react to the command.",
-        command: "git status"
+        command: "git status",
+        commandType: "real"
       },
       {
         title: "Publish before merge readiness",
         body: "Practice now includes the remote step. Push the branch so the simulated PR can exist outside your workstation.",
-        command: "git push"
+        command: "git push",
+        commandType: "real"
       },
       {
         title: "Load failure states when ready",
         body: "Use Load conflict drill from this tab for randomized merge conflict practice after baseline branch work makes sense.",
-        command: "resolve <file>"
+        command: "Load conflict drill",
+        commandType: "ui"
       },
       {
-        title: "Replay or ghost type",
-        body: "Use command replay to inspect your path, or wizard mode to watch a clean run from the current mission.",
-        command: GIT_WIZARD_COMMAND
+        title: "Use command replay",
+        body: "Use command replay to inspect the path you took through the current mission.",
+        command: "Command replay",
+        commandType: "ui"
       }
     ],
     footerLabel: "Skill target:",
@@ -3557,7 +3746,7 @@ function getPracticeHowToContent() {
 
 function getCodexHowToContent() {
   const section = codexLab.sections[state.codexSection] || codexLab.sections[0];
-  const firstCommand = section.steps?.[0]?.command || section.cards?.[0]?.command || CODEX_WIZARD_COMMAND;
+  const firstCommand = section.steps?.[0]?.command || section.cards?.[0]?.command || "codex.cmd";
   return {
     kicker: "Active Codex lesson",
     title: "How to run the Codex lesson",
@@ -3565,29 +3754,34 @@ function getCodexHowToContent() {
     steps: [
       {
         title: "Use the learning path order",
-        body: "Move through setup, onboarding, prompting, ticket orientation, prompt library, repo review kit, and safety.",
+        body: "Move through setup, onboarding, prompting, ticket orientation, prompt library, handoff review, and safety.",
         command: "Next",
+        commandType: "ui",
         emphasis: true
       },
       {
         title: "Practice in the mock CLI",
-        body: "Type the section command into the Codex terminal. The simulator tracks install, login, repo navigation, and prompt runs.",
-        command: firstCommand
+        body: "Type the section command into the Codex terminal. This lesson uses a simulator to teach sequence and judgment before real repo work.",
+        command: firstCommand,
+        commandType: "simulator"
       },
       {
         title: "Copy prompts deliberately",
         body: "Use copy buttons for reusable prompts, then adjust ticket text, repo area, expected output, and validation notes.",
-        command: "Copy prompt"
+        command: "Copy prompt",
+        commandType: "ui"
       },
       {
         title: "Inspect before editing",
         body: "Codex should orient on files, risks, and assumptions before changing repo content.",
-        command: "git status"
+        command: "git status",
+        commandType: "real"
       },
       {
-        title: "Watch the demo path",
-        body: "Codex wizard mode walks through install, login, repo navigation, and prompt execution.",
-        command: CODEX_WIZARD_COMMAND
+        title: "Use machine-true commands later",
+        body: "In real PowerShell on this workstation, use codex.cmd and npm.cmd when launcher scripts are blocked by execution policy.",
+        command: "codex.cmd --version",
+        commandType: "real"
       }
     ],
     footerLabel: "Rule:",
@@ -3605,29 +3799,28 @@ function getVSCodeHowToContent() {
       {
         title: "Start with extensions",
         body: "Install or recognize the required editor tools, then open the Oracle repo folder instead of a random file.",
-        command: "code C:\\Repositories\\Oracle",
+        command: "code.cmd C:\\Repositories\\Oracle",
+        commandType: "real",
         emphasis: true
       },
       {
         title: "Use Explorer and Search",
         body: "Find the SQL or markdown files in the repo tree. Search before editing so changes match existing patterns.",
-        command: "Ctrl+Shift+F"
+        command: "Ctrl+Shift+F",
+        commandType: "ui"
       },
       {
         title: "Use the integrated terminal",
         body: "Run Git from the VS Code terminal so Source Control, diffs, and branch state line up.",
-        command: "git status"
+        command: "git status",
+        commandType: "real"
       },
       {
         title: "Review Source Control",
         body: "Inspect diffs before staging, stage the intended files only, then commit with a clear message.",
-        command: "git diff"
+        command: "git diff",
+        commandType: "real"
       },
-      {
-        title: "Run wizard mode",
-        body: "The VS Code wizard demonstrates the workflow inside the mock editor and terminal.",
-        command: VSCODE_WIZARD_COMMAND
-      }
     ],
     footerLabel: "Skill target:",
     footer: "Learners should know where files live, how to inspect diffs, and how editor state maps back to Git."
@@ -3646,28 +3839,27 @@ function getSqlHowToContent() {
         title: "Choose a repository SQL file",
         body: "Use the Connections panel to see the CCS SQL files modeled from the repo.",
         command: "show files",
+        commandType: "ui",
         emphasis: true
       },
       {
         title: "Start broad",
         body: "Begin with SELECT * so learners see the grain and available columns before filtering.",
-        command: starter
+        command: starter,
+        commandType: "real"
       },
       {
         title: "Run and read the result grid",
         body: "Use Run to return rows, then inspect columns, counts, and messages before moving to the next query.",
-        command: "Run"
+        command: "Run",
+        commandType: "ui"
       },
       {
         title: "Describe before guessing",
         body: "Use describe when the table shape is unclear. This builds SQL reasoning instead of memorizing column names.",
-        command: "describe ccs_emergency_response_activity_extract"
+        command: "describe ccs_emergency_response_activity_extract",
+        commandType: "ui"
       },
-      {
-        title: "Use wizard mode for a worked example",
-        body: "SQL wizard mode walks from SELECT * through filters, summaries, joins, and final review.",
-        command: SQL_WIZARD_COMMAND
-      }
     ],
     footerLabel: "Skill target:",
     footer: "Learners should explain output grain, filters, joins, and validation risks before treating a query as done."
@@ -3677,7 +3869,7 @@ function getSqlHowToContent() {
 function getCapstoneHowToContent() {
   return {
     kicker: "Active capstone",
-    title: "How to run Git Lab 3",
+    title: "How to run Git Workflow 5",
     summary:
       "The capstone turns Codex-assisted repo inspection into durable review artifacts: notes, lineage, quality checks, and final review.",
     steps: [
@@ -3685,22 +3877,26 @@ function getCapstoneHowToContent() {
         title: "Start from read-only inspection",
         body: "Use the prompt library to ask Codex for repo orientation before creating artifacts.",
         command: "Inspect before editing",
+        commandType: "ui",
         emphasis: true
       },
       {
         title: "Create durable files",
         body: "Complete REPO_NOTES, SQL_LINEAGE, DATA_QUALITY_REPORT, and CODEX_REVIEW rather than leaving the work in chat.",
-        command: "Copy prompt"
+        command: "Copy prompt",
+        commandType: "ui"
       },
       {
         title: "Review the diff",
         body: "Use the terminal panel to inspect the changed-file surface before treating the kit as complete.",
-        command: "git diff --stat"
+        command: "git diff --stat",
+        commandType: "real"
       },
       {
         title: "Use the prompt library",
         body: "Open the collapsible prompt panel for reusable prompts; copy them and tailor to the current repo question.",
-        command: "Prompt library"
+        command: "Prompt library",
+        commandType: "ui"
       }
     ],
     footerLabel: "Output:",
@@ -3946,8 +4142,8 @@ function clearFlowDropHighlights() {
 
 function handleAction(button) {
   const action = button.dataset.action;
-  if (wizardPlayback && action !== "run-command" && action !== "toggle-theme" && action !== "open-how-to" && action !== "close-how-to") {
-    cancelWizardPlayback();
+  if (devPlayback && action !== "run-command" && action !== "toggle-theme" && action !== "open-how-to" && action !== "close-how-to") {
+    cancelDevPlayback();
   }
 
   if (action === "open-how-to") {
@@ -3965,6 +4161,7 @@ function handleAction(button) {
     saveState();
     render();
     queuePrimaryInputFocus();
+    announceStatus("Lab reset. Start again at step 1.");
     return;
   }
 
@@ -3973,6 +4170,13 @@ function handleAction(button) {
     saveState();
     render();
     queuePrimaryInputFocus();
+    return;
+  }
+
+  if (action === "mark-visual-branching-complete") {
+    markLabComplete(VISUAL_BRANCHING_LAB_ID);
+    saveState();
+    render();
     return;
   }
 
@@ -4043,6 +4247,14 @@ function handleAction(button) {
   if (action === "start-conflict") {
     state = createConflictState();
     state.practiceMission = "conflict-recovery";
+    state.practiceReferenceOpen = false;
+    saveState();
+    render();
+    return;
+  }
+
+  if (action === "toggle-practice-reference") {
+    state.practiceReferenceOpen = !state.practiceReferenceOpen;
     saveState();
     render();
     return;
@@ -4235,13 +4447,13 @@ function runCommand(rawCommand) {
     return;
   }
 
-  if (isWizardModeCommand(command)) {
-    runWizardMode(command);
+  if (isDevPlaybackCommand(command)) {
+    runDevPlayback(command);
     return;
   }
 
-  if (wizardPlayback) {
-    cancelWizardPlayback("Wizard mode stopped because a manual command was entered.");
+  if (devPlayback) {
+    cancelDevPlayback("Developer playback stopped because a manual command was entered.");
   }
 
   if (command.toLowerCase() === "clear") {
@@ -4313,72 +4525,84 @@ function runCommand(rawCommand) {
   announceStatus(result.text);
 }
 
-function isWizardModeCommand(command) {
-  const normalized = normalizeCommand(command);
-  return [GIT_WIZARD_COMMAND, CODEX_WIZARD_COMMAND, VSCODE_WIZARD_COMMAND, SQL_WIZARD_COMMAND].includes(normalized);
+function isDevPlaybackCommand(command) {
+  return getAllDevPlaybackCommands().includes(normalizeCommand(command));
 }
 
-function runWizardMode(command) {
+function runDevPlayback(command) {
   const normalized = normalizeCommand(command);
-  const expectedWizardCommand = getExpectedWizardCommand();
+  const expectedDevPlaybackCommands = getExpectedDevPlaybackCommands();
   const prompt = isCodexMode() ? getCodexPrompt() : isSqlMode() ? getSqlPrompt() : getPrompt();
   appendTerminal("prompt", `${prompt} ${command}`);
 
-  if (normalized !== expectedWizardCommand) {
-    appendTerminal("note", getWizardUsageMessage());
+  if (!expectedDevPlaybackCommands.includes(normalized)) {
+    appendTerminal("note", getDevPlaybackUsageMessage());
     saveState();
     render();
     return;
   }
 
   if (isCodexMode()) {
-    runCodexWizardMode();
+    runCodexDevPlayback();
   } else if (isSqlMode()) {
-    runSqlWizardMode();
+    runSqlDevPlayback();
   } else if (isVSCodeMode()) {
-    runVSCodeWizardMode();
+    runVSCodeDevPlayback();
   } else if (isPracticeMode()) {
-    runPracticeWizardMode();
+    runPracticeDevPlayback();
   } else if (state.inLesson) {
-    runGuidedGitWizardMode();
+    runGuidedGitDevPlayback();
   } else {
-    appendTerminal("note", "Open a lesson or simulator first, then try wizard mode.");
+    appendTerminal("note", "Open a lesson first, then use How to when you want the simulator walkthrough.");
   }
 
   saveState();
   render();
 }
 
-function getExpectedWizardCommand() {
-  if (isCodexMode()) {
-    return CODEX_WIZARD_COMMAND;
-  }
-  if (isVSCodeMode()) {
-    return VSCODE_WIZARD_COMMAND;
-  }
-  if (isSqlMode()) {
-    return SQL_WIZARD_COMMAND;
-  }
-  return GIT_WIZARD_COMMAND;
+function getAllDevPlaybackCommands() {
+  return [
+    DEV_PLAYBACK_GIT_COMMAND,
+    DEV_PLAYBACK_CODEX_COMMAND,
+    DEV_PLAYBACK_VSCODE_COMMAND,
+    DEV_PLAYBACK_SQL_COMMAND,
+    WIZARD_GIT_COMMAND,
+    WIZARD_CODEX_COMMAND,
+    WIZARD_VSCODE_COMMAND,
+    WIZARD_SQL_COMMAND
+  ].map(normalizeCommand);
 }
 
-function getWizardUsageMessage() {
+function getExpectedDevPlaybackCommands() {
   if (isCodexMode()) {
-    return `Codex uses ${CODEX_WIZARD_COMMAND}. Git labs use ${GIT_WIZARD_COMMAND}. VS Code Lab uses ${VSCODE_WIZARD_COMMAND}.`;
+    return [DEV_PLAYBACK_CODEX_COMMAND, WIZARD_CODEX_COMMAND].map(normalizeCommand);
   }
   if (isVSCodeMode()) {
-    return `VS Code Lab uses ${VSCODE_WIZARD_COMMAND}. Git labs use ${GIT_WIZARD_COMMAND}. Codex uses ${CODEX_WIZARD_COMMAND}.`;
+    return [DEV_PLAYBACK_VSCODE_COMMAND, WIZARD_VSCODE_COMMAND].map(normalizeCommand);
   }
   if (isSqlMode()) {
-    return `Oracle SQL Lab uses ${SQL_WIZARD_COMMAND}. Git labs use ${GIT_WIZARD_COMMAND}. VS Code Lab uses ${VSCODE_WIZARD_COMMAND}.`;
+    return [DEV_PLAYBACK_SQL_COMMAND, WIZARD_SQL_COMMAND].map(normalizeCommand);
   }
-  return `This simulator uses ${GIT_WIZARD_COMMAND}. VS Code Lab uses ${VSCODE_WIZARD_COMMAND}. Codex uses ${CODEX_WIZARD_COMMAND}.`;
+  return [DEV_PLAYBACK_GIT_COMMAND, WIZARD_GIT_COMMAND].map(normalizeCommand);
 }
 
-function runGuidedGitWizardMode() {
+function getDevPlaybackUsageMessage() {
+  if (isCodexMode()) {
+    return "This lesson uses codex wizard mode for developer playback.";
+  }
+  if (isVSCodeMode()) {
+    return "This lesson uses code --wizard mode for developer playback.";
+  }
+  if (isSqlMode()) {
+    return "This lesson uses sql wizard mode for developer playback.";
+  }
+  return "This lesson uses git wizard mode for developer playback.";
+}
+
+function runGuidedGitDevPlayback() {
   const active = getActiveModule();
   if (state.guidedStep >= active.commands.length) {
-    appendTerminal("success", "Git wizard mode: this module is already complete.");
+    appendTerminal("success", "Developer playback: this module is already complete.");
     return;
   }
 
@@ -4393,11 +4617,11 @@ function runGuidedGitWizardMode() {
         appendTerminal("prompt", `${getPrompt()} ${item.cmd}`);
         const result = executeCommand(item.cmd);
         if (result.type === "error") {
-          appendTerminal("error", `Wizard stopped at step ${index + 1}: ${result.text}`);
+          appendTerminal("error", `Developer playback stopped at step ${index + 1}: ${result.text}`);
           state.guidedStep = index;
           return false;
         }
-        appendTerminal("success", `Wizard ran - ${item.desc}`);
+        appendTerminal("success", `Developer playback ran - ${item.desc}`);
         if (result.text) {
           appendTerminal(result.type, result.text);
         }
@@ -4408,25 +4632,25 @@ function runGuidedGitWizardMode() {
     });
   }
 
-  startWizardPlayback({
-    label: `Git wizard mode: ghost typing ${active.title} from ${lessonTitle} through lab completion.`,
+  startDevPlayback({
+    label: `Developer playback: running ${active.title} from ${lessonTitle} through lab completion.`,
     steps,
     onComplete: () => {
-      appendTerminal("note", "Git wizard mode: full lab complete.");
+      appendTerminal("note", "Developer playback: full lab complete.");
     }
   });
 }
 
-function runPracticeWizardMode() {
-  const wizard = ensurePracticeWizardState();
-  const sections = getPracticeWizardSections(wizard.branchName);
-  if (wizard.section >= sections.length) {
-    appendTerminal("success", "Git wizard mode: the practice demo path is already complete.");
+function runPracticeDevPlayback() {
+  const playbackState = ensurePracticeDevPlaybackState();
+  const sections = getPracticeDevPlaybackSections(playbackState.branchName);
+  if (playbackState.section >= sections.length) {
+    appendTerminal("success", "Developer playback: the practice demo path is already complete.");
     return;
   }
 
-  startPracticeChallengeTrackerForWizard();
-  const startSection = wizard.section;
+  startPracticeChallengeTrackerForDevPlayback();
+  const startSection = playbackState.section;
   const steps = [];
   sections.slice(startSection).forEach((section, offset) => {
     const sectionIndex = startSection + offset;
@@ -4441,11 +4665,11 @@ function runPracticeWizardMode() {
           recordPracticeChallengeCommand(command, result);
           recordPracticeCommandEvent(command, result);
           if (result.type === "error") {
-            appendTerminal("error", "Wizard stopped so the learner can correct the simulator state.");
+            appendTerminal("error", "Developer playback stopped so the learner can correct the simulator state.");
             return false;
           }
           if (isLastInSection) {
-            wizard.section = sectionIndex + 1;
+            playbackState.section = sectionIndex + 1;
           }
           return true;
         }
@@ -4453,16 +4677,16 @@ function runPracticeWizardMode() {
     });
   });
 
-  startWizardPlayback({
-    label: `Git wizard mode: ghost typing the full practice lab from ${sections[startSection].title}.`,
+  startDevPlayback({
+    label: `Developer playback: running the full practice lab from ${sections[startSection].title}.`,
     steps,
     onComplete: () => {
-      appendTerminal("note", "Git wizard mode: practice demo complete.");
+      appendTerminal("note", "Developer playback: practice demo complete.");
     }
   });
 }
 
-function startPracticeChallengeTrackerForWizard() {
+function startPracticeChallengeTrackerForDevPlayback() {
   const mode = ensureChallengeModeState();
   if (mode.started || getPracticeChallengeList().every((challenge) => mode.completedIds.includes(challenge.id))) {
     return;
@@ -4477,20 +4701,20 @@ function startPracticeChallengeTrackerForWizard() {
   mode.started = true;
   mode.commandLog = [];
   mode.hintOpen = false;
-  appendTerminal("note", `Challenge tracker following wizard mode: ${next.title}.`);
+  appendTerminal("note", `Challenge tracker following developer playback: ${next.title}.`);
 }
 
-function ensurePracticeWizardState() {
-  if (!state.practiceWizard || typeof state.practiceWizard !== "object") {
-    state.practiceWizard = {
+function ensurePracticeDevPlaybackState() {
+  if (!state.practiceDevPlayback || typeof state.practiceDevPlayback !== "object") {
+    state.practiceDevPlayback = {
       section: 0,
-      branchName: `feature/wizard-practice-${Math.max(1, state.nextCommit || 1)}`
+      branchName: `feature/dev-playback-practice-${Math.max(1, state.nextCommit || 1)}`
     };
   }
-  return state.practiceWizard;
+  return state.practiceDevPlayback;
 }
 
-function getPracticeWizardSections(branchName) {
+function getPracticeDevPlaybackSections(branchName) {
   return [
     {
       title: "Inspect baseline",
@@ -4679,6 +4903,7 @@ function normalizeLearnerProgress(value) {
       ? { ...createLearnerProgressState(), ...value }
       : createLearnerProgressState();
   progress.badges = Array.isArray(progress.badges) ? uniqueSorted(progress.badges) : [];
+  progress.completedLabs = Array.isArray(progress.completedLabs) ? uniqueSorted(progress.completedLabs) : [];
   progress.completedMissions = Array.isArray(progress.completedMissions) ? uniqueSorted(progress.completedMissions) : [];
   progress.bestReadiness = Number.isFinite(progress.bestReadiness) ? progress.bestReadiness : 0;
   progress.lastReadiness = Number.isFinite(progress.lastReadiness) ? progress.lastReadiness : 0;
@@ -4689,6 +4914,109 @@ function normalizeLearnerProgress(value) {
 function ensureLearnerProgress() {
   state.learnerProgress = normalizeLearnerProgress(state.learnerProgress);
   return state.learnerProgress;
+}
+
+function markLabComplete(labId) {
+  const progress = ensureLearnerProgress();
+  if (!progress.completedLabs.includes(labId)) {
+    progress.completedLabs.push(labId);
+    progress.completedLabs = uniqueSorted(progress.completedLabs);
+  }
+}
+
+function syncLearnerLabProgress() {
+  const progress = ensureLearnerProgress();
+  const activeModuleId = state?.activeModuleId || "";
+  const guidedComplete =
+    state?.inLesson &&
+    state?.viewMode === "guided" &&
+    activeModuleId &&
+    getModuleById(activeModuleId)?.commands &&
+    (state.guidedStep >= getModuleById(activeModuleId).commands.length || state.taskFlags?.merged);
+
+  if (guidedComplete && activeModuleId) {
+    markLabComplete(activeModuleId);
+  }
+
+  if (progress.completedMissions.includes("orientation-path")) {
+    markLabComplete("practice");
+  }
+
+  if (state?.viewMode === "capstone" && state?.inLesson) {
+    const hasRepoReviewArtifacts = ["REPO_NOTES.md", "SQL_LINEAGE.md", "DATA_QUALITY_REPORT.md", "CODEX_REVIEW.md"].every((name) =>
+      Object.keys(state.workingFiles || {}).some((path) => path.endsWith(name))
+    );
+    if (hasRepoReviewArtifacts) {
+      markLabComplete(capstoneLab.id);
+    }
+  }
+
+  return progress;
+}
+
+function getModuleById(moduleId) {
+  return modules.find((module) => module.id === moduleId);
+}
+
+function isLabComplete(labId) {
+  return syncLearnerLabProgress().completedLabs.includes(labId);
+}
+
+function getGitWorkflowPortalSteps() {
+  const gitModule = modules[0];
+  const projectModule = modules.find((module) => module.id === "project-work");
+  return [
+    {
+      id: gitModule.id,
+      title: gitModule.title,
+      description: gitModule.description,
+      action: "start-lesson",
+      actionLabel: gitModule.startLabel || "Start lesson",
+      moduleId: gitModule.id,
+      track: ["Identity", "ADO sign-in", "Clone", "Remote", "Pull", "Branch from main", "Diff", "Commit", "Publish", "PR"]
+    },
+    {
+      id: VISUAL_BRANCHING_LAB_ID,
+      title: "Git Workflow 2: Visual Branching Gym",
+      description:
+        "Use the local Learn Git Branching trainer to build the graph mental model for commits, branches, merge, rebase, and remotes before recovery drills.",
+      href: LEARN_GIT_BRANCHING_URL,
+      actionLabel: "Open local visual trainer",
+      track: ["Commit graph", "Branch", "Merge", "Rebase", "Remote"]
+    },
+    {
+      id: "practice",
+      title: "Git Workflow 3: Recovery and Real-File Drills",
+      description: "Reinforce the flow with wrong-branch, dirty-state, conflict, replay, and PR-readiness habits.",
+      action: "open-simulator",
+      actionLabel: "Open practice lab",
+      track: ["Status", "Diff", "Commit", "Push", "Recover", "Conflict", "Replay"]
+    },
+    {
+      id: projectModule?.id || "project-work",
+      title: projectModule?.title || "Git Workflow 4: Project Capsule and Workstreams",
+      description:
+        projectModule?.description ||
+        "Create visible project context on main, then branch for day-to-day workstreams.",
+      action: "start-lesson",
+      actionLabel: projectModule?.startLabel || "Start lesson",
+      moduleId: projectModule?.id || "project-work",
+      track: ["Method", "Capsule", "Main", "Workstream", "Diff", "Publish", "Merge"]
+    },
+    {
+      id: capstoneLab.id,
+      title: capstoneLab.title,
+      description: capstoneLab.description,
+      action: "open-capstone-lab",
+      actionLabel: "Open handoff workflow",
+      track: ["Inspect", "Notes", "Lineage", "Quality", "Review", "Handoff"]
+    }
+  ];
+}
+
+function getNextGitWorkflowStep() {
+  const steps = getGitWorkflowPortalSteps();
+  return steps.find((step) => !isLabComplete(step.id)) || null;
 }
 
 function ensureCommandReplay() {
@@ -5011,7 +5339,7 @@ function maybeCompletePracticeChallenge() {
   appendTerminal("success", `Challenge complete: ${challenge.title}. +${points} points.`);
   appendTerminal("note", challenge.success);
 
-  if (wizardPlayback) {
+  if (devPlayback) {
     const next = getPracticeChallengeList().find((item) => !mode.completedIds.includes(item.id));
     if (next) {
       mode.activeId = next.id;
@@ -5086,13 +5414,13 @@ function practiceChallengeConditionMet(condition) {
   }
 }
 
-function runVSCodeWizardMode() {
+function runVSCodeDevPlayback() {
   ensureVSCodeCliState();
   const sectionIndex = clampIndex(state.vscodeSection || 0, vscodeLab.sections.length);
   const section = vscodeLab.sections[sectionIndex];
   const steps = [];
   for (let index = sectionIndex; index < vscodeLab.sections.length; index += 1) {
-    const commands = getVSCodeWizardCommands(index);
+    const commands = getVSCodeDevPlaybackCommands(index);
     commands.forEach((command, commandIndex) => {
       const isLastInSection = commandIndex === commands.length - 1;
       steps.push({
@@ -5102,13 +5430,13 @@ function runVSCodeWizardMode() {
           const result = executeVSCodeCommand(command);
           appendTerminal(result.type, result.text);
           recordVSCodeMissionCommand(command, result);
-          const expectedConflict = isExpectedVSCodeWizardConflict(command, result);
+          const expectedConflict = isExpectedVSCodeDevPlaybackConflict(command, result);
           if (result.type === "error" && !expectedConflict) {
-            appendTerminal("error", "Wizard stopped so the learner can correct the simulator state.");
+            appendTerminal("error", "Developer playback stopped so the learner can correct the simulator state.");
             return false;
           }
           if (expectedConflict) {
-            appendTerminal("note", "Wizard continuing through the expected conflict resolution practice.");
+            appendTerminal("note", "Developer playback continuing through the expected conflict resolution practice.");
           }
           if (isLastInSection) {
             state.vscodeSection = clampIndex(index + 1, vscodeLab.sections.length);
@@ -5119,16 +5447,16 @@ function runVSCodeWizardMode() {
     });
   }
 
-  startWizardPlayback({
-    label: `VS Code wizard mode: ghost typing the full VS Code lab from ${section.title}.`,
+  startDevPlayback({
+    label: `Developer playback: running the full VS Code lab from ${section.title}.`,
     steps,
     onComplete: () => {
-      appendTerminal("note", "VS Code wizard mode: lab complete.");
+      appendTerminal("note", "Developer playback: VS Code lab complete.");
     }
   });
 }
 
-function runSqlWizardMode() {
+function runSqlDevPlayback() {
   ensureSqlWorksheetState();
   const sectionIndex = clampIndex(state.sqlSection || 0, oracleSqlLab.sections.length);
   const section = oracleSqlLab.sections[sectionIndex];
@@ -5146,7 +5474,7 @@ function runSqlWizardMode() {
           state.sqlWorksheet.lastResult = result.result;
         }
         if (result.type === "error") {
-          appendTerminal("error", "SQL wizard stopped so the learner can correct the worksheet query.");
+          appendTerminal("error", "Developer playback stopped so the learner can correct the worksheet query.");
           return false;
         }
         completeSqlSection(index, false);
@@ -5156,35 +5484,33 @@ function runSqlWizardMode() {
     });
   }
 
-  startWizardPlayback({
-    label: `SQL wizard mode: ghost typing the Oracle SQL lab from ${section.title}.`,
+  startDevPlayback({
+    label: `Developer playback: running the Oracle SQL lab from ${section.title}.`,
     steps,
     onComplete: () => {
-      appendTerminal("note", "SQL wizard mode: lab complete.");
+      appendTerminal("note", "Developer playback: SQL lab complete.");
     }
   });
 }
 
-function getVSCodeWizardCommands(sectionIndex) {
+function getVSCodeDevPlaybackCommands(sectionIndex) {
   switch (sectionIndex) {
     case 0:
-      return [...vscodeLab.extensions.map((extension) => extension.command), "code --list-extensions"];
+      return [...vscodeLab.extensions.map((extension) => extension.command), "code.cmd --list-extensions"];
     case 1:
-      return [`code ${ORACLE_REPO_ROOT}`, "git status"];
+      return [`code.cmd ${ORACLE_REPO_ROOT}`, "Get-Location", "git status"];
     case 2:
-      return ['rg --files -g "*.sql"', `code --goto ${oracleLab.featureFile}:1`];
+      return ['rg --files -g "*.sql"', `code.cmd --goto ${vscodeTargetSqlFile()}:1`];
     case 3:
-      return [`git switch -c ${oracleLab.branchName}`, `edit ${oracleLab.featureFile}`, "git diff", `git add ${oracleLab.featureFile}`, `git commit -m "${oracleLab.featureCommitMessage}"`];
+      return [`edit ${vscodeTargetSqlFile()}`, "git diff"];
     case 4:
-      return ["git branch", "git status", "git log --oneline", "gitlens history"];
-    case 5:
-      return ["git merge main", "git diff", "resolve conflict", `git add ${oracleLab.featureFile}`, 'git commit -m "Resolve emergency orders conflict"'];
+      return ["git status", `git add ${vscodeTargetSqlFile()}`, 'git commit -m "Update arrearage detail export header"', "git status", "git log --oneline"];
     default:
       return ["git status"];
   }
 }
 
-function isExpectedVSCodeWizardConflict(command, result) {
+function isExpectedVSCodeDevPlaybackConflict(command, result) {
   return (
     normalizeCommand(command) === "git merge main" &&
     result?.type === "error" &&
@@ -5192,13 +5518,13 @@ function isExpectedVSCodeWizardConflict(command, result) {
   );
 }
 
-function runCodexWizardMode() {
+function runCodexDevPlayback() {
   ensureCodexCliState();
   const sectionIndex = clampIndex(state.codexSection || 0, codexLab.sections.length);
   const section = codexLab.sections[sectionIndex];
   const steps = [];
   for (let index = sectionIndex; index < codexLab.sections.length; index += 1) {
-    const commands = getCodexWizardCommands(codexLab.sections[index]).flatMap((item) => splitCodexCommandLine(item));
+    const commands = getCodexDevPlaybackCommands(codexLab.sections[index]).flatMap((item) => splitCodexCommandLine(item));
     commands.forEach((command, commandIndex) => {
       const isLastInSection = commandIndex === commands.length - 1;
       steps.push({
@@ -5208,7 +5534,7 @@ function runCodexWizardMode() {
           const result = executeCodexCommand(command);
           appendTerminal(result.type, result.text);
           if (result.type === "error") {
-            appendTerminal("error", "Codex wizard stopped so the learner can correct the setup state.");
+            appendTerminal("error", "Developer playback stopped so the learner can correct the setup state.");
             return false;
           }
           if (isLastInSection) {
@@ -5226,16 +5552,16 @@ function runCodexWizardMode() {
     return;
   }
 
-  startWizardPlayback({
-    label: `Codex wizard mode: ghost typing the full Codex lesson from ${section.title}.`,
+  startDevPlayback({
+    label: `Developer playback: running the full Codex lesson from ${section.title}.`,
     steps,
     onComplete: () => {
-      appendTerminal("note", "Codex wizard mode: lesson complete.");
+      appendTerminal("note", "Developer playback: Codex lesson complete.");
     }
   });
 }
 
-function getCodexWizardCommands(section) {
+function getCodexDevPlaybackCommands(section) {
   if (!section) {
     return [];
   }
@@ -5261,7 +5587,7 @@ function getCodexWizardCommands(section) {
   return [];
 }
 
-function createSimpleWizardSteps(commands, executor, promptGetter) {
+function createSimpleDevPlaybackSteps(commands, executor, promptGetter) {
   return commands.map((command) => ({
     command,
     run: () => {
@@ -5269,7 +5595,7 @@ function createSimpleWizardSteps(commands, executor, promptGetter) {
       const result = executor(command);
       appendTerminal(result.type, result.text);
       if (result.type === "error") {
-        appendTerminal("error", "Wizard stopped so the learner can correct the simulator state.");
+        appendTerminal("error", "Developer playback stopped so the learner can correct the simulator state.");
         return false;
       }
       return true;
@@ -5277,9 +5603,9 @@ function createSimpleWizardSteps(commands, executor, promptGetter) {
   }));
 }
 
-function startWizardPlayback({ label, steps, onComplete }) {
-  cancelWizardPlayback();
-  wizardPlayback = {
+function startDevPlayback({ label, steps, onComplete }) {
+  cancelDevPlayback();
+  devPlayback = {
     index: 0,
     steps: Array.isArray(steps) ? steps : [],
     onComplete
@@ -5287,38 +5613,38 @@ function startWizardPlayback({ label, steps, onComplete }) {
   appendTerminal("note", `${label} Watch the prompt; each command will be typed and run one at a time.`);
   saveState();
   render();
-  scheduleWizardPlayback(650);
+  scheduleDevPlayback(650);
 }
 
-function scheduleWizardPlayback(delay = 450) {
-  if (!wizardPlayback) {
+function scheduleDevPlayback(delay = 450) {
+  if (!devPlayback) {
     return;
   }
-  clearTimeout(wizardPlaybackTimer);
-  wizardPlaybackTimer = window.setTimeout(runNextWizardPlaybackStep, delay);
+  clearTimeout(devPlaybackTimer);
+  devPlaybackTimer = window.setTimeout(runNextDevPlaybackStep, delay);
 }
 
-function runNextWizardPlaybackStep() {
-  const playback = wizardPlayback;
+function runNextDevPlaybackStep() {
+  const playback = devPlayback;
   if (!playback) {
     return;
   }
 
   if (playback.index >= playback.steps.length) {
-    finishWizardPlayback(playback);
+    finishDevPlayback(playback);
     return;
   }
 
   const step = playback.steps[playback.index];
-  typeWizardCommand(step.command, playback, () => {
-    if (wizardPlayback !== playback) {
+  typeDevPlaybackCommand(step.command, playback, () => {
+    if (devPlayback !== playback) {
       return;
     }
 
-    clearWizardInputVisual();
+    clearDevPlaybackInputVisual();
     const ok = step.run();
     if (!ok) {
-      wizardPlayback = null;
+      devPlayback = null;
       saveState();
       render();
       return;
@@ -5326,47 +5652,49 @@ function runNextWizardPlaybackStep() {
 
     playback.index += 1;
     if (playback.index >= playback.steps.length) {
-      finishWizardPlayback(playback);
+      finishDevPlayback(playback);
       return;
     }
 
     saveState();
     render();
-    scheduleWizardPlayback(getWizardCommandPause(step.command));
+    scheduleDevPlayback(getDevPlaybackCommandPause(step.command));
   });
 }
 
-function finishWizardPlayback(playback) {
-  if (wizardPlayback !== playback) {
+function finishDevPlayback(playback) {
+  if (devPlayback !== playback) {
     return;
   }
 
-  wizardPlayback = null;
-  clearTimeout(wizardPlaybackTimer);
-  wizardPlaybackTimer = null;
-  clearWizardInputVisual();
+  devPlayback = null;
+  clearTimeout(devPlaybackTimer);
+  devPlaybackTimer = null;
+  clearDevPlaybackInputVisual();
   playback.onComplete?.();
   saveState();
   render();
 }
 
-function typeWizardCommand(command, playback, done) {
-  const input = document.getElementById("commandInput");
+function typeDevPlaybackCommand(command, playback, done) {
+  const input = isVSCodeMode()
+    ? document.getElementById("vscodeCommandInput") || document.getElementById("commandInput")
+    : document.getElementById("commandInput");
   if (!input) {
     done();
     return;
   }
 
   const text = String(command || "");
-  const delay = getWizardTypingDelay(text);
+  const delay = getDevPlaybackTypingDelay(text);
   let index = 0;
   input.value = "";
   input.focus();
-  input.classList.add("wizard-typing");
-  document.querySelector(".terminal-panel")?.classList.add("wizard-running");
+  input.classList.add("dev-playback-typing");
+  document.querySelector(".terminal-panel")?.classList.add("dev-playback-running");
 
   const tick = () => {
-    if (wizardPlayback !== playback) {
+    if (devPlayback !== playback) {
       return;
     }
 
@@ -5374,17 +5702,17 @@ function typeWizardCommand(command, playback, done) {
     input.value = text.slice(0, index);
     input.setSelectionRange(input.value.length, input.value.length);
     if (index >= text.length) {
-      wizardPlaybackTimer = window.setTimeout(done, 280);
+      devPlaybackTimer = window.setTimeout(done, 280);
       return;
     }
 
-    wizardPlaybackTimer = window.setTimeout(tick, delay);
+    devPlaybackTimer = window.setTimeout(tick, delay);
   };
 
-  wizardPlaybackTimer = window.setTimeout(tick, delay);
+  devPlaybackTimer = window.setTimeout(tick, delay);
 }
 
-function getWizardTypingDelay(command) {
+function getDevPlaybackTypingDelay(command) {
   const length = String(command || "").length;
   if (length > 240) {
     return 2;
@@ -5395,29 +5723,31 @@ function getWizardTypingDelay(command) {
   return 18;
 }
 
-function getWizardCommandPause(command) {
+function getDevPlaybackCommandPause(command) {
   return String(command || "").length > 160 ? 600 : 450;
 }
 
-function cancelWizardPlayback(message = "") {
-  if (wizardPlaybackTimer) {
-    clearTimeout(wizardPlaybackTimer);
+function cancelDevPlayback(message = "") {
+  if (devPlaybackTimer) {
+    clearTimeout(devPlaybackTimer);
   }
-  wizardPlaybackTimer = null;
-  wizardPlayback = null;
-  clearWizardInputVisual();
+  devPlaybackTimer = null;
+  devPlayback = null;
+  clearDevPlaybackInputVisual();
   if (message) {
     appendTerminal("note", message);
   }
 }
 
-function clearWizardInputVisual() {
-  const input = document.getElementById("commandInput");
+function clearDevPlaybackInputVisual() {
+  const input = isVSCodeMode()
+    ? document.getElementById("vscodeCommandInput") || document.getElementById("commandInput")
+    : document.getElementById("commandInput");
   if (input) {
     input.value = "";
-    input.classList.remove("wizard-typing");
+    input.classList.remove("dev-playback-typing");
   }
-  document.querySelector(".terminal-panel")?.classList.remove("wizard-running");
+  document.querySelector(".terminal-panel")?.classList.remove("dev-playback-running");
 }
 
 function runCodexCommand(command) {
@@ -5483,6 +5813,11 @@ function executeSqlCommand(command) {
     return { type: "note", text: "Type a SELECT statement, show files, describe <table>, or help." };
   }
 
+  const easterEgg = getGitEasterEgg(text);
+  if (easterEgg) {
+    return easterEgg;
+  }
+
   if (normalized === "help" || normalized === "sql help") {
     return {
       type: "note",
@@ -5494,8 +5829,7 @@ function executeSqlCommand(command) {
           "  describe ccs_emergency_response_activity_extract",
           "  SELECT * FROM ccs_emergency_response_activity_extract",
           "  SELECT activity_id, zip_code FROM ccs_emergency_response_activity_extract WHERE activity_status = 'OPEN'",
-          "  SELECT zip_code, COUNT(*) AS order_count FROM ccs_emergency_response_activity_extract GROUP BY zip_code",
-          `  ${SQL_WIZARD_COMMAND}`
+          "  SELECT zip_code, COUNT(*) AS order_count FROM ccs_emergency_response_activity_extract GROUP BY zip_code"
         ].join("\n")
     };
   }
@@ -5574,9 +5908,13 @@ function executeSqlSelectStatement(command) {
 
   const rows = applySqlWhere(table.rows, command);
   const columns = parseSqlSelectedColumns(command, table.columns);
-  const projected = projectSqlRows(applySqlOrder(rows, command), columns);
-  const result = createSqlResult(columns, projected, `${projected.length} row${projected.length === 1 ? "" : "s"} returned from ${tableName}.`);
-  return { type: "success", text: formatSqlResultForTerminal(result), result };
+  try {
+    const projected = projectSqlRows(applySqlOrder(rows, command), columns);
+    const result = createSqlResult(columns, projected, `${projected.length} row${projected.length === 1 ? "" : "s"} returned from ${tableName}.`);
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  } catch (error) {
+    return { type: "error", text: error.message };
+  }
 }
 
 function executeSqlJoinQuery(command) {
@@ -5594,10 +5932,14 @@ function executeSqlJoinQuery(command) {
   const filtered = applySqlWhere(joined, command);
   const combinedColumns = uniqueSqlColumns([...activity.columns, ...service.columns]);
   const columns = parseSqlSelectedColumns(command, combinedColumns);
-  const projected = projectSqlRows(applySqlOrder(filtered, command), columns);
-  const result = createSqlResult(columns, projected, `${projected.length} joined row${projected.length === 1 ? "" : "s"} returned using service_point_id.`);
-  state.sqlWorksheet.selectedFile = "ccs/sql/meters/ccs_device_service_agreement_extract.sql";
-  return { type: "success", text: formatSqlResultForTerminal(result), result };
+  try {
+    const projected = projectSqlRows(applySqlOrder(filtered, command), columns);
+    const result = createSqlResult(columns, projected, `${projected.length} joined row${projected.length === 1 ? "" : "s"} returned using service_point_id.`);
+    state.sqlWorksheet.selectedFile = "ccs/sql/meters/ccs_device_service_agreement_extract.sql";
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  } catch (error) {
+    return { type: "error", text: error.message };
+  }
 }
 
 function executeSqlAggregateQuery(command, tableName) {
@@ -5804,6 +6146,12 @@ function applySqlWhere(rows, command) {
     filtered = filtered.filter((row) => String(row.ACTIVITY_STATUS || "").toUpperCase() === status);
   }
 
+  const activityTypeEq = normalized.match(/activity_type\s*=\s*'([^']+)'/i);
+  if (activityTypeEq) {
+    const activityType = activityTypeEq[1].toUpperCase();
+    filtered = filtered.filter((row) => String(row.ACTIVITY_TYPE || "").toUpperCase() === activityType);
+  }
+
   const zipEq = normalized.match(/zip_code\s*=\s*'([^']+)'/i);
   if (zipEq) {
     filtered = filtered.filter((row) => String(row.ZIP_CODE || "") === zipEq[1]);
@@ -5816,7 +6164,7 @@ function applySqlWhere(rows, command) {
   }
 
   const dateLiteral = normalized.match(/order_date\s*>=\s*date\s*'(\d{4}-\d{2}-\d{2})'/i);
-  const dateBoundary = normalized.includes("trunc(sysdate) - 7") ? "2026-04-27" : dateLiteral?.[1];
+  const dateBoundary = normalized.includes("trunc(sysdate) - 7") ? "2026-05-05" : dateLiteral?.[1];
   if (dateBoundary) {
     filtered = filtered.filter((row) => !row.ORDER_DATE || String(row.ORDER_DATE) >= dateBoundary);
   }
@@ -5842,7 +6190,7 @@ function applySqlOrder(rows, command) {
   }
 
   const column = cleanSqlColumnExpression(match[1]);
-  const desc = !match[2] || match[2].trim().toLowerCase() === "desc";
+  const desc = match[2] && match[2].trim().toLowerCase() === "desc";
   return [...rows].sort((a, b) => {
     const left = a[column];
     const right = b[column];
@@ -5856,9 +6204,12 @@ function applySqlOrder(rows, command) {
 }
 
 function projectSqlRows(rows, columns) {
-  return rows.map((row) =>
-    Object.fromEntries(columns.map((column) => [column, Object.prototype.hasOwnProperty.call(row, column) ? row[column] : ""]))
-  );
+  const unknownColumns = columns.filter((column) => rows.some((row) => row && !Object.prototype.hasOwnProperty.call(row, column)));
+  if (unknownColumns.length) {
+    throw new Error(`Unknown column${unknownColumns.length === 1 ? "" : "s"}: ${unknownColumns.join(", ")}`);
+  }
+
+  return rows.map((row) => Object.fromEntries(columns.map((column) => [column, row[column]])));
 }
 
 function uniqueSqlColumns(columns) {
@@ -5914,15 +6265,94 @@ function ensureVSCodeCliState() {
   state.vscodeCli.missionLog = Array.isArray(state.vscodeCli.missionLog) ? state.vscodeCli.missionLog : [];
 }
 
+function vscodeTargetSqlFile() {
+  return "ccs/sql/accounts/ccs_arrearage_detail_report.sql";
+}
+
+function vscodeTargetFileName() {
+  return vscodeTargetSqlFile().split("/").pop();
+}
+
+function getGitEasterEgg(command) {
+  const normalized = normalizeCommand(command);
+  if (normalized === "git money") {
+    return {
+      type: "success",
+      text: "git paid. Direct deposit fast-forwarded; coffee budget remains untracked."
+    };
+  }
+  if (normalized === "git snacks" || normalized === "git snack") {
+    return {
+      type: "success",
+      text: "snak attak. Chips staged, salsa committed, crumbs ignored by .gitignore."
+    };
+  }
+  if (normalized === "git a life") {
+    return {
+      type: "success",
+      text:
+        [
+          "git a life",
+          "",
+          "  .-''''-.",
+          " /        \\",
+          "|  .--.  .-|",
+          "| (    \\/  |",
+          " \\  '--'  /",
+          "  '-.__.-'",
+          "    /||\\",
+          "   /_||_\\",
+          "",
+          "No life found. Try committing to a hobby branch."
+        ].join("\n")
+    };
+  }
+  if (normalized === "git out of my swamp") {
+    return {
+      type: "success",
+      text:
+        [
+          "git out of my swamp",
+          "",
+          "⢀⡴⠑⡄⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+          "⠸⡇⠀⠿⡀⠀⠀⠀⣀⡴⢿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⠀⠑⢄⣠⠾⠁⣀⣄⡈⠙⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⠀⢀⡀⠁⠀⠀⠈⠙⠛⠂⠈⣿⣿⣿⣿⣿⠿⡿⢿⣆⠀⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⢀⡾⣁⣀⠀⠴⠂⠙⣗⡀⠀⢻⣿⣿⠭⢤⣴⣦⣤⣹⠀⠀⠀⢀⢴⣶⣆",
+          "⠀⠀⢀⣾⣿⣿⣿⣷⣮⣽⣾⣿⣥⣴⣿⣿⡿⢂⠔⢚⡿⢿⣿⣦⣴⣾⠁⠸⣼⡿",
+          "⠀⢀⡞⠁⠙⠻⠿⠟⠉⠀⠛⢹⣿⣿⣿⣿⣿⣌⢤⣼⣿⣾⣿⡟⠉⠀⠀⠀⠀⠀",
+          "⠀⣾⣷⣶⠇⠀⠀⣤⣄⣀⡀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀",
+          "⠀⠉⠈⠉⠀⠀⢦⡈⢻⣿⣿⣿⣶⣶⣶⣶⣤⣽⡹⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⠀⠀⠀⠀⠉⠲⣽⡻⢿⣿⣿⣿⣿⣿⣿⣷⣜⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⣶⣮⣭⣽⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⠀⠀⠀⣀⣀⣈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+          "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠻⠿⠿⠿⠿⠛⠉",
+          "",
+          "Ogres have layers. So does Git history."
+        ].join("\n")
+    };
+  }
+  return null;
+}
+
 function executeVSCodeCommand(command) {
   ensureVSCodeCliState();
   const text = String(command || "").trim();
   const normalized = normalizeCommand(text);
   const tokens = tokenize(text);
   const lower = tokens.map((token) => token.toLowerCase());
+  const isCodeCommand = lower[0] === "code" || lower[0] === "code.cmd";
+  const normalizedCodeArgs = isCodeCommand ? normalizeCommand(tokens.slice(1).join(" ")) : "";
 
   if (!text) {
     return { type: "note", text: "Type a VS Code or Git command." };
+  }
+
+  const easterEgg = getGitEasterEgg(text);
+  if (easterEgg) {
+    return easterEgg;
   }
 
   if (normalized === "help") {
@@ -5931,38 +6361,35 @@ function executeVSCodeCommand(command) {
       text:
         [
           "VS Code lab simulator commands:",
-          "  code .",
-          "  code --install-extension ms-vscode.PowerShell",
-          "  code --install-extension eamodio.gitlens",
-          "  code --install-extension Oracle.sql-developer",
-          "  code --list-extensions",
-          `  code --goto ${oracleLab.featureFile}:1`,
+          "  code.cmd .",
+          "  code.cmd --install-extension ms-vscode.PowerShell",
+          "  code.cmd --install-extension eamodio.gitlens",
+          "  code.cmd --install-extension Oracle.sql-developer",
+          "  code.cmd --list-extensions",
+          `  code.cmd ${ORACLE_REPO_ROOT}`,
+          `  code.cmd --goto ${vscodeTargetSqlFile()}:1`,
           "  rg --files -g \"*.sql\"",
           "  git status",
-          `  git switch -c ${oracleLab.branchName}`,
-          `  edit ${oracleLab.featureFile}`,
+          `  edit ${vscodeTargetSqlFile()}`,
           "  git diff",
-          `  git add ${oracleLab.featureFile}`,
-          "  git commit -m \"Add emergency orders ZIP report\"",
-          "  git merge main",
-          "  resolve conflict",
-          "  gitlens history",
-          `  ${VSCODE_WIZARD_COMMAND}`
+          `  git add ${vscodeTargetSqlFile()}`,
+          "  git commit -m \"Update arrearage detail export header\"",
+          "  gitlens history"
         ].join("\n")
     };
   }
 
-  if (normalized === "code ." || normalizeCommand(text.replace(/^code\s+/i, "")) === normalizeCommand(ORACLE_REPO_ROOT)) {
+  if (isCodeCommand && (normalizedCodeArgs === "." || normalizedCodeArgs === normalizeCommand(ORACLE_REPO_ROOT))) {
     state.vscodeCli.openedWorkspace = true;
     state.cwd = ORACLE_REPO_ROOT;
     return { type: "success", text: `VS Code opened ${ORACLE_REPO_ROOT}. Explorer, terminal, and Source Control now share repo context.` };
   }
 
-  if (lower[0] === "code" && lower[1] === "--install-extension") {
+  if (isCodeCommand && lower[1] === "--install-extension") {
     return installVSCodeExtension(tokens.slice(2).join(" "));
   }
 
-  if (normalized === "code --list-extensions") {
+  if (isCodeCommand && normalizedCodeArgs === "--list-extensions") {
     return {
       type: "success",
       text:
@@ -5972,15 +6399,16 @@ function executeVSCodeCommand(command) {
     };
   }
 
-  if (lower[0] === "code" && lower[1] === "--goto") {
+  if (isCodeCommand && lower[1] === "--goto") {
     const target = tokens.slice(2).join(" ").trim();
     if (!target) {
-      return { type: "error", text: `Specify a file, for example: code --goto ${oracleLab.featureFile}:1` };
+      return { type: "error", text: `Specify a file, for example: code.cmd --goto ${vscodeTargetSqlFile()}:1` };
     }
-    if (!target.includes(oracleLab.featureFile)) {
-      return { type: "note", text: `Opened ${target}. For this lab, the main target file is ${oracleLab.featureFile}.` };
+    state.vscodeCli.activeFile = target.replace(/:\d+$/g, "");
+    if (!target.includes(vscodeTargetSqlFile())) {
+      return { type: "note", text: `Opened ${target}. For this lab, the main target file is ${vscodeTargetSqlFile()}.` };
     }
-    return { type: "success", text: `Opened ${oracleLab.featureFile} at the requested line. Compare it with neighboring SQL before editing.` };
+    return { type: "success", text: `Opened ${vscodeTargetSqlFile()} at the requested line. Compare it with neighboring SQL before editing.` };
   }
 
   if (lower[0] === "cd" || lower[0] === "set-location") {
@@ -6011,17 +6439,19 @@ function executeVSCodeCommand(command) {
   }
 
   if (lower[0] === "edit") {
-    const target = tokens.slice(1).join(" ").trim() || oracleLab.featureFile;
+    const target = tokens.slice(1).join(" ").trim() || vscodeTargetSqlFile();
+    state.vscodeCli.activeFile = target;
     state.vscodeCli.edited = true;
     state.vscodeCli.staged = false;
     state.vscodeCli.committed = false;
     return { type: "success", text: `Edited ${target}. Source Control now shows one changed SQL file.` };
   }
 
-  if (normalized === `code ${normalizeCommand(oracleLab.featureFile)}` || lower[0] === "code" && text.includes(oracleLab.featureFile)) {
+  if ((isCodeCommand && normalizedCodeArgs === normalizeCommand(vscodeTargetSqlFile())) || isCodeCommand && text.includes(vscodeTargetSqlFile())) {
+    state.vscodeCli.activeFile = vscodeTargetSqlFile();
     state.vscodeCli.edited = true;
     state.vscodeCli.staged = false;
-    return { type: "success", text: `Opened and marked ${oracleLab.featureFile} as edited for this simulator. Run git diff next.` };
+    return { type: "success", text: `Opened and marked ${vscodeTargetSqlFile()} as edited for this simulator. Run git diff next.` };
   }
 
   if (normalized === "git diff" || normalized === "git diff --staged") {
@@ -6030,7 +6460,7 @@ function executeVSCodeCommand(command) {
         type: "note",
         text:
           [
-            `diff -- ${oracleLab.featureFile}`,
+          `diff -- ${vscodeTargetSqlFile()}`,
             "<<<<<<< HEAD",
             "where activity_status = 'OPEN'",
             "=======",
@@ -6040,7 +6470,7 @@ function executeVSCodeCommand(command) {
       };
     }
     if (!state.vscodeCli.edited) {
-      return { type: "note", text: "No file edits yet. Try: edit ccs/sql/meters/ccs_emergency_response_activity_by_zip_prior_week.sql" };
+      return { type: "note", text: `No file edits yet. Try: edit ${vscodeTargetSqlFile()}` };
     }
     if (normalized === "git diff --staged" && !state.vscodeCli.staged) {
       return { type: "note", text: "No staged diff yet. Stage the intended file first." };
@@ -6049,9 +6479,9 @@ function executeVSCodeCommand(command) {
       type: "success",
       text:
         [
-          `diff -- ${oracleLab.featureFile}`,
-          "+where activity_status in ('OPEN', 'PENDING')",
-          "+  and order_date >= trunc(sysdate) - 7"
+          `diff -- ${vscodeTargetSqlFile()}`,
+          "+-- EXPORT NAME: ARREARAGE_DETAIL.csv",
+          "+-- REFRESH: Fabric Lakehouse arrearage detail ingestion"
         ].join("\n")
     };
   }
@@ -6073,7 +6503,7 @@ function executeVSCodeCommand(command) {
     state.vscodeCli.staged = false;
     state.vscodeCli.conflictOpen = false;
     state.vscodeCli.conflictResolved = false;
-    return { type: "success", text: "Created commit c002 on the task branch. Review PR summary and validation notes next." };
+    return { type: "success", text: "Created commit c002. VS Code Source Control is clean and the terminal agrees." };
   }
 
   if (normalized === "git log --oneline") {
@@ -6081,7 +6511,7 @@ function executeVSCodeCommand(command) {
       type: "success",
       text:
         state.vscodeCli.committed
-          ? "c002 Add emergency orders ZIP report\nc001 Add ticket context\nc000 Oracle repo baseline"
+          ? "c002 Update arrearage detail export header\nc001 Add ticket context\nc000 Oracle repo baseline"
           : "c001 Add ticket context\nc000 Oracle repo baseline"
     };
   }
@@ -6094,7 +6524,7 @@ function executeVSCodeCommand(command) {
       type: "success",
       text:
         state.vscodeCli.committed
-          ? "GitLens history: c002 Add emergency orders ZIP report -> c001 Add ticket context -> c000 Oracle repo baseline"
+          ? "GitLens history: c002 Update arrearage detail export header -> c001 Add ticket context -> c000 Oracle repo baseline"
           : "GitLens history: c001 Add ticket context -> c000 Oracle repo baseline"
     };
   }
@@ -6104,7 +6534,7 @@ function executeVSCodeCommand(command) {
     state.vscodeCli.conflictResolved = false;
     state.vscodeCli.edited = true;
     state.vscodeCli.staged = false;
-    return { type: "error", text: `CONFLICT (content): Merge conflict in ${oracleLab.featureFile}. Use the editor conflict actions, then run: resolve conflict` };
+    return { type: "error", text: `CONFLICT (content): Merge conflict in ${vscodeTargetSqlFile()}. Use the editor conflict actions, then run: resolve conflict` };
   }
 
   if (normalized === "resolve conflict") {
@@ -6170,14 +6600,9 @@ function getVSCodeMissionSteps() {
       complete: Boolean(state.vscodeCli.openedWorkspace) && normalizePathForCompare(state.cwd) === normalizePathForCompare(ORACLE_REPO_ROOT)
     },
     {
-      label: "Target files discovered",
-      detail: "Use Explorer, Quick Open, or ripgrep before editing.",
-      complete: vscodeRan('rg --files -g "*.sql"') || vscodeRan(`code --goto ${oracleLab.featureFile}:1`)
-    },
-    {
-      label: "Task branch visible",
-      detail: "Status bar and terminal agree on the branch name.",
-      complete: state.vscodeCli.branch !== "main"
+      label: "SQL file opened",
+      detail: "Explorer or Quick Open was used to open the target SQL file.",
+      complete: vscodeRan(`code.cmd --goto ${vscodeTargetSqlFile()}:1`) || vscodeRan(`code --goto ${vscodeTargetSqlFile()}:1`) || state.vscodeCli.activeFile === vscodeTargetSqlFile()
     },
     {
       label: "Diff reviewed",
@@ -6193,11 +6618,6 @@ function getVSCodeMissionSteps() {
       label: "Commit created",
       detail: "The change has a reviewable checkpoint.",
       complete: Boolean(state.vscodeCli.committed)
-    },
-    {
-      label: "Conflict handling practiced",
-      detail: "The learner can recognize and resolve conflict markers.",
-      complete: Boolean(state.vscodeCli.conflictResolved || vscodeRan("resolve conflict"))
     }
   ];
 }
@@ -6212,7 +6632,7 @@ function renderVSCodeMissionPanel() {
           <span class="section-kicker">Editor missions</span>
           <h3>${complete}/${steps.length} complete</h3>
         </div>
-        <code>${escapeHtml(VSCODE_WIZARD_COMMAND)}</code>
+        <code>VS Code workflow</code>
       </div>
       <div class="vscode-mission-list">
         ${steps
@@ -6250,15 +6670,16 @@ function commandVSCodeCd(args) {
 
 function renderVSCodeGitStatus(short = false) {
   ensureVSCodeCliState();
+  const file = vscodeTargetSqlFile();
   if (short) {
     if (state.vscodeCli.conflictOpen) {
-      return `UU ${oracleLab.featureFile}`;
+      return `UU ${file}`;
     }
     if (state.vscodeCli.staged) {
-      return `A  ${oracleLab.featureFile}`;
+      return `M  ${file}`;
     }
     if (state.vscodeCli.edited || state.vscodeCli.conflictResolved) {
-      return ` M ${oracleLab.featureFile}`;
+      return ` M ${file}`;
     }
     return "";
   }
@@ -6269,7 +6690,7 @@ function renderVSCodeGitStatus(short = false) {
       "You have unmerged paths.",
       "",
       "Unmerged paths:",
-      `  both modified: ${oracleLab.featureFile}`,
+      `  both modified: ${file}`,
       "",
       "Fix conflicts and run git add."
     ].join("\n");
@@ -6279,7 +6700,7 @@ function renderVSCodeGitStatus(short = false) {
     return [
       `On branch ${state.vscodeCli.branch}`,
       "Changes to be committed:",
-      `  new file: ${oracleLab.featureFile}`
+      `  modified: ${file}`
     ].join("\n");
   }
 
@@ -6287,7 +6708,7 @@ function renderVSCodeGitStatus(short = false) {
     return [
       `On branch ${state.vscodeCli.branch}`,
       "Changes not staged for commit:",
-      `  modified: ${oracleLab.featureFile}`
+      `  modified: ${file}`
     ].join("\n");
   }
 
@@ -6296,7 +6717,7 @@ function renderVSCodeGitStatus(short = false) {
 
 function splitCodexCommandLine(command) {
   const text = String(command || "").trim();
-  if (!text || /^codex\s+(exec\s+)?["']?/i.test(text)) {
+  if (!text || /^codex(?:\.cmd)?\s+(exec\s+)?["']?/i.test(text)) {
     return [text].filter(Boolean);
   }
   return text
@@ -6316,56 +6737,105 @@ function executeCodexCommand(command) {
     return { type: "note", text: "Type a setup command or Codex prompt." };
   }
 
-  if (normalized === "help" || normalized === "codex help") {
+  const easterEgg = getGitEasterEgg(text);
+  if (easterEgg) {
+    return easterEgg;
+  }
+
+  if (normalized === "help" || normalized === "codex help" || normalized === "codex.cmd help") {
     return {
       type: "note",
       text:
         [
-          "Codex simulator commands:",
+          "Windows PowerShell practice commands:",
+          "  whoami",
           "  node --version",
           "  npm --version",
+          "  npm.cmd --version",
+          "  codex --version",
+          "  codex.cmd --version",
           `  ${codexLab.cliCommand}`,
-          "  codex login",
+          "  codex.cmd login",
           `  cd ${ORACLE_REPO_ROOT}`,
           "  Get-Location",
           "  Get-ChildItem -Force",
           "  rg --files",
           "  rg --files -g \"*.sql\"",
           "  git status",
-          "  codex",
-          "  codex exec \"Review this repo for docs gaps\"",
-          "  exit",
-          `  ${CODEX_WIZARD_COMMAND}`
+          "  codex.cmd",
+          "  codex.cmd exec \"Review this repo for docs gaps\"",
+          "  exit"
         ].join("\n")
     };
   }
 
+  if (normalized === "whoami") {
+    return { type: "success", text: LOCAL_WINDOWS_USER };
+  }
+
+  if (normalized === "who am i" || normalized === "who iam i") {
+    return { type: "error", text: "PowerShell uses whoami with no spaces: whoami" };
+  }
+
   if (normalized === "node --version") {
-    return { type: "success", text: "v20.11.1" };
+    return { type: "success", text: LOCAL_NODE_VERSION };
   }
 
   if (normalized === "npm --version") {
-    return { type: "success", text: "10.2.4" };
+    return { type: "error", text: POWERSHELL_NPM_SHIM_BLOCKER };
+  }
+
+  if (normalized === "npm.cmd --version") {
+    return { type: "success", text: LOCAL_NPM_VERSION };
+  }
+
+  if (lower[0] === "npm") {
+    return { type: "error", text: POWERSHELL_NPM_SHIM_BLOCKER };
+  }
+
+  if (normalized === "codex --version") {
+    return { type: "error", text: POWERSHELL_CODEX_SHIM_BLOCKER };
+  }
+
+  if (normalized === "codex.cmd --version") {
+    state.codexCli.installed = true;
+    return { type: "success", text: LOCAL_CODEX_VERSION };
   }
 
   if (normalized === normalizeCommand(codexLab.cliCommand)) {
     state.codexCli.installed = true;
-    return { type: "success", text: "Installed @openai/codex globally. Next: codex login" };
+    return {
+      type: "success",
+      text:
+        [
+          "npm reports @openai/codex is available globally.",
+          `Verified CLI shim: codex.cmd --version -> ${LOCAL_CODEX_VERSION}`,
+          "Next: codex.cmd login"
+        ].join("\n")
+    };
   }
 
   if (normalized === "codex --upgrade" || normalized === "codex upgrade") {
+    return { type: "error", text: POWERSHELL_CODEX_SHIM_BLOCKER };
+  }
+
+  if (normalized === "codex.cmd --upgrade" || normalized === "codex.cmd upgrade") {
     if (!state.codexCli.installed) {
       return { type: "error", text: "Codex is not installed yet. Run the install command first." };
     }
-    return { type: "success", text: "Codex CLI is up to date in this simulator." };
+    return { type: "success", text: "Codex CLI is up to date in this practice terminal." };
   }
 
   if (normalized === "codex login") {
+    return { type: "error", text: POWERSHELL_CODEX_SHIM_BLOCKER };
+  }
+
+  if (normalized === "codex.cmd login") {
     if (!state.codexCli.installed) {
-      return { type: "error", text: "Install Codex first: npm install -g @openai/codex" };
+      return { type: "error", text: "Confirm Codex first: codex.cmd --version or npm.cmd install -g @openai/codex" };
     }
     state.codexCli.loggedIn = true;
-    return { type: "success", text: "Browser sign-in completed. Codex is authenticated for this simulator." };
+    return { type: "success", text: "Browser sign-in completed. Codex is authenticated for this practice terminal." };
   }
 
   if (lower[0] === "cd" || lower[0] === "set-location") {
@@ -6402,7 +6872,7 @@ function executeCodexCommand(command) {
     if (!isCodexRepoRoot()) {
       return { type: "error", text: "fatal: not a git repository. Navigate to C:\\Repositories\\Oracle first." };
     }
-    return { type: "success", text: "No local file changes in this Codex simulator." };
+    return { type: "success", text: "No local file changes in this practice terminal." };
   }
 
   if (normalized === "git status") {
@@ -6433,6 +6903,10 @@ function executeCodexCommand(command) {
   }
 
   if (lower[0] === "codex") {
+    return { type: "error", text: POWERSHELL_CODEX_SHIM_BLOCKER };
+  }
+
+  if (lower[0] === "codex.cmd") {
     return commandCodex(tokens.slice(1), text);
   }
 
@@ -6443,11 +6917,11 @@ function executeCodexCommand(command) {
   if (looksLikeCodexPrompt(text)) {
     return {
       type: "note",
-      text: "This looks like a prompt. Start Codex first with codex, or run it as: codex \"your prompt\"."
+      text: "This looks like a prompt. Start Codex first with codex.cmd, or run it as: codex.cmd \"your prompt\"."
     };
   }
 
-  return { type: "error", text: "Command not recognized in the Codex simulator. Type help for supported commands." };
+  return { type: "error", text: "Command not recognized in this PowerShell practice terminal. Type help for supported commands." };
 }
 
 function commandCodexCd(args) {
@@ -6483,10 +6957,10 @@ function commandCodexCd(args) {
 
 function commandCodex(args, rawText) {
   if (!state.codexCli.installed) {
-    return { type: "error", text: "Codex is not installed yet. Run: npm install -g @openai/codex" };
+    return { type: "error", text: "Codex is not confirmed yet. Run: codex.cmd --version" };
   }
   if (!state.codexCli.loggedIn) {
-    return { type: "error", text: "Codex is not authenticated yet. Run: codex login" };
+    return { type: "error", text: "Codex is not authenticated yet. Run: codex.cmd login" };
   }
   if (!isCodexRepoRoot()) {
     return { type: "error", text: `Navigate to the repo root first: cd ${ORACLE_REPO_ROOT}` };
@@ -6503,7 +6977,7 @@ function commandCodex(args, rawText) {
   const mode = args[0]?.toLowerCase() === "exec" ? "exec" : "one-shot";
   const prompt = args[0]?.toLowerCase() === "exec" ? args.slice(1).join(" ") : args.join(" ");
   if (!prompt.trim()) {
-    return { type: "error", text: `Provide a prompt, for example: codex ${mode === "exec" ? "exec " : ""}"Inspect this repo"` };
+    return { type: "error", text: `Provide a prompt, for example: codex.cmd ${mode === "exec" ? "exec " : ""}"Inspect this repo"` };
   }
 
   return runCodexPrompt(prompt, mode, rawText);
@@ -6521,7 +6995,7 @@ function runCodexPrompt(prompt, mode = "interactive") {
 
 function simulateCodexPromptResponse(prompt, mode) {
   const normalized = String(prompt).toLowerCase();
-  const prefix = mode === "exec" ? "codex exec simulation" : "Codex simulation";
+  const prefix = mode === "exec" ? "codex.cmd exec practice response" : "Codex practice response";
   if (normalized.includes("ado") || normalized.includes("ticket")) {
     return [
       `${prefix}: ADO orientation draft`,
@@ -6602,7 +7076,7 @@ function ensureCodexCliState() {
     ...(state.codexCli && typeof state.codexCli === "object" ? state.codexCli : {})
   };
   state.codexCli.promptRuns = Array.isArray(state.codexCli.promptRuns) ? state.codexCli.promptRuns : [];
-  if (!state.cwd) {
+  if (!state.cwd || normalizePathForCompare(state.cwd) === normalizePathForCompare(CODEX_OLD_DEFAULT_CWD)) {
     state.cwd = CODEX_DEFAULT_CWD;
   }
   return state.codexCli;
@@ -6622,6 +7096,11 @@ function normalizePathForCompare(path) {
 }
 
 function executeCommand(command) {
+  const easterEgg = getGitEasterEgg(command);
+  if (easterEgg) {
+    return easterEgg;
+  }
+
   const outFile = parseOutFile(command);
   if (outFile) {
     return commandOutFile(outFile);
@@ -6637,6 +7116,8 @@ function executeCommand(command) {
         [
           "Supported commands:",
           `  git clone ${ADO_REPO_URL}`,
+          "  git config --global user.name",
+          "  git config --global user.email",
           "  git remote -v",
           "  git status",
           "  git diff | git diff --stat | git diff --staged",
@@ -6648,7 +7129,6 @@ function executeCommand(command) {
           "  git log --oneline",
           "  git push | git pull",
           "  git restore --staged <file>",
-          `  ${GIT_WIZARD_COMMAND}`,
           "  mkdir <folder>",
           "  cd <folder>",
           "  git init",
@@ -6686,6 +7166,8 @@ function executeCommand(command) {
   switch (lower[1]) {
     case "clone":
       return commandClone(tokens.slice(2));
+    case "config":
+      return commandConfig(tokens.slice(2));
     case "init":
       return commandInit();
     case "remote":
@@ -6767,6 +7249,45 @@ function commandInit() {
   return { type: "success", text: "Initialized empty Git repository in .git/" };
 }
 
+function commandConfig(args) {
+  const normalized = args.map((arg) => arg.toLowerCase());
+  const isGlobal = normalized[0] === "--global";
+  const key = isGlobal ? args[1] : args[0];
+  const value = isGlobal ? args.slice(2).join(" ") : args.slice(1).join(" ");
+  const normalizedKey = String(key || "").toLowerCase();
+
+  if (!key) {
+    return {
+      type: "error",
+      text: "Specify a config key. Try git config --global user.name or git config --global user.email."
+    };
+  }
+
+  if (value) {
+    if (normalizedKey === "user.name") {
+      state.gitIdentity = { ...(state.gitIdentity || {}), name: value.replace(/^['\"]|['\"]$/g, "") };
+      return { type: "success", text: `Configured user.name=${state.gitIdentity.name}` };
+    }
+    if (normalizedKey === "user.email") {
+      state.gitIdentity = { ...(state.gitIdentity || {}), email: value.replace(/^['\"]|['\"]$/g, "") };
+      return { type: "success", text: `Configured user.email=${state.gitIdentity.email}` };
+    }
+  }
+
+  if (normalizedKey === "user.name") {
+    return { type: "success", text: state.gitIdentity?.name || "putnambrownej" };
+  }
+
+  if (normalizedKey === "user.email") {
+    return { type: "success", text: state.gitIdentity?.email || "putnam.browne@deltautilities.com" };
+  }
+
+  return {
+    type: "error",
+    text: "This lab only models user.name and user.email. Azure DevOps sign-in happens during remote clone, fetch, push, and PR actions."
+  };
+}
+
 function commandClone(args) {
   const remoteUrl = args[0];
   if (!remoteUrl) {
@@ -6805,7 +7326,10 @@ function commandClone(args) {
   state.selectedCommitId = rootCommit.id;
   state.pendingMerge = null;
   state.conflict = null;
-  return { type: "success", text: `Cloned Oracle into ${CLONED_REPO_FOLDER} and configured origin.` };
+  return {
+    type: "success",
+    text: `Authenticated to Azure DevOps, cloned Oracle into ${CLONED_REPO_FOLDER}, and configured origin.`
+  };
 }
 
 function commandRemote(args) {
@@ -7207,7 +7731,7 @@ function commandPush() {
   state.taskFlags.pushed = true;
   return {
     type: "success",
-    text: `Pushed ${state.currentBranch} to ${remoteName} at ${headId()}.`
+    text: `Authenticated to Azure DevOps and pushed ${state.currentBranch} to ${remoteName} at ${headId()}.`
   };
 }
 
@@ -7329,7 +7853,10 @@ function createBranch(name, switchTo) {
 
   if (switchTo) {
     state.currentBranch = name;
-    return { type: "success", text: `Switched to a new branch ${name}` };
+    return {
+      type: "success",
+      text: `Created branch ${name} from ${headId()} and switched to it. This is the safe branch-from-main checkpoint.`
+    };
   }
 
   return { type: "success", text: `Created branch ${name} at ${headId()}.` };
@@ -7638,9 +8165,15 @@ function render() {
 
 function updateTopbarContextActions(practiceMode) {
   const conflictButton = document.querySelector('[data-action="start-conflict"]');
+  const referenceButton = document.querySelector('[data-action="toggle-practice-reference"]');
   const conflictRow = conflictButton?.closest(".topbar-action-secondary");
   if (conflictButton) {
     conflictButton.hidden = !practiceMode;
+  }
+  if (referenceButton) {
+    referenceButton.hidden = !practiceMode;
+    referenceButton.setAttribute("aria-expanded", String(Boolean(practiceMode && state.practiceReferenceOpen)));
+    referenceButton.classList.toggle("active", Boolean(practiceMode && state.practiceReferenceOpen));
   }
   if (conflictRow) {
     conflictRow.hidden = !practiceMode;
@@ -7693,22 +8226,21 @@ function renderPortal() {
   document.getElementById("portalView").innerHTML = `
     ${renderResumeWorkItemPanel(gitModule)}
     <div class="course-stack primary-course-stack">
-      <details class="git-learning-group" open>
-        <summary>
-          <div class="path-section-header">
-            <div>
-              <span class="section-kicker">Primary path</span>
-              <h2>Git workflow labs</h2>
-              <p>For users who already know Codex, VS Code, and SQL: start here and focus on ticket-to-branch-to-PR competence.</p>
-            </div>
-            <div class="git-learning-summary-meta">
-              <span class="path-count">4 Git-focused modules</span>
-              <span class="git-learning-toggle-label">Show labs</span>
-            </div>
+      <details class="path-section path-section-group" open>
+        <summary class="path-section-header">
+          <div>
+            <span class="section-kicker">Primary path</span>
+            <h2>Git workflow labs</h2>
+            <p>Start here first. Build the ticket-to-branch-to-PR loop before using the support modules.</p>
+          </div>
+          <div class="path-section-meta">
+            <span class="path-count">5 Git-focused modules</span>
+            <em aria-hidden="true"></em>
           </div>
         </summary>
-        <div class="git-learning-panel">
+        <div class="path-section-body">
           ${renderCourseCard(gitModule)}
+          ${renderVisualBranchingCourseCard()}
           ${renderPracticeCourseCard()}
           ${projectModule ? renderCourseCard(projectModule) : ""}
           ${renderCapstoneCourseCard()}
@@ -7726,9 +8258,9 @@ function renderGettingStartedCatalog(gitModule, projectModule) {
     <section class="course-section catalog-intro">
       <span class="section-kicker">Optional support path</span>
       <h3>Getting Started</h3>
-      <p>Use these if the learner needs tool or SQL context. Collapse this rail and start the Git path if they already know the basics.</p>
+      <p>Open these only when the learner needs tool or SQL context. Most first runs should stay on the Git path.</p>
     </section>
-    <details class="catalog-group" open>
+    <details class="catalog-group">
       <summary>
         <span>Tools</span>
         <strong>Codex and VS Code</strong>
@@ -7757,7 +8289,7 @@ function renderGettingStartedCatalog(gitModule, projectModule) {
         })}
       </div>
     </details>
-    <details class="catalog-group" open>
+    <details class="catalog-group">
       <summary>
         <span>Languages</span>
         <strong>Oracle SQL</strong>
@@ -7774,7 +8306,7 @@ function renderGettingStartedCatalog(gitModule, projectModule) {
         })}
       </div>
     </details>
-    <details class="catalog-group" open>
+    <details class="catalog-group">
       <summary>
         <span>Concepts</span>
         <strong>ADO, Git terms, and repo habits</strong>
@@ -7836,21 +8368,57 @@ function renderCatalogCard({ label, title, description, meta, action, actionLabe
 }
 
 function renderPracticeCourseCard() {
+  const complete = isLabComplete("practice");
   return `
-    <article class="course-card practice-course-card">
+    <article class="course-card practice-course-card ${complete ? "complete" : ""}">
       <span class="section-kicker">Practice lab</span>
-      <h2>Git Practice Lab</h2>
-      <p>Use missions, randomized recovery drills, command replay, branch publishing, and merge practice after the guided path is clear.</p>
+      <h2>Git Workflow 3: Recovery and Real-File Drills</h2>
+      <p>Use this after the visual trainer for wrong-branch, dirty-state, conflict, command replay, and PR-readiness reps.</p>
       <div class="course-meta">
         <span class="pill blue">Practice</span>
         <span class="pill green">30 min</span>
-        <span class="pill gray">Recovery drills</span>
+        <span class="pill gray">Local recovery drills</span>
+        ${complete ? '<span class="pill green">Complete</span>' : ""}
       </div>
       <div class="portal-actions">
         <button class="icon-button primary-button" type="button" data-action="open-simulator">
           <span aria-hidden="true">P</span>
-          <span>Open practice lab</span>
+          <span>${escapeHtml(complete ? "Review practice lab" : "Open practice lab")}</span>
         </button>
+      </div>
+    </article>
+  `;
+}
+
+function renderVisualBranchingCourseCard() {
+  const complete = isLabComplete(VISUAL_BRANCHING_LAB_ID);
+  return `
+    <article class="course-card visual-branching-course-card ${complete ? "complete" : ""}">
+      <div class="course-card-topline">
+        <span class="section-kicker">Visual trainer</span>
+        ${complete ? '<span class="pill green">Complete</span>' : '<span class="pill amber">Recommended after Workflow 1</span>'}
+      </div>
+      <h2>Git Workflow 2: Visual Branching Gym</h2>
+      <p>Use the local Learn Git Branching trainer to make commits, branches, merge, rebase, and remotes visible before recovery drills.</p>
+      <div class="visual-branching-note">
+        <strong>Best fit</strong>
+        <span>Great for graph intuition. Keep this lab for local file workflow, PR readiness, and conflict cleanup.</span>
+      </div>
+      <div class="course-meta">
+        <span class="pill blue">External</span>
+        <span class="pill green">25 min</span>
+        <span class="pill gray">MIT licensed</span>
+      </div>
+      <div class="portal-actions">
+        <a class="icon-button primary-button" href="${escapeAttribute(LEARN_GIT_BRANCHING_URL)}" target="_blank" rel="noreferrer">
+          <span aria-hidden="true">2</span>
+          <span>Open local trainer</span>
+        </a>
+        <button class="icon-button secondary" type="button" data-action="mark-visual-branching-complete">
+          <span aria-hidden="true">OK</span>
+          <span>${escapeHtml(complete ? "Marked done" : "Mark done")}</span>
+        </button>
+        <a class="text-button catalog-link" href="${escapeAttribute(LEARN_GIT_BRANCHING_REPO_URL)}" target="_blank" rel="noreferrer">Source</a>
       </div>
     </article>
   `;
@@ -7860,7 +8428,7 @@ function renderCompactGlossary() {
   return `
     <dl class="compact-glossary">
       ${glossaryTerms
-        .slice(0, 6)
+        .slice(0, 8)
         .map((item) => `<div><dt>${escapeHtml(item.term)}</dt><dd>${escapeHtml(item.meaning)}</dd></div>`)
         .join("")}
     </dl>
@@ -7868,50 +8436,79 @@ function renderCompactGlossary() {
 }
 
 function renderResumeWorkItemPanel(gitModule) {
-  const projectModule = modules.find((module) => module.id === "project-work");
+  const nextStep = getNextGitWorkflowStep();
+  const allComplete = !nextStep;
+  const leadStep = nextStep || getGitWorkflowPortalSteps().at(-1);
+  const heading = allComplete ? "Git workflow path complete" : `Next step: ${leadStep.title}`;
+  const body = allComplete
+    ? "You completed the Git workflow path. Reopen any lab for review, extra reps, or handoff practice."
+    : leadStep.description;
   return `
     <section class="resume-work-card">
       <div>
-        <span class="resume-work-badge">Start here</span>
+        <span class="resume-work-badge">${allComplete ? "Complete" : "Next step"}</span>
         <span class="section-kicker">Recommended next work item</span>
-        <h2>Build the core ticket-to-PR workflow first</h2>
-        <p>
-          Start with the core job workflow: clone the repo, confirm origin, pull latest main, branch safely, review the
-          diff, publish the branch, and know what belongs in the PR before merge.
-        </p>
+        <h2>${escapeHtml(heading)}</h2>
+        <p>${escapeHtml(body)}</p>
         <div class="resume-work-track" aria-label="Recommended sequence">
-          <span>Clone</span>
-          <span>Remote</span>
-          <span>Pull</span>
-          <span>Ticket</span>
-          <span>Branch</span>
-          <span>Diff</span>
-          <span>Commit</span>
-          <span>Publish</span>
-          <span>PR</span>
+          ${leadStep.track.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
         </div>
       </div>
       <div class="resume-work-actions">
-        <button class="icon-button primary-button" type="button" data-action="start-lesson" data-module-id="${escapeAttribute(gitModule.id)}">
-          <span aria-hidden="true">1</span>
-          <span>${escapeHtml(gitModule.title)}</span>
-        </button>
         ${
-          projectModule
-            ? `<button class="icon-button secondary" type="button" data-action="start-lesson" data-module-id="${escapeAttribute(projectModule.id)}">
-                <span aria-hidden="true">2</span>
-                <span>${escapeHtml(projectModule.title)}</span>
+          allComplete
+            ? `<button class="icon-button primary-button" type="button" data-action="open-simulator">
+                <span aria-hidden="true">P</span>
+                <span>Open practice lab</span>
               </button>`
-            : ""
+            : `${renderPortalStepButton(leadStep, true)}
+              ${
+                leadStep.id === VISUAL_BRANCHING_LAB_ID
+                  ? `<button class="icon-button secondary" type="button" data-action="mark-visual-branching-complete">
+                      <span aria-hidden="true">OK</span>
+                      <span>Mark visual practice done</span>
+                    </button>`
+                  : ""
+              }`
         }
       </div>
     </section>
   `;
 }
 
-function renderCourseCard(module) {
+function renderPortalStepButton(step, primary = false) {
+  const actionClass = primary ? "icon-button primary-button" : "icon-button secondary";
+  const dataModule = step.moduleId ? ` data-module-id="${escapeAttribute(step.moduleId)}"` : "";
+  const icon =
+    step.id === VISUAL_BRANCHING_LAB_ID
+      ? "2"
+      : step.id === "practice"
+        ? "3"
+        : step.id === capstoneLab.id
+          ? "5"
+          : step.id === "project-work"
+            ? "4"
+            : "1";
+  if (step.href) {
+    return `
+      <a class="${actionClass}" href="${escapeAttribute(step.href)}" target="_blank" rel="noreferrer">
+        <span aria-hidden="true">${icon}</span>
+        <span>${escapeHtml(step.actionLabel || step.title)}</span>
+      </a>
+    `;
+  }
   return `
-    <article class="course-card">
+    <button class="${actionClass}" type="button" data-action="${escapeAttribute(step.action)}"${dataModule}>
+      <span aria-hidden="true">${icon}</span>
+      <span>${escapeHtml(step.title)}</span>
+    </button>
+  `;
+}
+
+function renderCourseCard(module) {
+  const complete = isLabComplete(module.id);
+  return `
+    <article class="course-card ${complete ? "complete" : ""}">
       <span class="section-kicker">Training module</span>
       <h2>${escapeHtml(module.title)}</h2>
       <p>${escapeHtml(module.description)}</p>
@@ -7919,11 +8516,12 @@ function renderCourseCard(module) {
         <span class="pill blue">${escapeHtml(module.level)}</span>
         <span class="pill green">${escapeHtml(module.time)}</span>
         <span class="pill gray">${escapeHtml(module.labTitle)}</span>
+        ${complete ? '<span class="pill green">Complete</span>' : ""}
       </div>
       <div class="portal-actions">
         <button class="icon-button primary-button" type="button" data-action="start-lesson" data-module-id="${escapeAttribute(module.id)}">
           <span aria-hidden="true">S</span>
-          <span>${escapeHtml(module.startLabel || "Start Lesson")}</span>
+          <span>${escapeHtml(complete ? "Review lesson" : module.startLabel || "Start Lesson")}</span>
         </button>
       </div>
     </article>
@@ -7931,20 +8529,27 @@ function renderCourseCard(module) {
 }
 
 function renderCapstoneCourseCard() {
+  const complete = isLabComplete(capstoneLab.id);
   return `
-    <article class="course-card capstone-course-card">
-      <span class="section-kicker">Capstone lab</span>
+    <article class="course-card capstone-course-card ${complete ? "complete" : ""}">
+      <div class="course-card-topline">
+        <span class="section-kicker">Final Git workflow</span>
+        ${complete ? '<span class="pill green">Complete</span>' : '<span class="pill amber">Optional after Workflow 4</span>'}
+      </div>
       <h2>${escapeHtml(capstoneLab.title)}</h2>
       <p>${escapeHtml(capstoneLab.description)}</p>
+      <div class="capstone-deliverable-strip" aria-label="Workflow 4 deliverables">
+        ${capstoneLab.deliverables.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
+      </div>
       <div class="course-meta">
-        <span class="pill blue">${escapeHtml(capstoneLab.level)}</span>
+        <span class="pill blue">Review</span>
         <span class="pill green">${escapeHtml(capstoneLab.time)}</span>
-        <span class="pill gray">${escapeHtml(capstoneLab.labTitle)}</span>
+        <span class="pill gray">Handoff package</span>
       </div>
       <div class="portal-actions">
         <button class="icon-button primary-button" type="button" data-action="open-capstone-lab">
-          <span aria-hidden="true">3</span>
-          <span>Open repo review kit</span>
+          <span aria-hidden="true">4</span>
+          <span>${escapeHtml(complete ? "Review handoff workflow" : "Open handoff workflow")}</span>
         </button>
       </div>
     </article>
@@ -8047,6 +8652,7 @@ function renderLessons() {
   const completed = activeLessons.filter((lesson) => lesson.complete(state)).length;
   const currentLessonIndex = getCurrentLessonIndex();
   const expandedLessonIndex = getExpandedLessonIndex();
+  const showFirstMove = state.inLesson && !isPracticeMode() && !isCodexMode() && !isVSCodeMode() && !isSqlMode() && !isCapstoneMode();
   document.getElementById("lessonProgress").textContent = `${completed} of ${activeLessons.length} complete`;
 
   document.getElementById("lessonList").innerHTML = activeLessons
@@ -8054,8 +8660,9 @@ function renderLessons() {
       const complete = lesson.complete(state);
       const active = index === currentLessonIndex;
       const expanded = index === expandedLessonIndex;
+      const tooltip = getLessonPathTooltip(lesson, index, expanded);
       return `
-        <article class="lesson-button ${active ? "active" : ""} ${complete ? "complete" : ""}" role="button" tabindex="0" data-lesson="${index}" data-lesson-toggle="true" aria-expanded="${expanded}">
+        <article class="lesson-button ${active ? "active" : ""} ${complete ? "complete" : ""}" role="button" tabindex="0" data-lesson="${index}" data-lesson-toggle="true" aria-expanded="${expanded}"${titleAttribute(tooltip)} aria-label="${escapeAttribute(tooltip)}">
           <span>${complete ? "Complete" : `Step ${index + 1}`}</span>
           <strong>${escapeHtml(lesson.title)}</strong>
           ${renderLessonCommandSummary(index, expanded)}
@@ -8066,22 +8673,43 @@ function renderLessons() {
 
   const visibleLessonIndex = Math.min(state.lessonIndex, activeLessons.length - 1);
   const lesson = activeLessons[visibleLessonIndex] || activeLessons[0];
+  const modeMeta = getLessonSurfaceMeta();
   document.getElementById("lessonDetail").innerHTML = `
     <span class="section-kicker">Current concept</span>
     <h2>${escapeHtml(lesson.title)}</h2>
     <p>${escapeHtml(lesson.concept)}</p>
+    <div class="lesson-surface-card">
+      <div>
+        <span class="section-kicker">Learning surface</span>
+        <strong>${escapeHtml(modeMeta.title)}</strong>
+        <p>${escapeHtml(modeMeta.summary)}</p>
+      </div>
+      <ul class="lesson-surface-list">
+        ${modeMeta.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+      </ul>
+    </div>
     <div class="lesson-task">
       <strong>Task</strong>
       <span>${escapeHtml(lesson.task)}</span>
       <code>${escapeHtml(lesson.hint)}</code>
     </div>
-    <section class="lesson-glossary" aria-label="Git glossary">
-      <div class="lesson-glossary-header">
+    ${
+      showFirstMove
+        ? `<div class="lesson-first-move">
+            <strong>First move</strong>
+            <span>Run the highlighted command first. Use the glossary and quiz after the terminal, status strip, and guided command area make sense.</span>
+          </div>`
+        : ""
+    }
+    <details class="lesson-glossary-drawer">
+      <summary>
         <span class="section-kicker">Glossary</span>
         <strong>Plain-English Git terms</strong>
-      </div>
-      ${renderGlossary()}
-    </section>
+      </summary>
+      <section class="lesson-glossary" aria-label="Git glossary">
+        ${renderGlossary()}
+      </section>
+    </details>
     <div class="lesson-controls">
       <button class="text-button" type="button" data-action="lesson-prev" ${visibleLessonIndex === 0 ? "disabled" : ""}>Previous</button>
       <button class="text-button" type="button" data-action="lesson-next" ${visibleLessonIndex === activeLessons.length - 1 ? "disabled" : ""}>Next</button>
@@ -8089,6 +8717,97 @@ function renderLessons() {
   `;
 
   updateCommandPlaceholder();
+}
+
+function getLessonPathTooltip(lesson, index, expanded) {
+  const commands = getActiveLessonCommandGroups()[index]
+    ?.map((commandIndex) => getActiveModule().commands[commandIndex]?.cmd)
+    .filter(Boolean) || [];
+  const commandHint = expanded
+    ? "Click any command chip to copy it into the PowerShell terminal, or type it yourself."
+    : "Open this step to see its commands. Then click a command chip to fill the PowerShell terminal, or type it yourself.";
+
+  return [
+    lesson.title,
+    lesson.concept,
+    `Task: ${lesson.task}`,
+    commandHint,
+    commands.length ? `Commands: ${commands.join(" -> ")}` : ""
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getLessonSurfaceMeta() {
+  if (isPracticeMode()) {
+    return {
+      title: "Simulated repository with real Git syntax",
+      summary: "Use this mode for reps, recovery, and branch-state debugging without touching a live repo.",
+      points: [
+        "Git commands are real Git-shaped commands.",
+        "Conflict drills and replay controls are simulator features.",
+        "Success means you can explain the state change, not just type the command."
+      ]
+    };
+  }
+
+  if (isCodexMode()) {
+    return {
+      title: "Mock CLI for tool onboarding",
+      summary: "This mode teaches setup sequence, prompting habits, and repo judgment before real workstation use.",
+      points: [
+        "Lesson scripts are simulator actions.",
+        "Real workstation commands on this machine should prefer codex.cmd and npm.cmd in PowerShell.",
+        "Treat prompt quality and validation notes as the real skill."
+      ]
+    };
+  }
+
+  if (isVSCodeMode()) {
+    return {
+      title: "Editor workflow with repo-shaped tasks",
+      summary: "This mode teaches where to look, how to inspect, and how editor actions map back to Git.",
+      points: [
+        "VS Code steps model real editor behavior.",
+        "The mock workspace is safe; the Git commands remain real.",
+        "Open the repo folder first, then search and diff before editing."
+      ]
+    };
+  }
+
+  if (isSqlMode()) {
+    return {
+      title: "Oracle-style worksheet simulator",
+      summary: "This mode teaches SQL reasoning, review habits, and Oracle-flavored workflow on stable fixture data.",
+      points: [
+        "SQL syntax should stay real and reviewable.",
+        "Buttons like Run and file discovery panels are simulator UI.",
+        "Explain grain, filters, joins, and validation risk before calling a query done."
+      ]
+    };
+  }
+
+  if (isCapstoneMode()) {
+    return {
+      title: "Artifact-first capstone workflow",
+      summary: "This mode turns repo inspection into durable notes, lineage, and review outputs instead of chat-only conclusions.",
+      points: [
+        "Prompts and copy actions are workspace helpers.",
+        "The quality bar is whether another analyst could reuse the artifact.",
+        "Stay read-only until the task proves a file change is necessary."
+      ]
+    };
+  }
+
+  return {
+    title: "Guided Git workflow simulator",
+    summary: "This mode uses a safe repo model to teach the real Git path from clone through branch publish and PR readiness.",
+    points: [
+      "Highlighted Git commands are real.",
+      "The terminal is the primary learner action surface.",
+      "Goal: clone, branch, diff, commit, publish, PR readiness."
+    ]
+  };
 }
 
 function renderGlossary() {
@@ -8161,8 +8880,8 @@ function renderLessonCommandSummary(lessonIndex, expanded) {
           const label = status === "done" ? "Back" : status === "now" ? "Now" : "Next";
           const tooltip =
             status === "done"
-              ? `Rewind to this command and rebuild the lab state:\n${command.cmd}`
-              : `Type this command into the PowerShell IDE:\n${command.cmd}`;
+              ? `Rewind to this command and rebuild the lab state.\nYou can also type it manually in the PowerShell terminal.\n\n${command.cmd}`
+              : `Click to fill this command into the PowerShell terminal, or type it manually.\n\n${command.cmd}`;
           return `
             <button class="mini-command ${status}" type="button" data-command-index="${commandIndex}" data-command-fill="${escapeAttribute(command.cmd)}"${titleAttribute(tooltip)}>
               <b>${label}</b>
@@ -8258,7 +8977,7 @@ function calculateScenarioGates() {
   ];
 }
 
-function renderGuidedScenarioPanel() {
+function renderGuidedScenarioPanel(layout = "default") {
   if (isPracticeMode() || isCodexMode() || isVSCodeMode() || isSqlMode() || isCapstoneMode()) {
     return "";
   }
@@ -8267,43 +8986,49 @@ function renderGuidedScenarioPanel() {
   const gates = calculateScenarioGates();
   const complete = gates.filter((gate) => gate.complete).length;
   return `
-    <section class="scenario-panel" aria-label="ADO ticket and pull request readiness">
-      <article class="scenario-card scenario-ticket-card">
-        <div>
-          <span class="section-kicker">${escapeHtml(scenario.kind)}</span>
-          <h3>${escapeHtml(scenario.title)}</h3>
+    <section class="scenario-panel ${layout === "sidebar" ? "sidebar" : ""}" aria-label="ADO ticket and pull request readiness">
+      <details class="scenario-card scenario-drawer scenario-ticket-card">
+        <summary class="scenario-card-summary">
+          <div>
+            <span class="section-kicker">${escapeHtml(scenario.kind)}</span>
+            <h3>${escapeHtml(scenario.title)}</h3>
+          </div>
+        </summary>
+        <div class="scenario-drawer-body">
           <p>${escapeHtml(scenario.request)}</p>
+          <div class="scenario-file-list">
+            <span>Target branch</span>
+            <code>${escapeHtml(scenario.branch)}</code>
+            <span>Files in scope</span>
+            ${[...scenario.contextFiles, ...scenario.changedFiles].map((path) => `<code>${escapeHtml(path)}</code>`).join("")}
+          </div>
         </div>
-        <div class="scenario-file-list">
-          <span>Target branch</span>
-          <code>${escapeHtml(scenario.branch)}</code>
-          <span>Files in scope</span>
-          ${[...scenario.contextFiles, ...scenario.changedFiles].map((path) => `<code>${escapeHtml(path)}</code>`).join("")}
-        </div>
-      </article>
-      <article class="scenario-card scenario-pr-card">
-        <div class="scenario-card-head">
+      </details>
+      <details class="scenario-card scenario-drawer scenario-pr-card">
+        <summary class="scenario-card-summary">
           <div>
             <span class="section-kicker">Simulated PR gate</span>
             <h3>${complete}/${gates.length} ready</h3>
           </div>
           <strong>${escapeHtml(currentHeadLabel())}</strong>
+        </summary>
+        <div class="scenario-drawer-body">
+          <div class="scenario-progress-track" aria-hidden="true">
+            <span style="width: ${(complete / gates.length) * 100}%"></span>
+          </div>
+          <div class="scenario-checks">
+            ${gates
+              .map(
+                (gate) => `
+                  <span class="scenario-check ${gate.complete ? "complete" : ""}">
+                    ${gate.complete ? "Done" : "Open"} ${escapeHtml(gate.label)}
+                  </span>
+                `
+              )
+              .join("")}
+          </div>
         </div>
-        <div class="scenario-progress-track" aria-hidden="true">
-          <span style="width: ${(complete / gates.length) * 100}%"></span>
-        </div>
-        <div class="scenario-checks">
-          ${gates
-            .map(
-              (gate) => `
-                <span class="scenario-check ${gate.complete ? "complete" : ""}">
-                  ${gate.complete ? "Done" : "Open"} ${escapeHtml(gate.label)}
-                </span>
-              `
-            )
-            .join("")}
-        </div>
-      </article>
+      </details>
     </section>
   `;
 }
@@ -8316,7 +9041,6 @@ function renderRepositoryDirectory() {
 
   const open = state.repoExplorerTouched ? Boolean(state.repoExplorerOpen) : true;
   panel.innerHTML = `
-    ${renderGuidedScenarioPanel()}
     <button class="repo-explorer-toggle" type="button" data-action="toggle-repo-explorer" aria-expanded="${open}"${titleAttribute("Show or hide the Oracle repository explorer")}>
       <span aria-hidden="true">${open ? "v" : ">"}</span>
       <strong>Repository Explorer</strong>
@@ -8550,6 +9274,7 @@ function fileKind(name) {
 }
 
 function renderPracticeWorkspace() {
+  setGuidedPanelMode("practice", "Open the live graph and mission reference");
   renderPracticeGraph();
   renderPracticeChallengePanel();
   renderPowerShellReferencePanel();
@@ -8557,6 +9282,7 @@ function renderPracticeWorkspace() {
 }
 
 function renderCodexWorkspace() {
+  setGuidedPanelMode("codex", "Open lesson explanation and command reference");
   const sectionIndex = clampIndex(state.codexSection, codexLab.sections.length);
   const section = codexLab.sections[sectionIndex];
   document.getElementById("lessonProgress").textContent = `${codexLab.sections.length} lesson sections`;
@@ -8617,8 +9343,8 @@ function renderCodexTerminal(section) {
     form.hidden = false;
   }
 
-  document.querySelector(".terminal-panel .section-kicker").textContent = "Codex setup";
-  document.querySelector(".terminal-panel h2").textContent = "Mock Codex CLI";
+  document.querySelector(".terminal-panel .section-kicker").textContent = "Windows PowerShell practice";
+  document.querySelector(".terminal-panel h2").textContent = "Codex setup terminal";
   document.querySelector(".terminal-note").innerHTML = `
     <a href="${escapeAttribute(codexLab.setupUrl)}" target="_blank" rel="noreferrer">Official setup page</a>
     <span class="codex-cli-state">${renderCodexCliStateText()}</span>
@@ -8652,21 +9378,22 @@ function codexCliPlaceholder(section) {
     return codexLab.cliCommand;
   }
   if (!state.codexCli.loggedIn) {
-    return "codex login";
+    return "codex.cmd login";
   }
   if (!isCodexRepoRoot()) {
     return `cd ${ORACLE_REPO_ROOT}`;
   }
   if (!state.codexCli.sessionOpen && section?.prompt) {
-    return "codex";
+    return "codex.cmd";
   }
   if (state.codexCli.sessionOpen) {
     return "Paste a prompt, or type exit";
   }
-  return "codex";
+  return "codex.cmd";
 }
 
 function renderCapstoneWorkspace() {
+  setGuidedPanelMode("capstone", "Open deliverable workflow and repo guidance");
   const section = capstoneLab.section;
   document.getElementById("lessonProgress").textContent = `${capstoneLab.deliverables.length} deliverables`;
   document.getElementById("lessonList").innerHTML = capstoneLab.deliverables
@@ -8681,7 +9408,7 @@ function renderCapstoneWorkspace() {
     )
     .join("");
   document.getElementById("lessonDetail").innerHTML = `
-    <span class="section-kicker">GIT Lab 3</span>
+    <span class="section-kicker">${escapeHtml(section.kicker)}</span>
     <h2>${escapeHtml(section.title)}</h2>
     <p>${escapeHtml(section.intro)}</p>
     <div class="lesson-task">
@@ -8725,7 +9452,7 @@ function renderCapstoneWorkspace() {
     <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git status</div>
     <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git diff --stat</div>
     <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git add REPO_NOTES.md SQL_LINEAGE.md DATA_QUALITY_REPORT.md CODEX_REVIEW.md</div>
-    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git commit -m "Add repo review kit"</div>
+    <div class="terminal-line prompt">PS ${escapeHtml(ORACLE_REPO_ROOT)}> git commit -m "Add handoff review package"</div>
   `;
 
   document.getElementById("quizScore").textContent = "Capstone reference";
@@ -8733,6 +9460,7 @@ function renderCapstoneWorkspace() {
   document.getElementById("quizList").innerHTML = `
     ${renderCodexPromptLibraryPanel(true)}
     ${renderCapstoneDeliverablesPanel()}
+    ${renderCapstoneGitReferencePanel()}
     ${renderCodexPracticePacksPanel()}
   `;
 
@@ -8772,6 +9500,7 @@ function codexLessonReference(section) {
 }
 
 function renderVSCodeWorkspace() {
+  setGuidedPanelMode("vscode", "Open editor walkthrough and supporting reference");
   const sectionIndex = clampIndex(state.vscodeSection, vscodeLab.sections.length);
   const section = vscodeLab.sections[sectionIndex];
   document.getElementById("lessonProgress").textContent = `${vscodeLab.sections.length} lab sections`;
@@ -8811,21 +9540,9 @@ function renderVSCodeWorkspace() {
   document.getElementById("processMap").innerHTML = renderVSCodeLessonContent(sectionIndex);
   document.getElementById("guidedCommands").innerHTML = "";
 
-  const form = document.getElementById("commandForm");
-  if (form) {
-    form.hidden = false;
-  }
   ensureVSCodeCliState();
-  const terminalOutput = document.getElementById("terminalOutput");
-  document.querySelector(".terminal-panel .section-kicker").textContent = "VS Code integrated terminal";
-  document.querySelector(".terminal-panel h2").textContent = "Practice the editor commands";
-  document.querySelector(".terminal-note").innerHTML = 'Type <code>help</code> for supported VS Code lab commands';
-  document.getElementById("promptLabel").textContent = getPrompt();
-  document.getElementById("terminalHistory").innerHTML = state.terminal
-    .map((line) => `<div class="terminal-line ${line.type}">${escapeHtml(line.text)}</div>`)
-    .join("");
-  document.getElementById("commandInput").placeholder = section.command ? `Try: ${section.command}` : "Try: git status";
-  terminalOutput.scrollTop = terminalOutput.scrollHeight;
+  document.getElementById("terminalHistory").innerHTML = "";
+  document.getElementById("commandInput").placeholder = "Use the VS Code terminal in the editor mock";
 
   document.getElementById("quizScore").textContent = "VS Code checklist";
   document.querySelector(".quiz-panel .section-kicker").textContent = "Quick checks";
@@ -8833,15 +9550,15 @@ function renderVSCodeWorkspace() {
     ${renderVSCodeMissionPanel()}
     <article class="quiz-card codex-check-card">
       <strong>Before changing files</strong>
-      <p>Confirm the opened folder is the repo root, required extensions are installed, and the branch shown in the status bar is correct.</p>
+      <p>Confirm the opened folder is <code>C:\\Repositories\\Oracle</code>, required extensions are installed, and Explorer shows the Oracle repo tree.</p>
     </article>
     <article class="quiz-card codex-check-card">
       <strong>Before committing</strong>
-      <p>Review the Source Control panel so only intended files are staged.</p>
+      <p>Review Source Control and <code>git diff</code> so only the intended SQL file is staged.</p>
     </article>
     <article class="quiz-card codex-check-card">
-      <strong>When a conflict appears</strong>
-      <p>Use the editor conflict view, remove markers, then run <code>git status</code> before staging the resolution.</p>
+      <strong>After committing</strong>
+      <p>Run <code>git status</code> and confirm VS Code and Git both show a clean working tree.</p>
     </article>
   `;
 
@@ -8852,6 +9569,7 @@ function renderVSCodeWorkspace() {
 }
 
 function renderSqlWorkspace() {
+  setGuidedPanelMode("sql", "Open SQL walkthrough and worked lesson guidance");
   ensureSqlWorksheetState();
   const sectionIndex = clampIndex(state.sqlSection, oracleSqlLab.sections.length);
   const section = oracleSqlLab.sections[sectionIndex];
@@ -9076,8 +9794,7 @@ function renderSqlCommandPalette(section) {
   const helpers = [
     { label: "Lesson query", command: section.query },
     { label: "Show repo files", command: "show files" },
-    { label: "Describe starter table", command: "DESCRIBE ccs_emergency_response_activity_extract" },
-    { label: "Run SQL wizard", command: SQL_WIZARD_COMMAND }
+    { label: "Describe starter table", command: "DESCRIBE ccs_emergency_response_activity_extract" }
   ];
   return `
     <section class="sql-command-palette" aria-label="SQL query shortcuts">
@@ -9112,7 +9829,7 @@ function renderSqlTerminal(section) {
 
   document.querySelector(".terminal-panel .section-kicker").textContent = "Oracle SQL worksheet";
   document.querySelector(".terminal-panel h2").textContent = "Edit and run SQL statements";
-  document.querySelector(".terminal-note").innerHTML = `Try <code>SELECT * FROM ${escapeHtml(oracleSqlFiles[0].table)}</code> or <code>${escapeHtml(SQL_WIZARD_COMMAND)}</code>`;
+  document.querySelector(".terminal-note").innerHTML = `Try <code>SELECT * FROM ${escapeHtml(oracleSqlFiles[0].table)}</code> or <code>show files</code>`;
   document.getElementById("promptLabel").textContent = "SQL";
   const runButton = form?.querySelector('button[data-action="run-command"]');
   if (runButton) {
@@ -9230,14 +9947,15 @@ function renderVSCodeLessonContent(sectionIndex) {
   const section = vscodeLab.sections[sectionIndex] || vscodeLab.sections[0];
   return `
     <div class="codex-lesson-content vscode-lesson-content">
-      <section class="codex-lesson-section two-column vscode-lesson-section">
-        <div>
+      <section class="vscode-lesson-section">
+        ${renderVSCodeUserStory()}
+        <div class="vscode-step-brief">
           <span class="section-kicker">${escapeHtml(section.kicker)}</span>
           <h3>${escapeHtml(section.title)}</h3>
           <p>${escapeHtml(section.intro)}</p>
-          <ul>
+          <ol>
             ${section.checklist.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-          </ul>
+          </ol>
           <div class="codex-formula">${escapeHtml(section.callout)}</div>
         </div>
         ${renderVSCodeMock(sectionIndex)}
@@ -9248,16 +9966,57 @@ function renderVSCodeLessonContent(sectionIndex) {
   `;
 }
 
+function renderVSCodeUserStory() {
+  return `
+    <article class="vscode-user-story" aria-label="VS Code lab user story">
+      <div>
+        <span class="section-kicker">User story</span>
+        <h3>Small SQL handoff fix before refresh</h3>
+      </div>
+      <p><strong>As a ${escapeHtml(vscodeLab.story.role)},</strong> ${escapeHtml(vscodeLab.story.need)}</p>
+      <p>${escapeHtml(vscodeLab.story.background)}</p>
+      <p><strong>Done means:</strong> ${escapeHtml(vscodeLab.story.outcome)}</p>
+    </article>
+  `;
+}
+
 function renderVSCodeMock(sectionIndex) {
   ensureVSCodeCliState();
   const openFiles = vscodeOpenFiles(sectionIndex);
-  const activePanel = sectionIndex === 0 ? "X" : sectionIndex === 2 ? "S" : sectionIndex >= 3 ? "G" : "E";
+  const activePanel = sectionIndex === 0 ? "extensions" : sectionIndex >= 3 ? "source" : "explorer";
+  const activeFile = openFiles[openFiles.length - 1] || vscodeTargetFileName();
+  const workspaceOpen = Boolean(state.vscodeCli.openedWorkspace) || sectionIndex > 0;
+  const terminalCommand = sectionIndex === 0
+    ? "code.cmd --install-extension ms-vscode.PowerShell"
+    : sectionIndex === 1
+      ? `code.cmd ${ORACLE_REPO_ROOT}`
+      : sectionIndex === 2
+        ? `code.cmd --goto ${vscodeTargetSqlFile()}:1`
+        : sectionIndex === 3
+          ? `edit ${vscodeTargetSqlFile()}`
+          : `git add ${vscodeTargetSqlFile()}`;
   return `
     <div class="vscode-mock" aria-label="Mock VS Code workspace">
-      <div class="vscode-titlebar">Visual Studio Code - Oracle</div>
+      <div class="vscode-titlebar">
+        <span class="vscode-logo">VS</span>
+        <span>File</span>
+        <span>Edit</span>
+        <span>Selection</span>
+        <span>View</span>
+        <span>Go</span>
+        <span>Run</span>
+        <span>Terminal</span>
+        <span>Help</span>
+        <strong>Repositories</strong>
+      </div>
       <div class="vscode-body">
         <div class="vscode-activity" aria-hidden="true">
-          ${["E", "S", "G", "X"].map((label) => `<span class="${activePanel === label ? "active" : ""}">${label}</span>`).join("")}
+          ${[
+            ["explorer", "EX"],
+            ["search", "SR"],
+            ["source", "SC"],
+            ["extensions", "XT"]
+          ].map(([id, label]) => `<span class="${activePanel === id ? "active" : ""}">${label}</span>`).join("")}
         </div>
         <div class="vscode-explorer">
           ${renderVSCodeSidebar(sectionIndex)}
@@ -9266,16 +10025,64 @@ function renderVSCodeMock(sectionIndex) {
           <div class="vscode-tabs">
             ${openFiles.map((file, index) => `<span class="${index === openFiles.length - 1 ? "active" : ""}">${escapeHtml(file)}</span>`).join("")}
           </div>
-          <pre><code>${escapeHtml(vscodeEditorSnippet(sectionIndex))}</code></pre>
+          <div class="vscode-breadcrumbs">Oracle &gt; ccs &gt; sql &gt; accounts &gt; ${escapeHtml(activeFile)}</div>
+          <div class="vscode-editor-main">
+            <pre><code>${escapeHtml(vscodeEditorSnippet(sectionIndex))}</code></pre>
+            <div class="vscode-minimap" aria-hidden="true">
+              ${Array.from({ length: 22 }, (_, index) => `<i style="width:${35 + ((index * 17) % 52)}%"></i>`).join("")}
+            </div>
+          </div>
+        </div>
+        <aside class="vscode-chat-panel">
+          <div>
+            <span class="section-kicker">Codex</span>
+            <strong>Chat</strong>
+          </div>
+          <p>${escapeHtml(vscodeChatHint(sectionIndex))}</p>
+        </aside>
+        <div class="vscode-bottom-panel">
+          <div class="vscode-panel-tabs">
+            <span>PROBLEMS ${state.vscodeCli.edited ? "1" : "0"}</span>
+            <span>OUTPUT</span>
+            <span class="active">TERMINAL</span>
+            <span>PORTS</span>
+            <span>QUERY RESULTS</span>
+            <span>SOURCE CONTROL</span>
+          </div>
+          <div class="vscode-terminal-output" id="vscodeTerminalOutput" aria-live="polite">
+            ${renderVSCodeTerminalHistory(terminalCommand)}
+            <form class="vscode-command-form" id="vscodeCommandForm">
+              <label class="sr-only" for="vscodeCommandInput">VS Code terminal command</label>
+              <span aria-hidden="true">PS C:\\Repositories\\Oracle&gt;</span>
+              <input id="vscodeCommandInput" name="vscodeCommand" autocomplete="off" spellcheck="false" placeholder="${escapeAttribute(`Try: ${terminalCommand}`)}" />
+              <button type="submit">Run</button>
+            </form>
+          </div>
         </div>
       </div>
       <div class="vscode-status">
+        <span>${workspaceOpen ? "Oracle" : "No folder opened"}</span>
         <span>${escapeHtml(state.vscodeCli.branch || "main")}</span>
         <span>${escapeHtml(vscodeStatusSummary())}</span>
+        <span>SQL</span>
         <span>PowerShell</span>
       </div>
     </div>
   `;
+}
+
+function renderVSCodeTerminalHistory(suggestedCommand) {
+  const history = state.terminal.length
+    ? state.terminal
+    : [
+        { type: "note", text: `Type ${suggestedCommand}, then press Enter.` },
+        { type: "note", text: "This is the VS Code integrated terminal. It is the interactive surface for this lab." }
+      ];
+
+  return history
+    .slice(-12)
+    .map((line) => `<div class="terminal-line ${line.type}">${escapeHtml(line.text)}</div>`)
+    .join("");
 }
 
 function vscodeOpenFiles(sectionIndex) {
@@ -9283,18 +10090,15 @@ function vscodeOpenFiles(sectionIndex) {
     return ["Extensions", "Required tools"];
   }
   if (sectionIndex === 1) {
-    return ["README.md", "AGENTS.md"];
+    return ["Welcome", "Oracle"];
   }
   if (sectionIndex === 2) {
-    return ["Search", "ccs_emergency_response_activity_extract.sql"];
+    return ["README.md", vscodeTargetFileName()];
   }
   if (sectionIndex === 3) {
-    return ["ccs_emergency_response_activity_extract.sql", oracleLab.featureFile.split("/").pop()];
+    return ["ccs_master_collections_process_report.sql", vscodeTargetFileName()];
   }
-  if (sectionIndex === 4) {
-    return ["pull_request_template.md", "PR summary notes"];
-  }
-  return ["MERGE_HEAD", oracleLab.featureFile.split("/").pop()];
+  return ["Source Control", vscodeTargetFileName()];
 }
 
 function renderVSCodeSidebar(sectionIndex) {
@@ -9314,34 +10118,83 @@ function renderVSCodeSidebar(sectionIndex) {
     `;
   }
 
-  if (sectionIndex === 2) {
-    return `
-      <strong>SEARCH</strong>
-      <span>ccs emergency response</span>
-      <p class="vscode-search-result active">ccs/sql/meters/${escapeHtml(oracleLab.featureFile.split("/").pop())}</p>
-      <p class="vscode-search-result">ccs/sql/meters/ccs_emergency_response_activity_extract.sql</p>
-      <p class="vscode-search-result">docs/sql_inventory.md</p>
-    `;
-  }
-
   if (sectionIndex >= 3) {
     return `
       <strong>SOURCE CONTROL</strong>
-      <span>${escapeHtml(vscodeStatusSummary())}</span>
-      <p class="vscode-source-row ${state.vscodeCli?.staged ? "active" : ""}">Staged Changes</p>
-      <p class="vscode-source-row ${state.vscodeCli?.edited || state.vscodeCli?.conflictOpen ? "active" : ""}">${escapeHtml(oracleLab.featureFile)}</p>
-      <p class="vscode-source-row">Branch: ${escapeHtml(state.vscodeCli?.branch || "main")}</p>
+      <span>CHANGES</span>
+      <div class="vscode-source-control">
+        ${renderVSCodeSourceRepo("azure-devops", "main", "1", true)}
+        ${renderVSCodeSourceRepo("Billed and Unbilled Revenue", "main", "0", false)}
+        ${renderVSCodeSourceRepo("CoE", "docs/sql-standard-coe", "0", false)}
+        ${renderVSCodeSourceRepo("Oracle", state.vscodeCli?.branch || "main", state.vscodeCli?.edited || state.vscodeCli?.staged ? "1" : "0", true)}
+      </div>
+      <div class="vscode-graph">
+        <strong>GRAPH</strong>
+        <p><span></span>Merged PR 94: ccs: preserve collection event source</p>
+        <p><span></span>Merged PR 92: docs: Update AGENTS.md</p>
+        <p><span></span>${state.vscodeCli?.committed ? "c002 Update arrearage detail export header" : "docs: open Oracle repo workflow notes"}</p>
+        <p><span></span>c001 Add ticket context</p>
+      </div>
     `;
   }
 
   return `
     <strong>EXPLORER</strong>
-    <span>ORACLE</span>
-    <code>ccs/sql/meters</code>
+    <span>${sectionIndex === 1 ? "OPEN FOLDER" : "REPOSITORIES"}</span>
+    ${renderVSCodeExplorerTree(sectionIndex)}
+  `;
+}
+
+function renderVSCodeSourceRepo(name, branch, changes, expanded) {
+  const changed = name === "Oracle" && (state.vscodeCli?.edited || state.vscodeCli?.staged);
+  return `
+    <div class="vscode-source-repo ${expanded ? "open" : ""}">
+      <p>
+        <span>${expanded ? "v" : ">"}</span>
+        <strong>${escapeHtml(name)}</strong>
+        <small>${escapeHtml(branch)}</small>
+      </p>
+      ${
+        changed
+          ? `
+            <div class="vscode-source-change ${state.vscodeCli?.staged ? "staged" : ""}">
+              <small>${state.vscodeCli?.staged ? "STAGED" : "M"}</small>
+              <span>${escapeHtml(vscodeTargetFileName())}</span>
+            </div>
+          `
+          : `<button type="button" disabled>${changes === "0" ? "Commit" : "Sync Changes"}</button>`
+      }
+    </div>
+  `;
+}
+
+function renderVSCodeExplorerTree(sectionIndex) {
+  if (sectionIndex === 1 && !state.vscodeCli.openedWorkspace) {
+    return `
+      <code>C:\\Repositories</code>
+      <p>_codex_temp_git_check</p>
+      <p>DU-putnam-browne-Delta</p>
+      <p class="active">Oracle</p>
+      <p>Fabric</p>
+      <p>GitHub</p>
+    `;
+  }
+
+  const targetActive = sectionIndex >= 2 || state.vscodeCli.activeFile === vscodeTargetSqlFile();
+  return `
+    <code>C:\\Repositories\\Oracle</code>
+    <p class="vscode-tree-folder open">v .azuredevops</p>
+    <p class="vscode-tree-folder open">v ccs</p>
+    <p class="vscode-tree-folder indent">› bip</p>
+    <p class="vscode-tree-folder indent open">v sql</p>
+    <p class="vscode-tree-folder indent-2 active-folder">v accounts</p>
+    <p class="indent-3 ${targetActive ? "active" : ""}">${escapeHtml(vscodeTargetFileName())}</p>
+    <p class="indent-3">ccs_master_collections_process_report.sql</p>
+    <p class="indent-3">ccs_paystar_arrearage_contacts.sql</p>
+    <p class="vscode-tree-folder indent-2">› billing</p>
+    <p class="vscode-tree-folder indent-2">› meters</p>
     <p>README.md</p>
-    <p>ccs_emergency_response_activity_extract.sql</p>
-    <p class="active">${escapeHtml(oracleLab.featureFile.split("/").pop())}</p>
-    <p>docs/sql_inventory.md</p>
+    <p>AGENTS.md</p>
   `;
 }
 
@@ -9353,8 +10206,8 @@ function vscodeEditorSnippet(sectionIndex) {
   }
   if (sectionIndex === 1) {
     return [
-      "Open Folder",
-      ORACLE_REPO_ROOT,
+      "File > Open Folder",
+      "C:\\Repositories\\Oracle",
       "",
       "Confirm:",
       "- Explorer shows repo folders",
@@ -9364,42 +10217,58 @@ function vscodeEditorSnippet(sectionIndex) {
   }
   if (sectionIndex === 2) {
     return [
-      "-- Compare with nearby SQL before editing",
-      "select activity_id, premise_id, meter_id",
-      "from ccs_meter.emergency_response_activity;",
+      "-- NAME EXPORT YYYYMMDD_ARREARAGE_DETAIL.csv",
+      "-- LOAD TO SharePoint Data Connection Sources",
+      "-- REFRESH Fabric Lakehouse ARREARAGE_DETAIL",
       "",
-      "-- New file belongs under ccs/sql/meters"
+      "WITH aging_data AS (",
+      "    SELECT",
+      "        sa_id,",
+      "        NVL(cur_amt, 0) AS current_amount",
+      "    FROM ccs_billing.arrearage_detail",
+      ")",
+      "SELECT *",
+      "FROM aging_data;"
     ].join("\n");
   }
   if (sectionIndex === 3) {
     return [
       "-- Diff view",
-      "- where activity_status = 'OPEN'",
-      "+ where activity_status in ('OPEN', 'PENDING')",
-      "+   and order_date >= trunc(sysdate) - 7",
+      "+ -- EXPORT OWNER: Data Analytics",
+      "+ -- VALIDATION: compare row counts to prior refresh",
       "",
-      "Source Control: stage only this SQL file."
-    ].join("\n");
-  }
-  if (sectionIndex === 4) {
-    return [
-      "PR summary draft",
+      "WITH aging_data AS (",
+      "    SELECT sa_id, NVL(cur_amt, 0) AS current_amount",
+      "    FROM ccs_billing.arrearage_detail",
+      ")",
       "",
-      "Purpose: Add emergency orders ZIP reporting support.",
-      "Files changed: ccs/sql/meters/...",
-      "Validation: compared against neighboring CCS meter SQL patterns.",
-      "Reviewer focus: date window, status filter, output fields."
+      "Source Control: one changed SQL file."
     ].join("\n");
   }
   return [
-    "<<<<<<< HEAD",
-    "where activity_status = 'OPEN'",
-    "=======",
-    "where activity_status in ('OPEN', 'PENDING')",
-    ">>>>>>> main",
+    "Source Control",
     "",
-    "Choose the final SQL, remove markers, then stage the file."
+    state.vscodeCli.staged ? "STAGED CHANGES" : "CHANGES",
+    vscodeTargetSqlFile(),
+    "",
+    "Terminal:",
+    `git add ${vscodeTargetSqlFile()}`,
+    'git commit -m "Update arrearage detail export header"',
+    "git status"
   ].join("\n");
+}
+
+function vscodeChatHint(sectionIndex) {
+  if (sectionIndex <= 1) {
+    return "After the repo folder is open, Codex and VS Code see the same workspace context.";
+  }
+  if (sectionIndex === 2) {
+    return "Ask for orientation only after you have opened the relevant SQL and checked neighboring files.";
+  }
+  if (sectionIndex === 3) {
+    return "Use Codex for review prompts, but inspect the diff yourself before staging.";
+  }
+  return "A clean commit is the checkpoint. PR notes come after the local repo state is clear.";
 }
 
 function renderVSCodeSupportPanel(sectionIndex) {
@@ -9408,7 +10277,7 @@ function renderVSCodeSupportPanel(sectionIndex) {
       <section class="vscode-reference-panel">
         <div>
           <span class="section-kicker">Required extensions</span>
-          <h3>Install these before the Git labs</h3>
+          <h3>Install these before repo work</h3>
         </div>
         <div class="vscode-extension-grid">
           ${vscodeLab.extensions
@@ -9429,10 +10298,10 @@ function renderVSCodeSupportPanel(sectionIndex) {
 
   const cards = [
     ["Repo context", "Open the folder root so Explorer, terminal, Source Control, and Codex all see the same workspace."],
-    ["Search discipline", "Search table names, file names, and ticket phrases before editing; neighboring SQL is the pattern library."],
-    ["Reviewable diffs", "Use Source Control to inspect changed files, stage intentionally, and avoid unrelated formatting churn."],
-    ["PR readiness", "Branch name, changed files, summary, validation, assumptions, and reviewer focus should line up."],
-    ["Conflict safety", "Resolve content in the editor, then confirm with git status before staging and committing."]
+    ["Explorer discipline", "Navigate through ccs > sql > accounts so the learner understands where the file lives in the repo."],
+    ["Open before editing", "Open the SQL file and compare neighboring reports before changing content."],
+    ["Reviewable diffs", "Use Source Control and git diff to inspect changed files, stage intentionally, and avoid unrelated formatting churn."],
+    ["Local checkpoint", "Commit only after VS Code and git status agree on the staged change."]
   ];
 
   return `
@@ -9826,6 +10695,34 @@ function renderCapstoneDeliverablesPanel() {
   `;
 }
 
+function renderCapstoneGitReferencePanel() {
+  const commands = [
+    "git status",
+    "git diff --stat",
+    "git add REPO_NOTES.md SQL_LINEAGE.md DATA_QUALITY_REPORT.md CODEX_REVIEW.md",
+    'git commit -m "Add handoff review package"'
+  ];
+  return `
+    <details class="codex-reference-panel">
+      <summary>
+        <span>
+          <strong>Git checkpoint commands</strong>
+          <em>Use after the capstone artifacts are reviewed.</em>
+        </span>
+      </summary>
+      <div class="codex-reference-body">
+        <article class="codex-reference-item">
+          <div class="codex-reference-item-header">
+            <strong>Recognize the review checkpoint flow</strong>
+            <em>Status, diff summary, stage only reviewed files, then commit.</em>
+          </div>
+          <pre><code>${commands.map((command) => `PS ${ORACLE_REPO_ROOT}> ${command}`).map(escapeHtml).join("\n")}</code></pre>
+        </article>
+      </div>
+    </details>
+  `;
+}
+
 function renderCodexPracticePacksPanel(open = false) {
   return `
     <details class="codex-reference-panel" ${open ? "open" : ""}>
@@ -9961,13 +10858,26 @@ function toggleReadyCheck(key) {
 }
 
 function renderPracticeGraph() {
-  document.getElementById("guidedTitle").textContent = "Dynamic branching graph";
+  document.getElementById("guidedTitle").textContent = "Practice cockpit";
   document.getElementById("guidedProgress").textContent = state.initialized
     ? `${state.currentBranch} @ ${currentHeadLabel()}`
     : "Not initialized";
-  document.getElementById("processMap").innerHTML = renderDynamicBranchGraph();
+  document.getElementById("processMap").innerHTML = `
+    <details class="practice-graph-drawer">
+      <summary>
+        <div>
+          <span class="section-kicker">Repository graph</span>
+          <strong>Open graph only when you need branch state</strong>
+        </div>
+        <em>${escapeHtml(state.initialized ? `${state.currentBranch} @ ${currentHeadLabel()}` : "Not initialized")}</em>
+      </summary>
+      <div class="practice-graph-body">
+        ${renderDynamicBranchGraph()}
+      </div>
+    </details>
+  `;
   document.getElementById("guidedCommands").innerHTML = "";
-  document.querySelector(".guided-panel .section-kicker").textContent = "Repository graph";
+  document.querySelector(".guided-panel .section-kicker").textContent = "Practice lab";
 }
 
 function renderPracticeMissionPanel() {
@@ -9975,43 +10885,47 @@ function renderPracticeMissionPanel() {
   const progress = ensureLearnerProgress();
   const difficulty = normalizePracticeDifficulty(state.practiceDifficulty);
   return `
-    <section class="practice-mission-panel" aria-label="Practice mission selector">
-      <div class="practice-mission-header">
+    <details class="practice-drawer practice-mission-panel" aria-label="Practice mission selector">
+      <summary class="practice-drawer-summary">
         <div>
-          <span class="section-kicker">Mission control</span>
-          <h3>${escapeHtml(mission.title)}</h3>
-          <p>${escapeHtml(mission.prompt)}</p>
+          <span class="section-kicker">Current scenario</span>
+          <strong>${escapeHtml(mission.title)}</strong>
+          <small>${escapeHtml(mission.target)}</small>
         </div>
-        <button class="text-button" type="button" data-action="practice-mission-random">Random mission</button>
+      </summary>
+      <div class="practice-drawer-body">
+        <div class="practice-mission-toolbar">
+          <p>${escapeHtml(mission.prompt)}</p>
+          <button class="text-button" type="button" data-action="practice-mission-random">Random mission</button>
+        </div>
+        <div class="practice-mission-grid">
+          ${getPracticeMissionList()
+            .map((item) => {
+              const active = item.id === mission.id;
+              const done = progress.completedMissions.includes(item.id);
+              return `
+                <button class="practice-mission-card ${active ? "active" : ""} ${done ? "complete" : ""}" type="button" data-action="practice-mission-start" data-mission-id="${escapeAttribute(item.id)}"${titleAttribute(`${item.title}\n${item.prompt}\n${item.target}`)}>
+                  <span>${escapeHtml(done ? "Done" : item.level)}</span>
+                  <strong>${escapeHtml(item.title)}</strong>
+                  <em>${escapeHtml(item.target)}</em>
+                </button>
+              `;
+            })
+            .join("")}
+        </div>
+        <div class="practice-difficulty-row" aria-label="Practice support mode">
+          ${practiceDifficultyModes
+            .map(
+              (item) => `
+                <button class="practice-difficulty ${item.id === difficulty ? "active" : ""}" type="button" data-action="practice-difficulty" data-difficulty="${escapeAttribute(item.id)}"${titleAttribute(item.desc)}>
+                  ${escapeHtml(item.label)}
+                </button>
+              `
+            )
+            .join("")}
+        </div>
       </div>
-      <div class="practice-mission-grid">
-        ${getPracticeMissionList()
-          .map((item) => {
-            const active = item.id === mission.id;
-            const done = progress.completedMissions.includes(item.id);
-            return `
-              <button class="practice-mission-card ${active ? "active" : ""} ${done ? "complete" : ""}" type="button" data-action="practice-mission-start" data-mission-id="${escapeAttribute(item.id)}"${titleAttribute(`${item.title}\n${item.prompt}\n${item.target}`)}>
-                <span>${escapeHtml(done ? "Done" : item.level)}</span>
-                <strong>${escapeHtml(item.title)}</strong>
-                <em>${escapeHtml(item.target)}</em>
-              </button>
-            `;
-          })
-          .join("")}
-      </div>
-      <div class="practice-difficulty-row" aria-label="Practice support mode">
-        ${practiceDifficultyModes
-          .map(
-            (item) => `
-              <button class="practice-difficulty ${item.id === difficulty ? "active" : ""}" type="button" data-action="practice-difficulty" data-difficulty="${escapeAttribute(item.id)}"${titleAttribute(item.desc)}>
-                ${escapeHtml(item.label)}
-              </button>
-            `
-          )
-          .join("")}
-        <code>${escapeHtml(GIT_WIZARD_COMMAND)}</code>
-      </div>
-    </section>
+    </details>
   `;
 }
 
@@ -10020,35 +10934,46 @@ function renderPracticeReadinessPanel() {
   const progress = ensureLearnerProgress();
   const selectedCommit = getCommitSafe(state.selectedCommitId);
   const selectedFiles = state.selectedCommitId ? changedFilesForCommit(state.selectedCommitId) : [];
+  const hasReplay = ensureCommandReplay().length > 0;
+  const hasSelectedCommit = Boolean(selectedCommit);
   return `
-    <section class="practice-readiness-panel" aria-label="Practice progress">
-      <div class="practice-readiness-score">
+    <details class="practice-drawer practice-readiness-panel" ${hasReplay ? "open" : ""} aria-label="Practice progress">
+      <summary class="practice-drawer-summary">
         <div>
           <span class="section-kicker">Skill readiness</span>
           <strong>${readiness.score}</strong>
-          <small>best ${Math.max(progress.bestReadiness || 0, readiness.score)}</small>
+          <small>best ${Math.max(progress.bestReadiness || 0, readiness.score)} - replay ${hasReplay ? "available" : "empty"}</small>
         </div>
-        <div class="readiness-checks">
-          ${readiness.checks
-            .map((check) => `<span class="${check.complete ? "complete" : ""}">${escapeHtml(check.label)}</span>`)
-            .join("")}
+      </summary>
+      <div class="practice-drawer-body">
+        <div class="practice-readiness-score">
+          <div>
+            <span class="section-kicker">Skill readiness</span>
+            <strong>${readiness.score}</strong>
+            <small>best ${Math.max(progress.bestReadiness || 0, readiness.score)}</small>
+          </div>
+          <div class="readiness-checks">
+            ${readiness.checks
+              .map((check) => `<span class="${check.complete ? "complete" : ""}">${escapeHtml(check.label)}</span>`)
+              .join("")}
+          </div>
         </div>
+        ${renderPracticeBadges()}
+        ${renderPracticeReplayTimeline()}
+        ${
+          selectedCommit
+            ? `
+              <div class="graph-selection-card">
+                <span class="section-kicker">Selected commit</span>
+                <strong>${escapeHtml(selectedCommit.id)}</strong>
+                <p>${escapeHtml(selectedCommit.message)}</p>
+                <em>${selectedFiles.length ? selectedFiles.map((file) => truncateLabel(file, 38)).join(", ") : "No file delta detected"}</em>
+              </div>
+            `
+            : ""
+        }
       </div>
-      ${renderPracticeBadges()}
-      ${renderPracticeReplayTimeline()}
-      ${
-        selectedCommit
-          ? `
-            <div class="graph-selection-card">
-              <span class="section-kicker">Selected commit</span>
-              <strong>${escapeHtml(selectedCommit.id)}</strong>
-              <p>${escapeHtml(selectedCommit.message)}</p>
-              <em>${selectedFiles.length ? selectedFiles.map((file) => truncateLabel(file, 38)).join(", ") : "No file delta detected"}</em>
-            </div>
-          `
-          : ""
-      }
-    </section>
+    </details>
   `;
 }
 
@@ -10120,68 +11045,111 @@ function renderPracticeChallengePanel() {
   const allowHints = normalizePracticeDifficulty(state.practiceDifficulty) !== "no-hints";
 
   target.innerHTML = `
-    ${renderPracticeMissionPanel()}
-    ${renderPracticeReadinessPanel()}
-    <section class="challenge-panel" aria-label="Practice challenge mode">
-      <div class="challenge-header">
+    ${renderPracticeRunStory()}
+    <div class="practice-control-grid">
+      ${renderPracticeMissionPanel()}
+      ${renderPracticeReadinessPanel()}
+    </div>
+    <details class="practice-drawer challenge-panel" ${mode.started || completeCount > 0 ? "open" : ""} aria-label="Practice challenge mode">
+      <summary class="practice-drawer-summary">
         <div>
           <span class="section-kicker">Challenge mode</span>
-          <h3>Practice objectives</h3>
+          <strong>Practice objectives</strong>
+          <small>${completeCount}/${challenges.length} complete · ${mode.score} pts · ${mode.misses} misses</small>
         </div>
-        <div class="challenge-stats" aria-label="Challenge score">
-          <span>${completeCount}/${challenges.length} complete</span>
-          <span>${mode.score} pts</span>
-          <span>${mode.misses} misses</span>
+      </summary>
+      <div class="practice-drawer-body">
+        <div class="challenge-header">
+          <div>
+            <span class="section-kicker">Challenge mode</span>
+            <h3>Practice objectives</h3>
+          </div>
+          <div class="challenge-stats" aria-label="Challenge score">
+            <span>${completeCount}/${challenges.length} complete</span>
+            <span>${mode.score} pts</span>
+            <span>${mode.misses} misses</span>
+          </div>
         </div>
-      </div>
-      <div class="challenge-track">
-        ${challenges
-          .map((item, index) => {
-            const isActive = item.id === mode.activeId;
-            const isDone = mode.completedIds.includes(item.id);
-            const label = isDone ? "Done" : `${index + 1}`;
-            return `
-              <button class="challenge-token ${isActive ? "active" : ""} ${isDone ? "complete" : ""}" type="button" data-action="practice-challenge-select" data-challenge-id="${escapeAttribute(item.id)}"${titleAttribute(`${item.title}\n${item.prompt}`)}>
-                <span>${escapeHtml(label)}</span>
-                <strong>${escapeHtml(item.title)}</strong>
-              </button>
-            `;
-          })
-          .join("")}
-      </div>
-      ${
-        challenge
-          ? `
-            <article class="challenge-card ${complete ? "complete" : mode.started ? "active" : ""}">
-              <div class="challenge-card-copy">
-                <span class="pill ${complete ? "green" : mode.started ? "amber" : "blue"}">${escapeHtml(challenge.level)}</span>
-                <div>
-                  <h4>${escapeHtml(challenge.title)}</h4>
-                  <p>${escapeHtml(challenge.prompt)}</p>
+        <div class="challenge-track">
+          ${challenges
+            .map((item, index) => {
+              const isActive = item.id === mode.activeId;
+              const isDone = mode.completedIds.includes(item.id);
+              const label = isDone ? "Done" : `${index + 1}`;
+              return `
+                <button class="challenge-token ${isActive ? "active" : ""} ${isDone ? "complete" : ""}" type="button" data-action="practice-challenge-select" data-challenge-id="${escapeAttribute(item.id)}"${titleAttribute(`${item.title}\n${item.prompt}`)}>
+                  <span>${escapeHtml(label)}</span>
+                  <strong>${escapeHtml(item.title)}</strong>
+                </button>
+              `;
+            })
+            .join("")}
+        </div>
+        ${
+          challenge
+            ? `
+              <article class="challenge-card ${complete ? "complete" : mode.started ? "active" : ""}">
+                <div class="challenge-card-copy">
+                  <span class="pill ${complete ? "green" : mode.started ? "amber" : "blue"}">${escapeHtml(challenge.level)}</span>
+                  <div>
+                    <h4>${escapeHtml(challenge.title)}</h4>
+                    <p>${escapeHtml(challenge.prompt)}</p>
+                  </div>
                 </div>
-              </div>
-              <ol class="challenge-steps">
-                ${progress.map((step, index) => renderPracticeChallengeStep(step, index)).join("")}
-              </ol>
-              ${
-                allowHints && mode.hintOpen && !complete
-                  ? `<div class="challenge-hint"><strong>Hint</strong><span>${escapeHtml(challenge.hint)}</span></div>`
-                  : ""
-              }
-              <div class="challenge-actions">
-                <button class="text-button" type="button" data-action="practice-challenge-start" data-challenge-id="${escapeAttribute(challenge.id)}" ${mode.started && !complete ? "disabled" : ""}>${escapeHtml(actionLabel)}</button>
+                <div class="challenge-scenario-grid">
+                  <section>
+                    <span class="section-kicker">Scenario</span>
+                    <p>${escapeHtml(challenge.scenario || challenge.prompt)}</p>
+                  </section>
+                  <section>
+                    <span class="section-kicker">Expected proof</span>
+                    <p>${escapeHtml(challenge.expected || challenge.success)}</p>
+                  </section>
+                </div>
+                <ol class="challenge-steps">
+                  ${progress.map((step, index) => renderPracticeChallengeStep(step, index)).join("")}
+                </ol>
                 ${
-                  allowHints
-                    ? `<button class="text-button" type="button" data-action="practice-challenge-hint" ${complete ? "disabled" : ""}>${mode.hintOpen ? "Hide hint" : "Hint"}</button>`
-                    : `<span class="challenge-no-hint">No-hints mode</span>`
+                  allowHints && mode.hintOpen && !complete
+                    ? `<div class="challenge-hint"><strong>Hint</strong><span>${escapeHtml(challenge.hint)}</span></div>`
+                    : ""
                 }
-                <button class="text-button" type="button" data-action="practice-challenge-next" ${allComplete ? "disabled" : ""}>Next challenge</button>
-                <button class="text-button subtle" type="button" data-action="practice-challenge-reset">Reset score</button>
-              </div>
-            </article>
-          `
-          : `<div class="empty-state">No challenges available.</div>`
-      }
+                <div class="challenge-actions">
+                  <button class="text-button" type="button" data-action="practice-challenge-start" data-challenge-id="${escapeAttribute(challenge.id)}" ${mode.started && !complete ? "disabled" : ""}>${escapeHtml(actionLabel)}</button>
+                  ${
+                    allowHints
+                      ? `<button class="text-button" type="button" data-action="practice-challenge-hint" ${complete ? "disabled" : ""}>${mode.hintOpen ? "Hide hint" : "Hint"}</button>`
+                      : `<span class="challenge-no-hint">No-hints mode</span>`
+                  }
+                  <button class="text-button" type="button" data-action="practice-challenge-next" ${allComplete ? "disabled" : ""}>Next challenge</button>
+                  <button class="text-button subtle" type="button" data-action="practice-challenge-reset">Reset score</button>
+                </div>
+              </article>
+            `
+            : `<div class="empty-state">No challenges available.</div>`
+        }
+      </div>
+    </details>
+  `;
+}
+
+function renderPracticeRunStory() {
+  const mission = getActivePracticeMission();
+  const readiness = calculatePRReadiness();
+  const status = getStatus();
+  const cleanText = status.clean ? "clean" : "changes open";
+  return `
+    <section class="practice-run-story" aria-label="Practice lab story">
+      <div>
+        <span class="section-kicker">What this page is for</span>
+        <h3>Practice the ticket-to-PR loop without touching a live repo.</h3>
+        <p>${escapeHtml(mission.prompt)} Use the PowerShell IDE below, then prove your branch, diff, commit, publish, and merge story.</p>
+      </div>
+      <ol>
+        <li><span>1</span><strong>Pick scenario</strong><em>${escapeHtml(mission.title)}</em></li>
+        <li><span>2</span><strong>Run commands</strong><em>Terminal is the work surface</em></li>
+        <li><span>3</span><strong>Prove readiness</strong><em>${readiness.score}/10 - ${escapeHtml(cleanText)}</em></li>
+      </ol>
     </section>
   `;
 }
@@ -10213,36 +11181,41 @@ function renderPowerShellReferencePanel() {
   repositoryZone.innerHTML = "";
 
   workingZone.innerHTML = `
-    <div class="powershell-reference">
-      <div class="reference-heading">
-        <div>
-          <span class="section-kicker">PowerShell reference</span>
-          <h3>Terms and command options</h3>
+    <details class="practice-reference-drawer" id="practiceReferenceDrawer" ${state.practiceReferenceOpen ? "open" : ""}>
+      <summary class="practice-reference-toggle" aria-hidden="true" tabindex="-1">
+        <span>Reference</span>
+      </summary>
+      <div class="practice-reference-shell">
+        <div class="reference-heading">
+          <div>
+            <span class="section-kicker">PowerShell reference</span>
+            <h3>Terms and command options</h3>
+          </div>
+          <strong>Click a command to type it</strong>
         </div>
-        <strong>Click a command to type it</strong>
+        <section class="reference-block" aria-label="Key Git and PowerShell terms">
+          <h4>Plain-English terms</h4>
+          <div class="reference-term-list">
+            ${powershellReferenceTerms
+              .map(
+                (item) => `
+                  <article>
+                    <strong>${escapeHtml(item.term)}</strong>
+                    <span>${escapeHtml(item.meaning)}</span>
+                  </article>
+                `
+              )
+              .join("")}
+          </div>
+        </section>
+        <section class="reference-block" aria-label="PowerShell command options">
+          <h4>Commands to try</h4>
+          <div class="reference-command-groups">
+            ${powershellReferenceCommands.map(renderPowerShellCommandGroup).join("")}
+          </div>
+        </section>
       </div>
-      <section class="reference-block" aria-label="Key Git and PowerShell terms">
-        <h4>Plain-English terms</h4>
-        <div class="reference-term-list">
-          ${powershellReferenceTerms
-            .map(
-              (item) => `
-                <article>
-                  <strong>${escapeHtml(item.term)}</strong>
-                  <span>${escapeHtml(item.meaning)}</span>
-                </article>
-              `
-            )
-            .join("")}
-        </div>
-      </section>
-      <section class="reference-block" aria-label="PowerShell command options">
-        <h4>Commands to try</h4>
-        <div class="reference-command-groups">
-          ${powershellReferenceCommands.map(renderPowerShellCommandGroup).join("")}
-        </div>
-      </section>
-    </div>
+    </details>
   `;
 }
 
@@ -10747,6 +11720,7 @@ function renderFileRow(name, label, tone, content, actions, options = {}) {
 }
 
 function renderGuidedCommands() {
+  setGuidedPanelMode("guided-git", "Open guided map and command reference");
   const active = getActiveModule();
   const total = active.commands.length;
   const current = active.commands[state.guidedStep];
@@ -10765,6 +11739,7 @@ function renderGuidedCommands() {
         <div>
           <strong${titleAttribute(currentLesson.title)}>${escapeHtml(currentLesson.title)}</strong>
           <p${titleAttribute(current.desc)}>${escapeHtml(current.desc)}</p>
+          ${renderRecommendedCommands(current)}
         </div>
         <code${titleAttribute(current.cmd)}>${escapeHtml(current.cmd)}</code>
       </article>
@@ -10779,6 +11754,45 @@ function renderGuidedCommands() {
         <code${titleAttribute("git log --oneline")}>git log --oneline</code>
       </article>
     `;
+}
+
+function renderRecommendedCommands(command) {
+  const recommended = Array.isArray(command?.recommended) ? command.recommended : [];
+  if (!recommended.length) {
+    return "";
+  }
+
+  return `
+    <div class="recommended-commands" aria-label="Recommended optional commands">
+      <span>Recommended, not required</span>
+      ${recommended
+        .map(
+          (item) => `
+            <button type="button" data-command-fill="${escapeAttribute(item.cmd)}"${titleAttribute(item.desc || item.cmd)}>
+              <code>${escapeHtml(item.cmd)}</code>
+            </button>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function setGuidedPanelMode(mode, hintText) {
+  const drawer = document.getElementById("guidedPanelDrawer");
+  const hint = document.getElementById("guidedPanelHint");
+  if (!drawer) {
+    return;
+  }
+
+  if (drawer.dataset.mode !== mode) {
+    drawer.open = !["guided-git", "codex"].includes(mode);
+    drawer.dataset.mode = mode;
+  }
+
+  if (hint) {
+    hint.textContent = hintText;
+  }
 }
 
 function renderProcessMap(active) {
@@ -11081,7 +12095,7 @@ function renderTerminalHeader() {
   if (isPracticeMode()) {
     kicker.textContent = "PowerShell IDE";
     heading.textContent = "Practice against the simulated repository";
-    note.innerHTML = 'Try <code>git status</code>, <code>git branch</code>, <code>git log --oneline</code>, or <code>git wizard mode</code>';
+    note.innerHTML = 'Try <code>git status</code>, <code>git branch</code>, or <code>git log --oneline</code>. Use <strong>How to</strong> for the simulator walkthrough.';
     return;
   }
 
@@ -11101,13 +12115,16 @@ function updateCommandPlaceholder() {
 }
 
 function renderQuiz() {
-  document.querySelector(".quiz-panel .section-kicker").textContent = "Knowledge checks";
+  const guidedGitSidebar = !isPracticeMode() && !isCodexMode() && !isVSCodeMode() && !isSqlMode() && !isCapstoneMode();
+  document.querySelector(".quiz-panel .section-kicker").textContent = guidedGitSidebar ? "Context and checks" : "Knowledge checks";
   const session = ensureQuizSession();
   const round = clampQuizRound(session.round);
   const quizBank = getQuizBank(state?.activeModuleId, round);
   const quizById = new Map(quizBank.map((quiz) => [quiz.id, quiz]));
   const correctCount = session.correctIds.filter((id) => quizById.has(id)).length;
   const missedCount = session.missedIds.filter((id) => quizById.has(id)).length;
+  const quizOpen = correctCount > 0 || missedCount > 0 || session.round > 1;
+  const sidebarContext = guidedGitSidebar ? renderGuidedScenarioPanel("sidebar") : "";
 
   document.getElementById("quizScore").innerHTML = `
     <span>${escapeHtml(getQuizRoundName(round))}</span>
@@ -11117,32 +12134,53 @@ function renderQuiz() {
 
   const activeQuizIds = session.activeIds.filter((id) => quizById.has(id));
   if (!activeQuizIds.length) {
-    document.getElementById("quizList").innerHTML = renderQuizEmptyState(round, correctCount, missedCount);
+    document.getElementById("quizList").innerHTML = `
+      ${sidebarContext}
+      <details class="quiz-drawer" open>
+        <summary>
+          <span class="section-kicker">Checks complete</span>
+          <strong>Review your results</strong>
+        </summary>
+        ${renderQuizEmptyState(round, correctCount, missedCount)}
+      </details>
+    `;
     return;
   }
 
-  document.getElementById("quizList").innerHTML = activeQuizIds
-    .map((quizId) => {
-      const quiz = quizById.get(quizId);
-      const attempt = session.attempts[quizId] || {};
-      const selected = attempt.selected;
-      const isExiting = attempt.status === "exiting";
-      const isMissed = attempt.status === "missed";
-      return `
-        <article class="quiz-card ${isExiting ? "is-exiting" : ""} ${isMissed ? "is-missed" : ""}">
-          <h3>${escapeHtml(quiz.question)}</h3>
-          ${renderQuizAnswerControl(quiz, session, attempt, selected, isExiting)}
-          ${
-            isExiting
-              ? `<p class="quiz-feedback">${escapeHtml(quiz.feedback)}</p>`
-              : isMissed
-                ? renderQuizRecoveryPanel(quiz, round, attempt)
-              : ""
-          }
-        </article>
-      `;
-    })
-    .join("");
+  document.getElementById("quizList").innerHTML = `
+    ${sidebarContext}
+    <details class="quiz-drawer" ${quizOpen ? "open" : ""}>
+      <summary>
+        <span class="section-kicker">Optional check</span>
+        <strong>Open knowledge checks when you want recall practice</strong>
+      </summary>
+      <div class="quiz-drawer-body">
+        ${activeQuizIds
+          .map((quizId) => {
+            const quiz = quizById.get(quizId);
+            const attempt = session.attempts[quizId] || {};
+            const selected = attempt.selected;
+            const isExiting = attempt.status === "exiting";
+            const isMissed = attempt.status === "missed";
+            const questionId = `quiz-question-${quiz.id}`;
+            return `
+              <article class="quiz-card ${isExiting ? "is-exiting" : ""} ${isMissed ? "is-missed" : ""}" aria-labelledby="${escapeAttribute(questionId)}">
+                <h3 id="${escapeAttribute(questionId)}">${escapeHtml(quiz.question)}</h3>
+                ${renderQuizAnswerControl(quiz, session, attempt, selected, isExiting, questionId)}
+                ${
+                  isExiting
+                    ? `<p class="quiz-feedback">${escapeHtml(quiz.feedback)}</p>`
+                    : isMissed
+                      ? renderQuizRecoveryPanel(quiz, round, attempt)
+                      : ""
+                }
+              </article>
+            `;
+          })
+          .join("")}
+      </div>
+    </details>
+  `;
 }
 
 function renderQuizEmptyState(round, correctCount, missedCount) {
@@ -11165,7 +12203,7 @@ function renderQuizEmptyState(round, correctCount, missedCount) {
   `;
 }
 
-function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting) {
+function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting, questionId) {
   if (quiz.type !== "choice") {
     const typedValue = attempt.typed || "";
     const round = clampQuizRound(session.round);
@@ -11177,13 +12215,14 @@ function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting) {
     );
     const placeholder = showGhostAnswer ? quiz.answerLabel : quiz.placeholder || "Type your answer";
     return `
-      <form class="quiz-text-form" data-quiz-form="${escapeAttribute(quiz.id)}">
+      <form class="quiz-text-form" data-quiz-form="${escapeAttribute(quiz.id)}" aria-labelledby="${escapeAttribute(questionId)}">
         <input
           class="${showGhostAnswer ? "quiz-ghost-answer" : ""}"
           type="text"
           name="quiz-answer"
           value="${escapeAttribute(typedValue)}"
           placeholder="${escapeAttribute(placeholder)}"
+          aria-label="${escapeAttribute(`Answer for: ${quiz.question}`)}"
           autocomplete="off"
           ${isExiting ? "disabled" : ""}
         />
@@ -11194,7 +12233,7 @@ function renderQuizAnswerControl(quiz, session, attempt, selected, isExiting) {
 
   const optionOrder = getQuizOptionOrder(session, quiz);
   return `
-    <div class="quiz-options">
+    <div class="quiz-options" role="group" aria-labelledby="${escapeAttribute(questionId)}">
       ${optionOrder
         .map((optionIndex) => {
           const option = quiz.options[optionIndex];
@@ -11382,6 +12421,7 @@ function normalizeQuizItems(roundItems, quizRound) {
         type,
         question: quiz.question,
         acceptedAnswers: quiz.acceptedAnswers || [quiz.answer].filter(Boolean),
+        acceptedPrefixes: quiz.acceptedPrefixes || [],
         answerLabel: quiz.answerLabel || quiz.answer || quiz.acceptedAnswers?.[0] || "",
         placeholder: quiz.placeholder || "Type your answer",
         hint: quiz.hint || "",
@@ -11573,7 +12613,13 @@ function isQuizTextCorrect(quiz, value) {
 
   return (quiz.acceptedAnswers || [])
     .filter(Boolean)
-    .some((answer) => normalizeQuizText(answer) === normalized);
+    .some((answer) => normalizeQuizText(answer) === normalized) ||
+    (quiz.acceptedPrefixes || [])
+      .filter(Boolean)
+      .some((prefix) => {
+        const normalizedPrefix = normalizeQuizText(prefix);
+        return normalized.startsWith(`${normalizedPrefix} `) && normalized.length > normalizedPrefix.length + 1;
+      });
 }
 
 function normalizeQuizText(value) {
@@ -11836,13 +12882,21 @@ function guidedCommandMatchesExpected(command, expected) {
     return true;
   }
 
-  if (expectedNormalized === "git remote -v" && normalized.startsWith("git remote")) {
-    return true;
-  }
+    if (expectedNormalized === "git remote -v" && normalized.startsWith("git remote")) {
+      return true;
+    }
 
-  if (expectedNormalized.startsWith("git clone ") && normalized.startsWith("git clone ")) {
-    return true;
-  }
+    if (expectedNormalized.startsWith("git config ") && normalized.startsWith("git config ")) {
+      return expectedNormalized.includes("user.name")
+        ? normalized.includes("user.name")
+        : expectedNormalized.includes("user.email")
+          ? normalized.includes("user.email")
+          : normalized === expectedNormalized;
+    }
+
+    if (expectedNormalized.startsWith("git clone ") && normalized.startsWith("git clone ")) {
+      return true;
+    }
 
   return false;
 }
@@ -12044,7 +13098,12 @@ function loadState() {
           ...(parsed.codexCli && typeof parsed.codexCli === "object" ? parsed.codexCli : {})
         };
         parsed.codexCli.promptRuns = Array.isArray(parsed.codexCli.promptRuns) ? parsed.codexCli.promptRuns : [];
-        if (parsed.viewMode === "codex" && (!parsed.cwd || parsed.cwd === PS_ROOT)) {
+        if (
+          parsed.viewMode === "codex" &&
+          (!parsed.cwd ||
+            parsed.cwd === PS_ROOT ||
+            normalizePathForCompare(parsed.cwd) === normalizePathForCompare(CODEX_OLD_DEFAULT_CWD))
+        ) {
           parsed.cwd = CODEX_DEFAULT_CWD;
         }
         parsed.vscodeSection = clampIndex(parsed.vscodeSection, vscodeLab.sections.length);

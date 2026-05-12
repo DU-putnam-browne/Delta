@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Git Learning Lab</title>
+    <title>Analyst Engineering Enablement Lab</title>
     <link rel="stylesheet" href="styles.css" />
-    <script defer src="app.js?v=20260506-learning-catalog"></script>
+    <script defer src="app.js?v=20260512-swamp-egg"></script>
   </head>
   <body>
     <a class="skip-link" href="#labView">Skip to active lab</a>
@@ -35,12 +35,16 @@
               </span>
               <span id="themeLabel">Dark</span>
             </button>
-            <button class="icon-button secondary" type="button" data-action="reset" title="Reset the lab">
+            <button class="icon-button secondary" type="button" data-action="reset" title="Reset browser simulator state only">
               <span aria-hidden="true">R</span>
               <span>Reset</span>
             </button>
           </div>
           <div class="topbar-action-row topbar-action-secondary" hidden>
+            <button class="icon-button" type="button" data-action="toggle-practice-reference" aria-controls="practiceReferenceDrawer" aria-expanded="false" title="Open the Git and PowerShell reference">
+              <span aria-hidden="true">?</span>
+              <span>Reference / glossary</span>
+            </button>
             <button class="icon-button" type="button" data-action="start-conflict" title="Load a randomized file conflict drill">
               <span aria-hidden="true">!</span>
               <span>Load conflict drill</span>
@@ -77,15 +81,20 @@
           </section>
 
           <section class="guided-panel" aria-label="Guided lab commands">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Guided lab</span>
-                <h2 id="guidedTitle">Create your first repo</h2>
+            <details class="guided-panel-drawer" id="guidedPanelDrawer">
+              <summary class="section-header guided-panel-summary">
+                <div>
+                  <span class="section-kicker">Guided lab</span>
+                  <h2 id="guidedTitle">Create your first repo</h2>
+                  <em class="guided-panel-hint" id="guidedPanelHint">Open guided map and command reference</em>
+                </div>
+                <strong id="guidedProgress">Step 1 of 7</strong>
+              </summary>
+              <div class="guided-panel-body">
+                <div class="process-map" id="processMap" aria-label="Current command process location"></div>
+                <div class="guided-current-command" id="guidedCommands"></div>
               </div>
-              <strong id="guidedProgress">Step 1 of 7</strong>
-            </div>
-            <div class="process-map" id="processMap" aria-label="Current command process location"></div>
-            <div class="guided-current-command" id="guidedCommands"></div>
+            </details>
           </section>
 
           <section class="terminal-panel" aria-label="Command practice">
@@ -96,7 +105,7 @@
               </div>
               <span class="terminal-note">Type <code>help</code> for supported commands</span>
             </div>
-            <div class="terminal-output" id="terminalOutput" aria-live="polite">
+            <div class="terminal-output" id="terminalOutput">
               <div id="terminalHistory"></div>
               <form class="command-form" id="commandForm">
                 <label class="sr-only" for="commandInput">Git command</label>
@@ -136,38 +145,38 @@
         <div class="how-to-grid" id="howToGrid">
           <article>
             <span>1</span>
-            <strong>Start with Codex</strong>
-            <p>Open the Codex lesson to practice setup, login, safe repo inspection, and prompt examples.</p>
-            <code>codex wizard mode</code>
+            <strong>Start with Git Lab 1</strong>
+            <p>Run the ticket-to-PR path first: clone, inspect origin, pull main, branch safely, review the diff, commit, and publish the branch.</p>
+            <code>Git Workflow 1</code>
           </article>
           <article>
             <span>2</span>
-            <strong>Use VS Code Lab next</strong>
-            <p>Practice required extensions, opening the repo folder, search, Source Control, diffs, commits, and conflicts.</p>
-            <code>code --wizard mode</code>
-          </article>
-          <article>
-            <span>3</span>
-            <strong>Practice Oracle SQL</strong>
-            <p>Open the SQL Lab to start with SELECT *, then filter, aggregate, join, and build a review-ready query from repo-shaped files.</p>
-            <code>sql wizard mode</code>
-          </article>
-          <article>
-            <span>4</span>
-            <strong>Run the Git lessons</strong>
-            <p>Type the highlighted PowerShell/Git commands into the terminal. The graph and explorer update as you go.</p>
+            <strong>Use Practice Lab next</strong>
+            <p>Repeat the core commands until status, diff, staging, branch switching, and push behavior feel normal.</p>
             <code>git status</code>
           </article>
           <article>
+            <span>3</span>
+            <strong>Use VS Code Lab when ready</strong>
+            <p>Practice the repo view, Source Control, diffs, commits, and conflict tools after the Git flow is clear.</p>
+            <code>VS Code Lab</code>
+          </article>
+          <article>
+            <span>4</span>
+            <strong>Practice Oracle SQL in context</strong>
+            <p>Open the SQL Lab to inspect repo-shaped files, filter safely, aggregate, join, and produce a review-ready query.</p>
+            <code>Oracle SQL Lab</code>
+          </article>
+          <article>
             <span>5</span>
-            <strong>Practice freely</strong>
-            <p>Open the Practice Lab for missions, randomized recovery drills, badges, PR readiness, and command replay.</p>
-            <code>git wizard mode</code>
+            <strong>Use Codex as support</strong>
+            <p>Open the Codex lesson after the base Git flow is clear so prompt patterns support the repo workflow instead of replacing it.</p>
+            <code>Codex Lesson</code>
           </article>
         </div>
         <div class="how-to-footer" id="howToFooter">
           <strong>Good path:</strong>
-          <span>Codex lesson -> VS Code Lab -> Oracle SQL Lab -> Git Lab 1 -> Practice Lab -> Git Lab 2 -> Git Lab 3.</span>
+          <span>Git Lab 1 -> Practice Lab -> VS Code Lab -> Oracle SQL Lab -> Codex lesson -> Git Lab 2 -> Git Lab 3.</span>
         </div>
       </section>
     </div>

@@ -89,7 +89,7 @@ Before presenting, the highest-value improvements are:
 
 - Severity: High
 - Area: UX / Learning Design
-- Evidence: The portal exposes many primary-feeling entry points: Ticket to First PR, Project Capsule Workflow, Codex lesson, VS Code Lab, Oracle SQL Lab, Git practice lab, and repo review kit. Source rendering for these cards is concentrated around `app.js:7195-7199`, `app.js:7317`, `app.js:7367`, `app.js:7392`, and `app.js:7413`.
+- Evidence: The portal exposes many primary-feeling entry points: Git Workflow 1, Git Workflow 3, Codex lesson, VS Code Lab, Oracle SQL Lab, Git practice lab, and Git Workflow 4. Source rendering for these cards is concentrated in the portal rendering functions in `app.js`.
 - Why it matters: A new Git learner may not know whether to start with Codex, VS Code, SQL, the guided Git lesson, or open practice. This adds cognitive load before the first command.
 - Recommendation: Make one dominant first-run CTA, such as `Start recommended Git path`. Demote Codex, VS Code, SQL, and capstone modules into secondary supporting cards or an expandable section.
 - Acceptance criteria:
