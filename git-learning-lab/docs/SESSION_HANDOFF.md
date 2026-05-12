@@ -6,13 +6,9 @@ Last updated: 2026-05-12
 
 This document is the working handoff for the Analyst Engineering Enablement Lab. It is meant to let the next session resume productively without re-discovering repo structure, recent changes, or open priorities.
 
-## Primary repo locations
+## Primary repo location
 
-Source copy used for direct editing inside `C:\Repositories`:
-
-- `C:\Repositories\GitHub\git-learning-lab`
-
-Work GitHub clone tied to the active GitHub remote:
+Canonical repo location:
 
 - `C:\Users\PutnamBrowne\OneDrive - Delta Utilities\Documents\GitHub\DU-putnam-browne-Delta\git-learning-lab`
 
@@ -76,12 +72,13 @@ Git workflow path currently includes:
 - The Git learning modules are now grouped under an expandable `Git workflow labs` section.
 - The active user interface is now prioritized higher in the page layout so the learner sees the tool surface before secondary reading panels.
 - The `Getting Started` support modules remain separate from the Git-first path.
+- The duplicate `C:\Repositories\GitHub\git-learning-lab` working copy was removed. This repo is now the only source of truth.
 
 ## Important repo / workflow expectations
 
-- Edit in the source copy under `C:\Repositories\GitHub\git-learning-lab`.
-- Mirror the same changes into the work GitHub clone after validation.
-- Push from the work GitHub clone, not the source copy.
+- Use the OneDrive/GitHub repo as the only source of truth.
+- Edit directly in `C:\Users\PutnamBrowne\OneDrive - Delta Utilities\Documents\GitHub\DU-putnam-browne-Delta\git-learning-lab`.
+- Push from this repo only.
 - Assume the remote may move between sessions. Fetch or pull before pushing.
 
 ## Validation pattern used so far
@@ -89,16 +86,14 @@ Git workflow path currently includes:
 For JavaScript and file-integrity checks:
 
 ```powershell
-node --check C:\Repositories\GitHub\git-learning-lab\app.js
-node --check "C:\Users\PutnamBrowne\OneDrive - Delta Utilities\Documents\GitHub\DU-putnam-browne-Delta\git-learning-lab\app.js"
-git -C "C:\Users\PutnamBrowne\OneDrive - Delta Utilities\Documents\GitHub\DU-putnam-browne-Delta\git-learning-lab" diff --check
+node --check app.js
+git diff --check
 ```
 
 ## Known current state
 
 - The latest session added another layout pass to move the active lab UI closer to the top of each module page.
-- Those newest layout changes were applied locally to `styles.css` in both copies.
-- This handoff does not assume those latest layout changes have been pushed unless the current session explicitly confirms a push after the change.
+- This handoff assumes the OneDrive/GitHub path is the only maintained copy.
 
 ## Highest-priority next work
 
@@ -126,7 +121,7 @@ Desired behavior:
 
 - Recommend the next incomplete Git module.
 - Change after Git Lab 1 completion.
-- Prefer “resume where you left off” once a learner has started.
+- Prefer `resume where you left off` once a learner has started.
 
 ### 3. Finish the review backlog from Robert's accessibility evaluation
 
@@ -156,20 +151,16 @@ The project now has enough mode-specific layout logic that every major UI change
 
 - Layout changes are increasingly mode-specific. CSS regressions are now more likely than syntax regressions.
 - The app is still a static single-page simulator, so state bugs tend to hide until a specific module/mode combination is exercised.
-- The source copy and work GitHub clone can drift if the mirror step is skipped.
+- Future sessions should not recreate a second full working copy.
 
 ## Recommended next-session start sequence
 
-1. Open the source copy in the browser:
-   - `file:///C:/Repositories/GitHub/git-learning-lab/index.html`
-2. Verify the current target module visually.
-3. Apply fixes in the source copy only.
-4. Run:
-   - `node --check`
-   - `git diff --check`
-5. Mirror files into the work GitHub clone.
-6. Commit and push from the work GitHub clone.
-
+1. Open the canonical repo:
+   - C:\Users\PutnamBrowne\OneDrive - Delta Utilities\Documents\GitHub\DU-putnam-browne-Delta\git-learning-lab
+2. Fetch or pull latest main before editing.
+3. Open the lab in the browser from:
+   - file:///C:/Users/PutnamBrowne/OneDrive%20-%20Delta%20Utilities/Documents/GitHub/DU-putnam-browne-Delta/git-learning-lab/index.html
+4. Confirm docs/SESSION_HANDOFF.md for last-session context before larger edits.
 ## Files most likely to change next
 
 - `app.js`
