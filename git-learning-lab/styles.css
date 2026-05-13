@@ -2476,9 +2476,15 @@ button:active {
 
 .scenario-file-list {
   display: grid;
-  grid-template-columns: minmax(80px, auto) minmax(0, 1fr);
-  gap: 6px 8px;
-  align-items: center;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.scenario-file-row {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
 }
 
 .scenario-file-list span {
@@ -2490,15 +2496,15 @@ button:active {
 
 .scenario-file-list code {
   min-width: 0;
-  overflow: hidden;
+  overflow-wrap: anywhere;
   padding: 5px 7px;
   border-radius: 6px;
   color: var(--ink);
   background: var(--surface-alt);
   font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 0.72rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.35;
+  white-space: normal;
 }
 
 .scenario-card-head {
@@ -3180,7 +3186,7 @@ button.repo-tree-file {
 
 .practice-run-story ol {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(170px, 1fr));
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -3215,12 +3221,11 @@ button.repo-tree-file {
 
 .practice-run-story li em {
   grid-column: 2;
-  overflow: hidden;
   color: var(--muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: 0.76rem;
   font-style: normal;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .practice-drawer {
@@ -3352,13 +3357,11 @@ button.repo-tree-file {
 
 .practice-mission-card strong,
 .practice-mission-card em {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .practice-mission-card strong {
   color: var(--ink);
-  white-space: nowrap;
 }
 
 .practice-mission-card em {

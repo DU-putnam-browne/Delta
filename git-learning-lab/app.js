@@ -3643,7 +3643,7 @@ function getGuidedGitHowToContent() {
       },
       {
         title: "Watch the PR gate",
-        body: "The right-side ADO/PR panel shows whether context, branch, diff review, commit, publish, clean state, and merge are ready.",
+        body: "The right-side ADO/PR panel shows whether context, branch, diff review, commit, publish, and clean state are ready for PR review.",
         command: "git push",
         commandType: "real"
       },
@@ -5076,7 +5076,12 @@ function calculatePRReadiness() {
     },
     { id: "clean", label: "Working tree clean", points: 10, complete: Boolean(status.clean) && !state.pendingMerge },
     { id: "history", label: "History verified", points: 8, complete: ran("git log --oneline") },
-    { id: "merge", label: "Merge or PR story complete", points: 10, complete: Boolean(state.taskFlags?.merged) }
+    {
+      id: "pr-ready",
+      label: "PR-ready branch story complete",
+      points: 10,
+      complete: Boolean(state.taskFlags?.pushed && (state.taskFlags?.branchCommitted || state.taskFlags?.committed))
+    }
   ];
   const score = Math.min(100, checks.reduce((total, check) => total + (check.complete ? check.points : 0), 0));
   return { score, checks };
@@ -8393,7 +8398,7 @@ function renderVisualBranchingCourseCard() {
         <span class="pill gray">MIT licensed</span>
       </div>
       <div class="portal-actions">
-        <a class="icon-button primary-button" href="${escapeAttribute(LEARN_GIT_BRANCHING_URL)}" target="_blank" rel="noreferrer">
+        <a class="icon-button primary-button" href="${escapeAttribute(LEARN_GIT_BRANCHING_URL)}">
           <span aria-hidden="true">2</span>
           <span>Open local trainer</span>
         </a>
@@ -8474,7 +8479,7 @@ function renderPortalStepButton(step, primary = false) {
             : "2";
   if (step.href) {
     return `
-      <a class="${actionClass}" href="${escapeAttribute(step.href)}" target="_blank" rel="noreferrer">
+      <a class="${actionClass}" href="${escapeAttribute(step.href)}">
         <span aria-hidden="true">${icon}</span>
         <span>${escapeHtml(step.actionLabel || step.title)}</span>
       </a>
@@ -8516,7 +8521,7 @@ function renderCapstoneCourseCard() {
   return `
     <article class="course-card capstone-course-card ${complete ? "complete" : ""}">
       <div class="course-card-topline">
-        <span class="section-kicker">Optional checklist</span>
+        <span class="section-kicker">Knowledge Check</span>
         ${complete ? '<span class="pill green">Complete</span>' : '<span class="pill amber">Codex-adjacent capstone</span>'}
       </div>
       <h2>Repo Review / Handoff Checklist</h2>
@@ -8955,8 +8960,7 @@ function calculateScenarioGates() {
         Boolean(state.taskFlags?.pushed) ||
         Object.keys(state.remoteBranches || {}).some((branch) => branch !== "origin/main")
     },
-    { label: "Working tree clean", complete: Boolean(status.clean) && !state.pendingMerge && !state.conflict },
-    { label: "Merged to main", complete: Boolean(state.taskFlags?.merged) }
+    { label: "Working tree clean", complete: Boolean(status.clean) && !state.pendingMerge && !state.conflict }
   ];
 }
 
@@ -8980,10 +8984,14 @@ function renderGuidedScenarioPanel(layout = "default") {
         <div class="scenario-drawer-body">
           <p>${escapeHtml(scenario.request)}</p>
           <div class="scenario-file-list">
-            <span>Target branch</span>
-            <code>${escapeHtml(scenario.branch)}</code>
-            <span>Files in scope</span>
-            ${[...scenario.contextFiles, ...scenario.changedFiles].map((path) => `<code>${escapeHtml(path)}</code>`).join("")}
+            <div class="scenario-file-row">
+              <span>Target branch</span>
+              <code>${escapeHtml(scenario.branch)}</code>
+            </div>
+            <div class="scenario-file-row">
+              <span>Files in scope</span>
+              ${[...scenario.contextFiles, ...scenario.changedFiles].map((path) => `<code>${escapeHtml(path)}</code>`).join("")}
+            </div>
           </div>
         </div>
       </details>
@@ -10842,23 +10850,8 @@ function toggleReadyCheck(key) {
 
 function renderPracticeGraph() {
   document.getElementById("guidedTitle").textContent = "Practice cockpit";
-  document.getElementById("guidedProgress").textContent = state.initialized
-    ? `${state.currentBranch} @ ${currentHeadLabel()}`
-    : "Not initialized";
-  document.getElementById("processMap").innerHTML = `
-    <details class="practice-graph-drawer">
-      <summary>
-        <div>
-          <span class="section-kicker">Repository graph</span>
-          <strong>Open graph only when you need branch state</strong>
-        </div>
-        <em>${escapeHtml(state.initialized ? `${state.currentBranch} @ ${currentHeadLabel()}` : "Not initialized")}</em>
-      </summary>
-      <div class="practice-graph-body">
-        ${renderDynamicBranchGraph()}
-      </div>
-    </details>
-  `;
+  document.getElementById("guidedProgress").textContent = "";
+  document.getElementById("processMap").innerHTML = "";
   document.getElementById("guidedCommands").innerHTML = "";
   document.querySelector(".guided-panel .section-kicker").textContent = "Practice lab";
 }
@@ -11121,6 +11114,9 @@ function renderPracticeRunStory() {
   const readiness = calculatePRReadiness();
   const status = getStatus();
   const cleanText = status.clean ? "clean" : "changes open";
+  const scenarioStep = `Pick scenario: ${mission.title}`;
+  const commandStep = "Run commands: Terminal is the work surface";
+  const readinessStep = `Prove readiness: ${readiness.score}/10 - ${cleanText}`;
   return `
     <section class="practice-run-story" aria-label="Practice lab story">
       <div>
@@ -11129,9 +11125,9 @@ function renderPracticeRunStory() {
         <p>${escapeHtml(mission.prompt)} Use the PowerShell IDE below, then prove your branch, diff, commit, publish, and recovery story.</p>
       </div>
       <ol>
-        <li><span>1</span><strong>Pick scenario</strong><em>${escapeHtml(mission.title)}</em></li>
-        <li><span>2</span><strong>Run commands</strong><em>Terminal is the work surface</em></li>
-        <li><span>3</span><strong>Prove readiness</strong><em>${readiness.score}/10 - ${escapeHtml(cleanText)}</em></li>
+        <li${titleAttribute(scenarioStep)}><span>1</span><strong>Pick scenario</strong><em>${escapeHtml(mission.title)}</em></li>
+        <li${titleAttribute(commandStep)}><span>2</span><strong>Run commands</strong><em>Terminal is the work surface</em></li>
+        <li${titleAttribute(readinessStep)}><span>3</span><strong>Prove readiness</strong><em>${readiness.score}/10 - ${escapeHtml(cleanText)}</em></li>
       </ol>
     </section>
   `;
@@ -11803,10 +11799,6 @@ function renderProcessMap(active) {
       )}</p>
       <code${titleAttribute(isComplete ? "ADO PR ready" : selectedCommand.cmd)}>${escapeHtml(isComplete ? "ADO PR ready" : selectedCommand.cmd)}</code>
     </div>
-    <details class="visual-branching-note guided-graph-note">
-      <summary>Optional graph mental model</summary>
-      <span>Use the Visual Branching Trainer for commit graph movement. This Delta lab stays focused on realistic file, branch, push, and PR readiness workflow.</span>
-    </details>
     <div class="process-rail" style="--step-count: ${total}">
       ${active.commands
         .map((command, index) => {
@@ -12137,7 +12129,7 @@ function renderQuiz() {
     ${sidebarContext}
     <details class="quiz-drawer" ${quizOpen ? "open" : ""}>
       <summary>
-        <span class="section-kicker">Optional check</span>
+        <span class="section-kicker">Knowledge Check</span>
         <strong>Open knowledge checks when you want recall practice</strong>
       </summary>
       <div class="quiz-drawer-body">

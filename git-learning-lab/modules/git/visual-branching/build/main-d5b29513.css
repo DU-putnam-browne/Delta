@@ -2321,32 +2321,32 @@ body.deltaTheme .moduleHeaderActions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-end;
 }
 
 body.deltaTheme .moduleButton {
   align-items: center;
-  background: rgba(13, 28, 52, 0.92);
-  border: 1px solid rgba(140, 166, 255, 0.55);
-  border-radius: 12px;
+  background: rgba(11, 24, 43, 0.82);
+  border: 1px solid rgba(124, 151, 255, 0.48);
+  border-radius: 14px;
   color: #f5f7ff;
   cursor: pointer;
   display: inline-flex;
   font-family: inherit;
-  font-size: 0.84rem;
-  font-weight: 800;
+  font-size: 0.86rem;
+  font-weight: 900;
   justify-content: center;
   line-height: 1;
-  min-height: 38px;
+  min-height: 40px;
   padding: 0 14px;
   text-decoration: none;
 }
 
 body.deltaTheme .moduleButton.primary {
-  background: #88f2d1;
-  border-color: #c8fff0;
-  color: #03121d;
+  background: #6f82ff;
+  border-color: #6f82ff;
+  color: #ffffff;
 }
 
 body.deltaTheme .moduleButton.danger {
@@ -2400,8 +2400,8 @@ body.deltaTheme.deltaLightMode .moduleButton {
 }
 
 body.deltaTheme.deltaLightMode .moduleButton.primary {
-  background: #0d8f72;
-  border-color: #0d8f72;
+  background: #5067e8;
+  border-color: #5067e8;
   color: #ffffff;
 }
 
@@ -2413,5 +2413,62 @@ body.deltaTheme.deltaLightMode .moduleButton.primary {
   body.deltaTheme .moduleHelpPanel {
     grid-template-columns: 1fr;
     margin: 12px 16px 0;
+  }
+}
+
+/* Delta training environment chrome overrides for the vendored trainer shell. */
+body.deltaTheme .moduleHeader {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 16px 24px;
+}
+
+body.deltaTheme .moduleHeaderBrand {
+  gap: 16px;
+}
+
+body.deltaTheme .moduleBrandLogo {
+  border-radius: 12px;
+  max-width: 180px;
+  width: clamp(120px, 12vw, 180px);
+}
+
+body.deltaTheme .moduleProgramLabel {
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+}
+
+body.deltaTheme .moduleBrandCopy h1 {
+  font-size: clamp(2rem, 3vw, 3.1rem);
+  line-height: 0.98;
+  margin: 6px 0 8px;
+}
+
+body.deltaTheme .moduleBrandCopy p {
+  font-size: 1rem;
+  line-height: 1.4;
+  max-width: 520px;
+}
+
+body.deltaTheme .moduleHeaderMeta {
+  display: none;
+}
+
+body.deltaTheme.deltaLightMode .moduleHeader {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(112, 231, 196, 0.2), transparent 34%),
+    linear-gradient(180deg, #f5f8ff 0%, #eaf1ff 100%);
+  border-bottom-color: #5067e8;
+}
+
+@media (max-width: 1100px) {
+  body.deltaTheme .moduleHeader {
+    grid-template-columns: 1fr;
+  }
+
+  body.deltaTheme .moduleHeaderActions {
+    justify-content: flex-start;
   }
 }
