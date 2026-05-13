@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Git Branching Lab | Delta Utilities</title>
+  <meta name="author" content="Delta Utilities">
+
+  <meta property="og:title" content="Git Branching Lab | Delta Utilities"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://deltautilities.com"/>
+  <meta property="og:image" content="assets/delta-utilities-logo.png"/>
+  <meta property="og:description" content="An interactive Delta Utilities learning lab module for practicing Git branching concepts."/>
+
+  <meta http-equiv="content-language" content="en">
+
+  <link rel="stylesheet" href="build/main-d5b29513.css" type="text/css" charset="utf-8">
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+
+
+  <!-- Templates from here on out... -->
+  <script type="text/html" id="modal-view-template">
+    <div class="contentHolder box vertical center flex1">
+    </div>
+  </script>
+
+  <script type="text/html" id="terminal-window-bare-template">
+    <div class="terminal-window-holder box flex10 vertical transitionTransform slideOut">
+      <div class="wrapper box vertical">
+        <div class="toolbar box vertical center">
+          <div class="controls box horizontal justify">
+            <div class="box flex1">
+              <div class="close">
+              </div>
+            </div>
+            <div class="box flex1">
+              <div class="minimize">
+              </div>
+            </div>
+            <div class="box flex1">
+              <div class="plus">
+              </div>
+            </div>
+          </div>
+          <div>
+            <i class="icon-cog"></i>
+            <%= title %>
+          </div>
+        </div>
+        <div class="terminal-text">
+          <p class="helperText">
+            <%= text %>
+          </p>
+        </div>
+        <div class="inside box flex1">
+        </div>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/html" id="terminal-window-template">
+    <div class="terminal-window box horizontal flex3 transitionAll">
+    <div class="box flex3">
+    </div>
+    <div class="terminal-window-holder box flex10 vertical transitionTransform">
+      <div class="wrapper box vertical">
+        <div class="toolbar box vertical center">
+          <div class="controls box horizontal justify">
+            <div class="box flex1">
+              <div class="close">
+              </div>
+            </div>
+            <div class="box flex1">
+              <div class="minimize">
+              </div>
+            </div>
+            <div class="box flex1">
+              <div class="plus">
+              </div>
+            </div>
+          </div>
+          <% if (title) { %>
+            <div>
+              <i class="icon-cog"></i>
+              <span class="modal-title">
+                <%= title %>
+              </span>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="inside">
+        </div>
+      </div>
+    </div>
+
+      <div class="box flex2">
+      </div>
+    </div>
+  </script>
+
+  <script type="text/html" id="level-dropdown-view">
+    <div class="box horizontal center levelDropdownTabWrapper">
+      <% for (var i = 0; i < tabs.length; i++) { %>
+        <% if (tabs[i].id === selectedTab) { %>
+          <div class="levelDropdownTab" data-id="<%=tabs[i].id%>">
+        <% } else { %>
+          <div class="levelDropdownTab deselected" data-id="<%=tabs[i].id%>">
+        <% } %>
+          <span data-id="<%=tabs[i].id%>">
+            <%= tabs[i].name %>
+          </span>
+        </div>
+      <% } %>
+    </div>
+  </script>
+
+  <script type="text/html" id="series-view">
+    <div class="displayName">
+      <h3> <%= displayName %> </h3>
+    </div>
+    <p class="about">
+      <%= about %>
+    </p>
+    <p class="levelInfo">
+      <%= levelInfo %>
+    </p>
+    <div class="iconHolder box horizontal">
+      <% for (var i = 0; i < ids.length; i++) { %>
+        <a href="javascript:void(0)" class="levelIcon box center centerAlign vertical" id="levelIcon-<%=ids[i]%>" data-id="<%=ids[i]%>">
+          <div class="index box" data-id="<%=ids[i]%>">
+            <i class="icon-ok-circle" data-id="<%=ids[i]%>"></i>
+            <i class="icon-star" data-id="<%=ids[i]%>"></i>
+            <div class="indexNum" data-id="<%=ids[i]%>">
+              <%= i + 1 %>
+            </div>
+          </div>
+        </a>
+      <% } %>
+    </div>
+  </script>
+
+  <script type="text/html" id="git-demonstration-view">
+    <div class="demonstrationText box vertical">
+      <div class="beforeText">
+        <p>
+          <%= beforeHTML %>
+        </p>
+      </div>
+
+      <div class="command center">
+        <p class="uiButton uiButtonYellow transitionOpacity">
+        <!--
+          we strip aboveAll since its just an
+          implementation detail for the UI and confusing
+        -->
+          <%= command.replace(' --aboveAll', '') %>
+        </p>
+        <p class="transitionOpacity" target="reset">
+            Reset Animation
+        </p>
+      </div>
+
+      <div class="afterText transitionOpacity">
+        <p>
+          <%= afterHTML %>
+        </p>
+      </div>
+    </div>
+
+    <div class="visHolder box vertical flex1">
+      <div class="visHolderInside box flex1">
+      </div>
+    </div>
+  </script>
+
+  <script type="text/html" id="general-button">
+      <%= buttonText %>
+  </script>
+
+  <script type="text/html" id="demonstration-builder">
+    <div class="insideBuilder box vertical">
+    </div>
+    <div class="buttons box horizontal center">
+      <div class="uiButton testButton">
+        Test View
+      </div>
+    </div>
+  </script>
+
+  <script type="text/html" id="multi-view-builder">
+    <div class="viewSoFar box vertical">
+      <% if (!views.length) { %>
+        <h3> You have no views specified yet! Add some with the buttons below </h3>
+      <% } %>
+      <% for (var i = 0; i < views.length; i++) { %>
+        <div class="view box horizontal centerAlign justify">
+          <div class="box horizontal">
+            <div class="info">
+              View
+              #<%= i + 1 %>: <%= views[i].type %>
+            </div>
+          </div>
+          <div class="singleViewButtons box horizontal">
+            <button class="noStyle uiButton uiButtonRed box deleteButton" data-index="<%=i%>">
+              Delete
+            </button>
+            <button class="noStyle uiButton uiButtonWhite box editButton" data-index="<%=i%>" data-type="<%= views[i].type %>">
+              Edit
+            </button>
+            <button class="noStyle uiButton box testButton" data-index="<%=i%>">
+              Test
+            </button>
+          </div>
+        </div>
+      <% } %>
+    </div>
+    <div class="buttons box horizontal center">
+      <% for (var i = 0; i < supportedViews.length; i++) { %>
+        <button class="noStyle uiButton addView uiButtonYellow" data-type="<%=supportedViews[i]%>">
+        Add <%=supportedViews[i]%> View
+        </button>
+      <% } %>
+    </div>
+    <div class="controlsForView box horizontal center">
+        <button class="noStyle uiButton uiButtonRed cancelView">
+          Cancel
+        </button>
+        <% if (views.length) { %>
+          <button class="noStyle uiButton uiButtonWhite testEntireView">
+            Test Entire View
+          </button>
+          <button class="noStyle uiButton saveView">
+            Save Entire View
+          </button>
+        <% } %>
+   </div>
+  </script>
+
+  <script type="text/html" id="text-grabber">
+    <p class="helperText">
+      <%= helperText %>
+    </p>
+    <textarea></textarea>
+  </script>
+
+  <script type="text/html" id="markdown-presenter">
+      <p class="helperText textAlignCenter">
+        <%= previewText %>
+      </p>
+        <textarea><%= fillerText %></textarea>
+  </script>
+
+  <script type="text/html" id="markdown-grabber-view">
+    <div class="inputSide box vertical">
+      <div class="markdownGrabberInput">
+        <textarea><%= fillerText %></textarea>
+      </div>
+    </div>
+
+    <div class="box vertical flex1">
+      <p class="helperText textAlignCenter">
+        <%= previewText %>
+      </p>
+
+      <div class="markdownGrabberPreview box flex1 vertical">
+        <div class="insidePreview">
+        </div>
+      </div>
+    </div>
+  </script>
+
+
+  <script type="text/html" id="modal-alert-template">
+    <h2>
+      <%= title %>
+    </h2>
+    <p>
+      <%= text %>
+    </p>
+  </script>
+
+  <script type="text/html" id="interactive-rebase-template">
+    <div class="iRebaseDialog wrapper transitionAllSlow">
+      <p>
+        Rebasing <%= num %> Commits
+      </p>
+      <% if (solutionOrder && solutionOrder.length) { %>
+        <p class="solutionText">
+          For the solution, order the commits as
+            <%= solutionOrder.join(', ') %>. You may need to omit or pick commits.
+        </p>
+      <% } %>
+      <p class="helperText">
+        (Drag and drop to re-order. Toggle the "Omit/Pick" button to omit or re-add a commit)
+      </p>
+      <div class="entryHolders">
+        <ul class="rebaseEntries">
+
+        </ul>
+      </div>
+
+      <div class="confirmCancel">
+      </div>
+    </div>
+  </script>
+
+  <script type="text/html" id="left-right-template">
+    <% if (!showLeft && lastNav ) { %>
+      <div class="box right">
+        <button class="noStyle"><i aria-hidden="true" class="icon-ok exit"></i><span class="visuallyHidden">OK</span></button>
+      </div>
+    <% } else { %>
+      <% if (showLeft) { %>
+        <div class="box left">
+          <button class="noStyle"><i aria-hidden="true" class="icon-circle-arrow-left"></i><span class="visuallyHidden">Previous</span></button>
+      <% } else { %>
+        <div class="box exit">
+          <button class="noStyle"><i aria-hidden="true" class="icon-signout"></i><span class="visuallyHidden">Close</span></button>
+      <% } %>
+      </div>
+      <div class="box right">
+        <% if (!lastNav) { %>
+          <button class="noStyle"><i aria-hidden="true" class="icon-circle-arrow-right"></i><span class="visuallyHidden">Next</span></button>
+        <% } else { %>
+          <button class="noStyle"><i aria-hidden="true"  class="icon-ok"></i><span class="visuallyHidden">OK</span></button>
+        <% } %>
+      </div>
+    <% } %>
+  </script>
+
+  <script type="text/html" id="confirm-cancel-template">
+    <% if (disableCancelButton) { %>
+      <span></span>
+    <% } else { %>
+      <button class="noStyle box cancelButton uiButton uiButtonRed">
+        <%= cancel %>
+      </button>
+    <% } %>
+    <button class="noStyle box confirmButton uiButton uiButtonYellow">
+      <%= confirm %>
+    </button>
+  </script>
+
+  <script type="text/html" id="interactive-rebase-entry-template">
+    <li id="<%= id %>" class="rebaseEntry transitionOpacity">
+      <div class="wrapper">
+        <i class="icon-align-justify"></i>
+        <span class="idwrapper">
+          <%= id %>
+        </span>
+        <button id="toggleButton" class="noStyle uiButton uiButtonPink">
+          <span class="showWhenPicked">
+            Click to Drop/Omit
+          </span>
+          <span class="showWhenNotPicked">
+            Click to Include/Pick
+          </span>
+        </button>
+      </div>
+    </li>
+  </script>
+
+  <!-- The compiled and minified build file (that actually does everything) is below.
+       For a much easier time perusing the source, see the individual files at:
+          https://github.com/pcottle/learnGitBranching
+  -->
+  <script defer src="build/bundle-af47e813.js"></script>
+</head>
+<body class="deltaTheme">
+  <!-- lol noscript. I did not write 9k+ lines of JS just for you to bounce off my website -->
+  <noscript>
+    <div style="z-index:1000000;background:red;color:white;position:absolute;top:0;left:0;height:300px;width:300px;">
+      This application simulates a git repository in your browser, so you will need
+      JS to use the app. Try enabling and refreshing the page -- Thanks!
+    </div>
+  </noscript>
+
+  <div class="appShell">
+    <header class="moduleHeader">
+      <div class="moduleHeaderBrand">
+        <img class="moduleBrandLogo" src="assets/delta-utilities-logo.png" alt="Delta Utilities" />
+        <div class="moduleBrandCopy">
+          <span class="moduleProgramLabel">Delta learning module</span>
+          <h1>Git Branching Lab</h1>
+          <p>
+            Practice branching, rebasing, and remote workflows in an interactive module designed
+            to fit the Delta Utilities learning environment.
+          </p>
+        </div>
+      </div>
+      <div class="moduleHeaderMeta" aria-label="Module details">
+        <div class="moduleMetaItem">
+          <span class="moduleMetaLabel">Format</span>
+          <span class="moduleMetaValue">Interactive simulation</span>
+        </div>
+        <div class="moduleMetaItem">
+          <span class="moduleMetaLabel">Focus</span>
+          <span class="moduleMetaValue">Git fundamentals and workflow fluency</span>
+        </div>
+        <div class="moduleMetaItem">
+          <span class="moduleMetaLabel">Progress</span>
+          <span class="moduleMetaValue">Saved locally in this browser</span>
+        </div>
+      </div>
+      <nav class="moduleHeaderActions" aria-label="Visual Branching Trainer actions">
+        <a class="moduleButton" href="../../../index.html">Home</a>
+        <button class="moduleButton" type="button" data-module-help>How to</button>
+        <button class="moduleButton" type="button" data-module-theme>Light</button>
+        <button class="moduleButton danger" type="button" data-module-reset>Reset trainer</button>
+        <button class="moduleButton primary" type="button" data-module-complete>Mark done / Return</button>
+      </nav>
+    </header>
+
+    <section class="moduleHelpPanel" id="moduleHelpPanel" hidden>
+      <div>
+        <span class="moduleMetaLabel">How to use this trainer</span>
+        <p>Work through the built-in Intro and Remotes levels to understand how commits, branches, merge, fetch, pull, and push move the graph.</p>
+      </div>
+      <div>
+        <span class="moduleMetaLabel">Delta translation</span>
+        <p>The trainer often uses <code>git checkout -b feature/x</code>. In Delta daily workflow, prefer <code>git switch -c feature/x</code> for new branches and <code>git switch main</code> to return to main.</p>
+      </div>
+      <div>
+        <span class="moduleMetaLabel">Reset scope</span>
+        <p><strong>Reset trainer</strong> clears only this trainer's local progress. The main lab reset does not clear trainer progress.</p>
+      </div>
+    </section>
+
+    <div id="learningWorkspace" class="box vertical flex1">
+      <!-- The entire interface is within this div -->
+      <div id="interfaceWrapper" class="box horizontal flex1">
+        <div id="controls" class="box vertical flex1 visBackgroundColor">
+          <div id="commandLineHistory" class="box vertical flex3">
+              <div class="toolbar box vertical center">
+                <div class="controls box horizontal justify">
+                  <div class="box flex1">
+                    <div class="close">
+                    </div>
+                  </div>
+                  <div class="box flex1">
+                    <div class="minimize">
+                    </div>
+                  </div>
+                  <div class="box flex1">
+                    <div class="plus">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label for="commandTextField">
+                    <i aria-hidden="true" class="icon-home"></i>
+                    <span class="visuallyHidden">Terminal &ndash;</span>
+                    <span class="vcs-mode-aware intl-aware" data-intl="learn-git-branching">
+                      Git Branching Lab
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <div id="levelToolbarMount">
+              </div>
+
+            <div id="terminal" class="box flex1 horizontal startAlign">
+              <div id="commandDisplay" class="box vertical flex1">
+              </div>
+            </div>
+
+            <div id="commandLineBar" class="box vertical flex0">
+              <div id="prompt" class="">
+                <span class="promptSign box">$</span>
+                <span class="cursor box">&nbsp;</span>
+                <p class="command"></p>
+                <div id="shadow"></div>
+              </div>
+              <textarea
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                id="commandTextField"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="mainVisSpace" class="box flex2 horizontal transitionAll visBackgroundColor">
+          <span class="modeText transitionOpacity gitMode">
+            Git
+          </span>
+          <span class="modeText transitionOpacity hgMode">
+            Hg
+          </span>
+        </div>
+
+        <!-- If you drag the goal window to the right side of the screen, this gets shown and causes
+             the main visualization to squeeze a bit. This way, you could have the goal window hang out
+             on the right side of the screen and still see the repo visualization. -->
+        <div id="goalPlaceholder" class="box flex1 visBackgroundColor" style="display: none;"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="canvasHolder">
+  </div>
+
+  <div id="reactMount">
+  </div>
+
+  <div id="helperBarMount">
+  </div>
+
+  <script>
+    (function () {
+      var labStateKey = "git-learning-lab-state-v6";
+      var themeKey = "visual-branching-trainer-theme";
+      var trainerProgressKeys = ["solvedMap", "lgb_CommandHistory", "aliasMap"];
+      var labHome = "../../../index.html";
+
+      function setTheme(mode) {
+        var light = mode === "light";
+        document.body.classList.toggle("deltaLightMode", light);
+        var button = document.querySelector("[data-module-theme]");
+        if (button) {
+          button.textContent = light ? "Dark" : "Light";
+        }
+        try {
+          localStorage.setItem(themeKey, light ? "light" : "dark");
+        } catch (error) {
+          // localStorage can be disabled in locked-down browsers.
+        }
+      }
+
+      function markMainLabDone() {
+        try {
+          var raw = localStorage.getItem(labStateKey);
+          var state = raw ? JSON.parse(raw) : {};
+          var progress = state.learnerProgress && typeof state.learnerProgress === "object" ? state.learnerProgress : {};
+          var completedLabs = Array.isArray(progress.completedLabs) ? progress.completedLabs : [];
+          if (completedLabs.indexOf("visual-branching") === -1) {
+            completedLabs.push("visual-branching");
+          }
+          state.schemaVersion = state.schemaVersion || 6;
+          state.inLesson = Boolean(state.inLesson);
+          state.activeModuleId = state.activeModuleId || "git-basics";
+          state.viewMode = state.viewMode || "guided";
+          state.commits = Array.isArray(state.commits) ? state.commits : [];
+          state.branches = state.branches && typeof state.branches === "object" ? state.branches : { main: null };
+          state.learnerProgress = Object.assign({}, progress, { completedLabs: completedLabs });
+          localStorage.setItem(labStateKey, JSON.stringify(state));
+        } catch (error) {
+          // Return still works even if progress cannot be bridged.
+        }
+      }
+
+      document.addEventListener("click", function (event) {
+        var helpButton = event.target.closest("[data-module-help]");
+        var themeButton = event.target.closest("[data-module-theme]");
+        var resetButton = event.target.closest("[data-module-reset]");
+        var completeButton = event.target.closest("[data-module-complete]");
+        var helpPanel = document.getElementById("moduleHelpPanel");
+
+        if (helpButton && helpPanel) {
+          helpPanel.hidden = !helpPanel.hidden;
+        }
+
+        if (themeButton) {
+          setTheme(document.body.classList.contains("deltaLightMode") ? "dark" : "light");
+        }
+
+        if (resetButton && window.confirm("Reset only the Visual Branching Trainer progress on this browser?")) {
+          trainerProgressKeys.forEach(function (key) {
+            localStorage.removeItem(key);
+          });
+          window.location.reload();
+        }
+
+        if (completeButton) {
+          markMainLabDone();
+          window.location.href = labHome;
+        }
+      });
+
+      try {
+        setTheme(localStorage.getItem(themeKey) === "light" ? "light" : "dark");
+      } catch (error) {
+        setTheme("dark");
+      }
+    })();
+  </script>
+
+</body>
+</html>

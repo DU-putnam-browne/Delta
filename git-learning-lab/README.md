@@ -45,7 +45,7 @@ Then open the URL printed in the terminal, usually `http://localhost:5173`.
 1. Download the repository ZIP or clone it.
 2. Open the folder.
 3. Double-click `index.html`.
-4. Start with the Git path in **How to** or open the guided lesson directly.
+4. Start with the Git path in **How to**: Visual Branching Trainer, then Ticket-to-PR, then Project Capsule.
 5. Type commands into the PowerShell-style terminal and press Enter.
 
 The guided cards show what to type. The app does not run real shell commands for the learner.
@@ -58,13 +58,24 @@ The guided cards show what to type. The app does not run real shell commands for
 | `app.js` | Simulator state, lesson content, command handling, quiz logic |
 | `styles.css` | Layout, responsive behavior, Delta Utilities visual styling |
 | `assets/` | Static image assets used by the app |
+| `modules/` | Module-owned learning assets and future extracted lesson content |
+| `modules/git/` | Git workflow modules and embedded Git trainers |
+| `modules/tools/` | Codex and VS Code tool modules |
+| `modules/languages/` | Language modules such as Oracle SQL |
+| `modules/MODULE_TEMPLATE.md` | Template for adding future modules without inventing a new structure |
 | `docs/` | Learner, facilitator, setup, troubleshooting, and release docs |
 | `scripts/` | Optional no-dependency local serve/check scripts |
 | `AGENTS.md` | Repo-local instructions for coding agents |
 
 ## Lab Flow
 
-The first guided lab models the normal ADO ticket workflow:
+The primary Git path is:
+
+1. Visual Branching Trainer for Git fundamentals.
+2. Ticket-to-PR for the normal ADO ticket workflow.
+3. Project Capsule for longer analyst project context.
+
+The Ticket-to-PR guided lab models:
 
 - clone the Oracle repo
 - inspect `origin`
@@ -74,7 +85,7 @@ The first guided lab models the normal ADO ticket workflow:
 - commit it with a clear message
 - publish the branch for PR review
 
-Later modules cover longer project work, conflicts, and merge concepts.
+Recovery drills are optional applied practice for wrong-branch, dirty-state, staged/unstaged cleanup, and conflict scenarios.
 
 ## Useful Simulator Commands
 

@@ -36,7 +36,7 @@ const oracleLab = {
 const ADO_REPO_URL = "https://dev.azure.com/deltautilities-it/Data%20and%20Analytics%20Projects/_git/Oracle";
 const CLONED_REPO_FOLDER = "Oracle";
 const ORACLE_REPO_ROOT = "C:\\Repositories\\Oracle";
-const LEARN_GIT_BRANCHING_URL = "file:///C:/Repositories/learnGitBranching/index.html";
+const LEARN_GIT_BRANCHING_URL = "modules/git/visual-branching/index.html";
 const LEARN_GIT_BRANCHING_REPO_URL = "https://github.com/pcottle/learnGitBranching";
 const VISUAL_BRANCHING_LAB_ID = "visual-branching";
 
@@ -227,9 +227,7 @@ const modules = [
       { cmd: "git diff", desc: "Reviews the SQL change before staging" },
       { cmd: `git add ${oracleLab.featureFile}`, desc: "Stages the SQL asset for review" },
       { cmd: `git commit -m "${oracleLab.featureCommitMessage}"`, desc: "Creates a branch commit for the report asset" },
-      { cmd: `git push -u origin ${oracleLab.branchName}`, desc: "Publishes the task branch so an ADO PR can be opened" },
-      { cmd: "git switch main", desc: "Returns HEAD to the main branch" },
-      { cmd: `git merge ${oracleLab.branchName}`, desc: "Completes the simulated PR merge back to main" }
+      { cmd: `git push -u origin ${oracleLab.branchName}`, desc: "Publishes the task branch so an ADO PR can be opened" }
     ],
     quiz: [
       {
@@ -293,16 +291,16 @@ const modules = [
         feedback: "Pulling first reduces stale-branch risk and keeps the new branch anchored to the latest main."
       },
       {
-        question: "What happens in this lab's fast-forward merge?",
-        options: ["main moves to the feature commit", "Git deletes the SQL", "HEAD leaves the repository", "The staging area becomes a branch"],
-        answer: "main moves to the feature commit",
-        feedback: "Because main did not move independently, Git can move the main branch pointer forward."
+        question: "What proves the branch is ready for an ADO pull request?",
+        options: ["Published branch, reviewed diff, and validation notes", "A local merge into main", "A broad commit message", "A skipped diff"],
+        answer: "Published branch, reviewed diff, and validation notes",
+        feedback: "The beginner SOP stops at PR readiness. ADO handles merge after review."
       }
     ]
   },
   {
     id: "project-work",
-    title: "Git Workflow 4: Project Capsule and Workstreams",
+    title: "Project Capsule Workflow",
     level: "Beginner",
     time: "45 min",
     description:
@@ -331,7 +329,7 @@ const modules = [
       "Commit on main",
       "Branch workstream",
       "Update workstream",
-      "Merge"
+      "Publish for PR"
     ],
     meetingContext: [
       "Everyday work: use a focused branch tied to one ADO request.",
@@ -363,9 +361,7 @@ const modules = [
       { cmd: "git diff", desc: "Reviews the workstream note before staging" },
       { cmd: `git add ${projectLab.workstreamsFile}`, desc: "Stages the workstream update" },
       { cmd: `git commit -m "${projectLab.workstreamCommitMessage}"`, desc: "Commits the focused workstream update" },
-      { cmd: `git push -u origin ${projectLab.branchName}`, desc: "Publishes the workstream branch for PR review" },
-      { cmd: "git switch main", desc: "Returns to the main branch" },
-      { cmd: `git merge ${projectLab.branchName}`, desc: "Completes the simulated PR merge back to main" }
+      { cmd: `git push -u origin ${projectLab.branchName}`, desc: "Publishes the workstream branch for PR review" }
     ],
     quiz: [
       {
@@ -396,8 +392,7 @@ const lessonCommandGroups = [
   [6],
   [7],
   [8, 9, 10],
-  [11],
-  [12, 13]
+  [11]
 ];
 
 const projectLessons = [
@@ -441,14 +436,6 @@ const projectLessons = [
     hint: "Small commits and published branches keep longer projects reviewable even when the project is broad.",
     complete: (state) => state.guidedStep >= 14 || (state.taskFlags.branchCommitted && state.taskFlags.pushed)
   },
-  {
-    title: "Merge and Continue",
-    concept:
-      "Merging the branch updates the shared project map. The next workstream can branch from that current context.",
-    task: "Return to main and fast-forward merge the workstream branch.",
-    hint: "Longer projects become a chain of visible decisions and focused branches.",
-    complete: (state) => state.guidedStep >= getActiveModule().commands.length || state.taskFlags.merged
-  }
 ];
 
 const projectLessonCommandGroups = [
@@ -456,8 +443,7 @@ const projectLessonCommandGroups = [
   [3, 4, 5],
   [6, 7],
   [8, 9, 10],
-  [11, 12, 13],
-  [14, 15]
+  [11, 12, 13]
 ];
 
 const codexLab = {
@@ -885,7 +871,7 @@ const codexPracticePacks = [
 
 const capstoneLab = {
   id: "repo-review-kit",
-  title: "Git Workflow 5: Repo Review and Handoff",
+  title: "Repo Review / Handoff Checklist",
   level: "Advanced",
   time: "45 min",
   labTitle: "Handoff package",
@@ -893,8 +879,8 @@ const capstoneLab = {
     "Turn repo inspection into durable review notes, SQL lineage, data-quality checks, and a final handoff summary.",
   section: {
     type: "workflow",
-    title: "Repo Review and Handoff",
-    kicker: "Git Workflow 5",
+    title: "Repo Review / Handoff Checklist",
+    kicker: "Optional capstone drawer",
     intro:
       "Use Git discipline and Codex prompts together: inspect the repo, create one reviewable artifact at a time, then review the diff before committing.",
     task: "Simulate a small repo-review package that could support a PR or handoff.",
@@ -1538,17 +1524,9 @@ const lessons = [
     title: "Publish and PR Readiness",
     concept:
       "Publishing the branch is what makes review possible outside your workstation. No branch on origin, no PR.",
-    task: "Push the feature branch to origin so the simulated PR can exist.",
-    hint: "Branch published is the point where the review loop becomes real.",
+    task: "Push the feature branch to origin and confirm the diff, ticket context, and validation notes are ready for a PR.",
+    hint: "In normal Delta work, ADO merges the PR after review. This lab stops at PR readiness instead of teaching local merge as the default completion step.",
     complete: (state) => state.guidedStep >= 12 || state.taskFlags.pushed
-  },
-  {
-    title: "Merge and PR Readiness",
-    concept:
-      "A merge combines branch work back into the baseline after review. In ADO, publishing the branch is what makes the PR possible.",
-    task: "Return to main and complete the simulated PR merge back to main.",
-    hint: "Real completion means the branch is published, the diff is understood, and validation notes are ready for reviewers.",
-    complete: (state) => state.guidedStep >= getActiveModule().commands.length || state.taskFlags.merged
   }
 ];
 
@@ -2540,18 +2518,6 @@ const commandProcessSteps = [
     label: "Remote",
     title: "Publish the branch",
     detail: "git push creates the remote branch so Azure DevOps can open a pull request."
-  },
-  {
-    area: "branch",
-    label: "HEAD switch",
-    title: "Return to main",
-    detail: "HEAD moves back to main, which still points at the baseline commit."
-  },
-  {
-    area: "merge",
-    label: "Merge",
-    title: "Fast-forward main",
-    detail: "main moves forward to the feature commit because it has not diverged."
   }
 ];
 
@@ -2639,18 +2605,6 @@ const projectProcessSteps = [
     label: "Remote",
     title: "Publish the workstream branch",
     detail: "git push creates the remote branch so the workstream can move through PR review."
-  },
-  {
-    area: "branch",
-    label: "HEAD switch",
-    title: "Return to main",
-    detail: "HEAD moves back to the shared project context on main."
-  },
-  {
-    area: "merge",
-    label: "Merge",
-    title: "Merge workstream update",
-    detail: "main fast-forwards so the project map includes the latest workstream note."
   }
 ];
 
@@ -2962,7 +2916,7 @@ function createAdvancedState() {
     commandReplay: [],
     practiceMission: "orientation-path",
     practiceDifficulty: "guided",
-    learnerProgress: createLearnerProgressState(),
+    learnerProgress: normalizeLearnerProgress(state?.learnerProgress),
     taskFlags: createTaskFlags(),
     readyChecks: {},
     quizAnswers: {},
@@ -3609,43 +3563,43 @@ function getPortalHowToContent() {
     kicker: "Course map",
     title: "How to use the learning platform",
     summary:
-      "Use the recommended path when you want the shortest route to job-ready workflow practice. Open a lesson first, then use practice mode for recovery and repetition.",
+      "Use the recommended path when you want the shortest route to job-ready Git fundamentals and Delta workflow practice.",
     steps: [
       {
-        title: "Start with the banner",
-        body: "Use Git Workflow 1 first. It teaches the core work unit: ticket, branch, diff, commit, publish, PR.",
-        command: "Git Workflow 1",
+        title: "Start with Git fundamentals",
+        body: "Open the Visual Branching Trainer first. It is the clearest place to see commits, branches, merge, remotes, fetch, pull, and push move.",
+        command: "Visual Branching Trainer",
         commandType: "navigation",
         emphasis: true
       },
       {
-        title: "Use Getting Started only when needed",
-        body: "The right-side catalog holds optional Tools, Languages, and Concepts. Learners who know Codex, VS Code, or SQL can skip those and stay on the Git path.",
-        command: "Tools / Languages / Concepts",
+        title: "Apply the Delta SOP",
+        body: "Run Ticket-to-PR next: identity, ADO clone, remote check, pull, branch, edit, diff, add, commit, push, and PR readiness.",
+        command: "Ticket to First PR",
         commandType: "navigation"
       },
       {
-        title: "Practice SQL in context",
-        body: "Use Oracle SQL Lab only when SQL reasoning is part of the learner's gap. It starts with SELECT * and builds toward reviewable query logic.",
-        command: "Oracle SQL Lab",
+        title: "Build on the SOP",
+        body: "Use Project Capsule after Ticket-to-PR for longer analyst work where durable context and workstream files matter.",
+        command: "Project Capsule",
         commandType: "navigation"
       },
       {
-        title: "Build the graph mental model",
-        body: "Open Learn Git Branching after Workflow 1. It is better than this app for seeing commits, branches, merge, rebase, and remote pointers move.",
-        command: "Git Workflow 2: Visual Branching Gym",
+        title: "Drill recovery only when needed",
+        body: "Use Recovery Drills as optional applied practice for wrong-branch, unstaged, dirty-switch, and conflict states against local file workflow.",
+        command: "Recovery Drills",
         commandType: "navigation"
       },
       {
-        title: "Move to recovery practice",
-        body: "Open the Git practice lab after the visual trainer. It covers wrong-branch, unstaged, dirty-switch, and conflict states against local file workflow.",
-        command: "Git Workflow 3: Recovery and Real-File Drills",
+        title: "Use support modules as needed",
+        body: "VS Code, Codex, and Oracle SQL are support paths. Open them when the learner needs setup, editor workflow, prompt workflow, or SQL context.",
+        command: "Tools / Languages",
         commandType: "navigation"
       }
     ],
     footerLabel: "Recommended path:",
     footer:
-      "Primary path: Workflow 1 Ticket-to-PR -> Workflow 2 Visual Branching Gym -> Workflow 3 Recovery Drills -> Workflow 4 Project Capsule -> Workflow 5 Handoff. Getting Started modules are optional support."
+      "Visual Branching Trainer -> Ticket-to-PR -> Project Capsule. Use Recovery Drills, VS Code, Codex, and Oracle SQL as support paths."
   };
 }
 
@@ -4185,6 +4139,7 @@ function handleAction(button) {
     saveState();
     render();
     queuePrimaryInputFocus();
+    announceStatus("Active lab reset. Saved progress was kept.");
     return;
   }
 
@@ -4967,6 +4922,15 @@ function getGitWorkflowPortalSteps() {
   const projectModule = modules.find((module) => module.id === "project-work");
   return [
     {
+      id: VISUAL_BRANCHING_LAB_ID,
+      title: "Git Fundamentals: Visual Branching Trainer",
+      description:
+        "Use the local Learn Git Branching trainer to build the graph mental model for commits, branches, merge, remotes, fetch, pull, and push.",
+      href: LEARN_GIT_BRANCHING_URL,
+      actionLabel: "Open local visual trainer",
+      track: ["Commit graph", "Branch", "Merge", "Remote", "Fetch", "Pull", "Push"]
+    },
+    {
       id: gitModule.id,
       title: gitModule.title,
       description: gitModule.description,
@@ -4976,40 +4940,15 @@ function getGitWorkflowPortalSteps() {
       track: ["Identity", "ADO sign-in", "Clone", "Remote", "Pull", "Branch from main", "Diff", "Commit", "Publish", "PR"]
     },
     {
-      id: VISUAL_BRANCHING_LAB_ID,
-      title: "Git Workflow 2: Visual Branching Gym",
-      description:
-        "Use the local Learn Git Branching trainer to build the graph mental model for commits, branches, merge, rebase, and remotes before recovery drills.",
-      href: LEARN_GIT_BRANCHING_URL,
-      actionLabel: "Open local visual trainer",
-      track: ["Commit graph", "Branch", "Merge", "Rebase", "Remote"]
-    },
-    {
-      id: "practice",
-      title: "Git Workflow 3: Recovery and Real-File Drills",
-      description: "Reinforce the flow with wrong-branch, dirty-state, conflict, replay, and PR-readiness habits.",
-      action: "open-simulator",
-      actionLabel: "Open practice lab",
-      track: ["Status", "Diff", "Commit", "Push", "Recover", "Conflict", "Replay"]
-    },
-    {
       id: projectModule?.id || "project-work",
-      title: projectModule?.title || "Git Workflow 4: Project Capsule and Workstreams",
+      title: projectModule?.title || "Project Capsule Workflow",
       description:
         projectModule?.description ||
         "Create visible project context on main, then branch for day-to-day workstreams.",
       action: "start-lesson",
       actionLabel: projectModule?.startLabel || "Start lesson",
       moduleId: projectModule?.id || "project-work",
-      track: ["Method", "Capsule", "Main", "Workstream", "Diff", "Publish", "Merge"]
-    },
-    {
-      id: capstoneLab.id,
-      title: capstoneLab.title,
-      description: capstoneLab.description,
-      action: "open-capstone-lab",
-      actionLabel: "Open handoff workflow",
-      track: ["Inspect", "Notes", "Lineage", "Quality", "Review", "Handoff"]
+      track: ["Method", "Capsule", "Main", "Workstream", "Diff", "Commit", "Publish"]
     }
   ];
 }
@@ -7191,9 +7130,9 @@ function executeCommand(command) {
     case "log":
       return commandLog(tokens.slice(2));
     case "push":
-      return commandPush();
+      return commandPush(tokens.slice(2));
     case "pull":
-      return commandPull();
+      return commandPull(tokens.slice(2));
     case "restore":
       return commandRestore(tokens.slice(2));
     default:
@@ -7290,8 +7229,12 @@ function commandConfig(args) {
 
 function commandClone(args) {
   const remoteUrl = args[0];
-  if (!remoteUrl) {
+  if (!remoteUrl || args.length !== 1) {
     return { type: "error", text: "Specify the Azure DevOps clone URL." };
+  }
+
+  if (remoteUrl !== ADO_REPO_URL) {
+    return { type: "error", text: "Use the Azure DevOps clone URL shown in the current lesson." };
   }
 
   if (state.initialized) {
@@ -7337,8 +7280,7 @@ function commandRemote(args) {
     return { type: "error", text: "fatal: not a git repository. Clone or initialize a repo first." };
   }
 
-  const subcommand = (args[0] || "-v").toLowerCase();
-  if (subcommand !== "-v") {
+  if (args.length !== 1 || args[0].toLowerCase() !== "-v") {
     return { type: "error", text: "This lab supports git remote -v." };
   }
 
@@ -7717,13 +7659,35 @@ function commandLog(args) {
   return { type: "success", text: lines.join("\n") };
 }
 
-function commandPush() {
+function commandPush(args = []) {
   if (!state.initialized || !hasHeadCommit()) {
     return { type: "error", text: "Create a commit before pushing." };
   }
 
   if (state.pendingMerge || state.conflict) {
     return { type: "error", text: "Finish the merge before pushing." };
+  }
+
+  const publishArgs = args.map((item) => item.toLowerCase());
+  const branchArg = publishArgs[publishArgs.length - 1];
+  const hasRemoteArgs = args.length > 0;
+  const validPlainPush = args.length === 0;
+  const validOriginPush = args.length === 2 && publishArgs[0] === "origin" && branchArg === state.currentBranch.toLowerCase();
+  const validSetUpstreamPush =
+    args.length === 3 &&
+    ["-u", "--set-upstream"].includes(publishArgs[0]) &&
+    publishArgs[1] === "origin" &&
+    branchArg === state.currentBranch.toLowerCase();
+
+  if (hasRemoteArgs && !validOriginPush && !validSetUpstreamPush) {
+    return {
+      type: "error",
+      text: `This lab only models git push for the current branch. Use git push -u origin ${state.currentBranch}.`
+    };
+  }
+
+  if (!validPlainPush && !validOriginPush && !validSetUpstreamPush) {
+    return { type: "error", text: "This lab supports git push, git push origin <current-branch>, or git push -u origin <current-branch>." };
   }
 
   const remoteName = `origin/${state.currentBranch}`;
@@ -7735,9 +7699,13 @@ function commandPush() {
   };
 }
 
-function commandPull() {
+function commandPull(args = []) {
   if (!state.initialized) {
     return { type: "error", text: "fatal: not a git repository. Run git init first." };
+  }
+
+  if (args.length > 0) {
+    return { type: "error", text: "This lab models plain git pull from the current branch only." };
   }
 
   const remoteName = `origin/${state.currentBranch}`;
@@ -8230,19 +8198,34 @@ function renderPortal() {
         <summary class="path-section-header">
           <div>
             <span class="section-kicker">Primary path</span>
-            <h2>Git workflow labs</h2>
-            <p>Start here first. Build the ticket-to-branch-to-PR loop before using the support modules.</p>
+            <h2>Git fundamentals</h2>
+            <p>Start with visual Git movement before applying Delta's ticket-to-branch-to-PR workflow.</p>
           </div>
           <div class="path-section-meta">
-            <span class="path-count">5 Git-focused modules</span>
+            <span class="path-count">1 core trainer</span>
+            <em aria-hidden="true"></em>
+          </div>
+        </summary>
+        <div class="path-section-body">
+          ${renderVisualBranchingCourseCard()}
+        </div>
+      </details>
+      <details class="path-section path-section-group" open>
+        <summary class="path-section-header">
+          <div>
+            <span class="section-kicker">Applied Delta workflow</span>
+            <h2>Ticket, branch, PR, and project capsule</h2>
+            <p>Use this after fundamentals. Ticket-to-PR is the basic SOP; Project Capsule builds on it for longer work.</p>
+          </div>
+          <div class="path-section-meta">
+            <span class="path-count">2 required modules + optional drills</span>
             <em aria-hidden="true"></em>
           </div>
         </summary>
         <div class="path-section-body">
           ${renderCourseCard(gitModule)}
-          ${renderVisualBranchingCourseCard()}
-          ${renderPracticeCourseCard()}
           ${projectModule ? renderCourseCard(projectModule) : ""}
+          ${renderPracticeCourseCard()}
           ${renderCapstoneCourseCard()}
         </div>
       </details>
@@ -8371,9 +8354,9 @@ function renderPracticeCourseCard() {
   const complete = isLabComplete("practice");
   return `
     <article class="course-card practice-course-card ${complete ? "complete" : ""}">
-      <span class="section-kicker">Practice lab</span>
-      <h2>Git Workflow 3: Recovery and Real-File Drills</h2>
-      <p>Use this after the visual trainer for wrong-branch, dirty-state, conflict, command replay, and PR-readiness reps.</p>
+      <span class="section-kicker">Optional practice</span>
+      <h2>Recovery Drills</h2>
+      <p>Use this as a drill button after Ticket-to-PR when learners need wrong-branch, dirty-state, unstaged/staged cleanup, or conflict recovery reps.</p>
       <div class="course-meta">
         <span class="pill blue">Practice</span>
         <span class="pill green">30 min</span>
@@ -8383,7 +8366,7 @@ function renderPracticeCourseCard() {
       <div class="portal-actions">
         <button class="icon-button primary-button" type="button" data-action="open-simulator">
           <span aria-hidden="true">P</span>
-          <span>${escapeHtml(complete ? "Review practice lab" : "Open practice lab")}</span>
+          <span>${escapeHtml(complete ? "Review recovery drills" : "Open recovery drills")}</span>
         </button>
       </div>
     </article>
@@ -8396,16 +8379,16 @@ function renderVisualBranchingCourseCard() {
     <article class="course-card visual-branching-course-card ${complete ? "complete" : ""}">
       <div class="course-card-topline">
         <span class="section-kicker">Visual trainer</span>
-        ${complete ? '<span class="pill green">Complete</span>' : '<span class="pill amber">Recommended after Workflow 1</span>'}
+        ${complete ? '<span class="pill green">Complete</span>' : '<span class="pill amber">Start here</span>'}
       </div>
-      <h2>Git Workflow 2: Visual Branching Gym</h2>
-      <p>Use the local Learn Git Branching trainer to make commits, branches, merge, rebase, and remotes visible before recovery drills.</p>
+      <h2>Visual Branching Trainer</h2>
+      <p>Use the local Learn Git Branching trainer to make commits, branches, merge, remotes, fetch, pull, and push visible before Delta workflow practice.</p>
       <div class="visual-branching-note">
-        <strong>Best fit</strong>
-        <span>Great for graph intuition. Keep this lab for local file workflow, PR readiness, and conflict cleanup.</span>
+        <strong>Delta translation</strong>
+        <span>The trainer may use <code>git checkout -b feature/x</code>. In Delta daily workflow, prefer <code>git switch -c feature/x</code>.</span>
       </div>
       <div class="course-meta">
-        <span class="pill blue">External</span>
+        <span class="pill blue">Local trainer</span>
         <span class="pill green">25 min</span>
         <span class="pill gray">MIT licensed</span>
       </div>
@@ -8455,18 +8438,18 @@ function renderResumeWorkItemPanel(gitModule) {
         </div>
       </div>
       <div class="resume-work-actions">
-        ${
+          ${
           allComplete
             ? `<button class="icon-button primary-button" type="button" data-action="open-simulator">
                 <span aria-hidden="true">P</span>
-                <span>Open practice lab</span>
+                <span>Open recovery drills</span>
               </button>`
             : `${renderPortalStepButton(leadStep, true)}
               ${
                 leadStep.id === VISUAL_BRANCHING_LAB_ID
                   ? `<button class="icon-button secondary" type="button" data-action="mark-visual-branching-complete">
                       <span aria-hidden="true">OK</span>
-                      <span>Mark visual practice done</span>
+                      <span>Mark trainer done</span>
                     </button>`
                   : ""
               }`
@@ -8481,14 +8464,14 @@ function renderPortalStepButton(step, primary = false) {
   const dataModule = step.moduleId ? ` data-module-id="${escapeAttribute(step.moduleId)}"` : "";
   const icon =
     step.id === VISUAL_BRANCHING_LAB_ID
-      ? "2"
+      ? "1"
       : step.id === "practice"
-        ? "3"
+        ? "P"
         : step.id === capstoneLab.id
-          ? "5"
+          ? "H"
           : step.id === "project-work"
-            ? "4"
-            : "1";
+            ? "3"
+            : "2";
   if (step.href) {
     return `
       <a class="${actionClass}" href="${escapeAttribute(step.href)}" target="_blank" rel="noreferrer">
@@ -8533,12 +8516,12 @@ function renderCapstoneCourseCard() {
   return `
     <article class="course-card capstone-course-card ${complete ? "complete" : ""}">
       <div class="course-card-topline">
-        <span class="section-kicker">Final Git workflow</span>
-        ${complete ? '<span class="pill green">Complete</span>' : '<span class="pill amber">Optional after Workflow 4</span>'}
+        <span class="section-kicker">Optional checklist</span>
+        ${complete ? '<span class="pill green">Complete</span>' : '<span class="pill amber">Codex-adjacent capstone</span>'}
       </div>
-      <h2>${escapeHtml(capstoneLab.title)}</h2>
-      <p>${escapeHtml(capstoneLab.description)}</p>
-      <div class="capstone-deliverable-strip" aria-label="Workflow 4 deliverables">
+      <h2>Repo Review / Handoff Checklist</h2>
+      <p>Use this as a lightweight drawer when a learner needs repo context, reviewer focus, validation notes, and a copyable Codex handoff prompt.</p>
+      <div class="capstone-deliverable-strip" aria-label="Handoff checklist deliverables">
         ${capstoneLab.deliverables.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
       </div>
       <div class="course-meta">
@@ -8548,8 +8531,8 @@ function renderCapstoneCourseCard() {
       </div>
       <div class="portal-actions">
         <button class="icon-button primary-button" type="button" data-action="open-capstone-lab">
-          <span aria-hidden="true">4</span>
-          <span>${escapeHtml(complete ? "Review handoff workflow" : "Open handoff workflow")}</span>
+          <span aria-hidden="true">H</span>
+          <span>${escapeHtml(complete ? "Review checklist" : "Open checklist")}</span>
         </button>
       </div>
     </article>
@@ -11143,7 +11126,7 @@ function renderPracticeRunStory() {
       <div>
         <span class="section-kicker">What this page is for</span>
         <h3>Practice the ticket-to-PR loop without touching a live repo.</h3>
-        <p>${escapeHtml(mission.prompt)} Use the PowerShell IDE below, then prove your branch, diff, commit, publish, and merge story.</p>
+        <p>${escapeHtml(mission.prompt)} Use the PowerShell IDE below, then prove your branch, diff, commit, publish, and recovery story.</p>
       </div>
       <ol>
         <li><span>1</span><strong>Pick scenario</strong><em>${escapeHtml(mission.title)}</em></li>
@@ -11749,9 +11732,9 @@ function renderGuidedCommands() {
         <span class="pill green"${titleAttribute("Complete")}>Complete</span>
         <div>
           <strong${titleAttribute("Guided command path complete")}>Guided command path complete</strong>
-          <p${titleAttribute("The branch has been merged back into main. The terminal history is the learner's audit trail.")}>The branch has been merged back into main. The terminal history is the learner's audit trail.</p>
+          <p${titleAttribute("The branch is published and ready for ADO PR review. The terminal history is the learner's audit trail.")}>The branch is published and ready for ADO PR review. The terminal history is the learner's audit trail.</p>
         </div>
-        <code${titleAttribute("git log --oneline")}>git log --oneline</code>
+        <code${titleAttribute("Open an ADO pull request")}>ADO PR ready</code>
       </article>
     `;
 }
@@ -11807,20 +11790,23 @@ function renderProcessMap(active) {
     <div class="process-summary ${isComplete ? "complete" : ""}">
       <div>
         <span class="section-kicker"${titleAttribute(isComplete ? "Process complete" : "Current location")}>${isComplete ? "Process complete" : "Current location"}</span>
-        <h3${titleAttribute(isComplete ? "Branch merged into main" : selected.title)}>${escapeHtml(isComplete ? "Branch merged into main" : selected.title)}</h3>
+        <h3${titleAttribute(isComplete ? "Branch published for PR" : selected.title)}>${escapeHtml(isComplete ? "Branch published for PR" : selected.title)}</h3>
       </div>
       <p${titleAttribute(
         isComplete
-          ? "The repository now has main, a feature branch, and a commit that main reached through a fast-forward merge."
+          ? "The local branch has a focused commit and the branch is published to origin for ADO pull request review."
           : selected.detail
       )}>${escapeHtml(
         isComplete
-          ? "The repository now has main, a feature branch, and a commit that main reached through a fast-forward merge."
+          ? "The local branch has a focused commit and the branch is published to origin for ADO pull request review."
           : selected.detail
       )}</p>
-      <code${titleAttribute(isComplete ? "git log --oneline" : selectedCommand.cmd)}>${escapeHtml(isComplete ? "git log --oneline" : selectedCommand.cmd)}</code>
+      <code${titleAttribute(isComplete ? "ADO PR ready" : selectedCommand.cmd)}>${escapeHtml(isComplete ? "ADO PR ready" : selectedCommand.cmd)}</code>
     </div>
-    ${renderBranchBuilder(active)}
+    <details class="visual-branching-note guided-graph-note">
+      <summary>Optional graph mental model</summary>
+      <span>Use the Visual Branching Trainer for commit graph movement. This Delta lab stays focused on realistic file, branch, push, and PR readiness workflow.</span>
+    </details>
     <div class="process-rail" style="--step-count: ${total}">
       ${active.commands
         .map((command, index) => {
@@ -12870,33 +12856,13 @@ function guidedCommandMatchesExpected(command, expected) {
     return true;
   }
 
-  if (expectedNormalized.startsWith("git commit -m ") && normalized.startsWith("git commit -m ")) {
-    return true;
+  if (expectedNormalized.startsWith("git config ") && normalized.startsWith("git config ")) {
+    return expectedNormalized.includes("user.name")
+      ? normalized.includes("user.name")
+      : expectedNormalized.includes("user.email")
+        ? normalized.includes("user.email")
+        : normalized === expectedNormalized;
   }
-
-  if (expectedNormalized.startsWith("git push ") && normalized.startsWith("git push")) {
-    return true;
-  }
-
-  if (expectedNormalized === "git pull" && normalized.startsWith("git pull")) {
-    return true;
-  }
-
-    if (expectedNormalized === "git remote -v" && normalized.startsWith("git remote")) {
-      return true;
-    }
-
-    if (expectedNormalized.startsWith("git config ") && normalized.startsWith("git config ")) {
-      return expectedNormalized.includes("user.name")
-        ? normalized.includes("user.name")
-        : expectedNormalized.includes("user.email")
-          ? normalized.includes("user.email")
-          : normalized === expectedNormalized;
-    }
-
-    if (expectedNormalized.startsWith("git clone ") && normalized.startsWith("git clone ")) {
-      return true;
-    }
 
   return false;
 }

@@ -1,5 +1,5 @@
 ﻿import { existsSync, readFileSync, statSync } from "node:fs";
-import { extname, resolve } from "node:path";
+import { dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -10,6 +10,11 @@ const requiredFiles = [
   "README.md",
   "AGENTS.md",
   "assets/delta-utilities-logo.png",
+  "modules/README.md",
+  "modules/git/README.md",
+  "modules/git/visual-branching/index.html",
+  "modules/tools/README.md",
+  "modules/languages/README.md",
   "docs/README.md",
   "docs/LEARNER_QUICKSTART.md",
   "docs/FACILITATOR_GUIDE.md",
@@ -35,9 +40,13 @@ function requireFile(path) {
 
 requiredFiles.forEach(requireFile);
 
-const indexPath = localPath("index.html");
-if (existsSync(indexPath)) {
-  const html = readFileSync(indexPath, "utf8");
+function checkHtmlReferences(path) {
+  const htmlPath = localPath(path);
+  if (!existsSync(htmlPath)) {
+    return;
+  }
+
+  const html = readFileSync(htmlPath, "utf8");
   const referencePattern = /\b(?:src|href)=["']([^"']+)["']/gi;
   const localReferences = [...html.matchAll(referencePattern)]
     .map((match) => match[1].trim())
@@ -46,12 +55,15 @@ if (existsSync(indexPath)) {
 
   localReferences.forEach((reference) => {
     const cleanReference = reference.split(/[?#]/, 1)[0];
-    const fullPath = localPath(cleanReference);
+    const fullPath = resolve(dirname(htmlPath), cleanReference);
     if (!existsSync(fullPath)) {
-      errors.push(`Broken local reference in index.html: ${reference}`);
+      errors.push(`Broken local reference in ${path}: ${reference}`);
     }
   });
 }
+
+checkHtmlReferences("index.html");
+checkHtmlReferences("modules/git/visual-branching/index.html");
 
 const appPath = localPath("app.js");
 if (existsSync(appPath)) {
