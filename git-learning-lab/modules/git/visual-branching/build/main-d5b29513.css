@@ -2483,3 +2483,44 @@ body.deltaTheme.deltaLightMode .moduleHeader {
     justify-content: flex-start;
   }
 }
+
+/* Laptop-height overflow fix for Delta wrapper */
+body.deltaTheme {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.deltaTheme .appShell {
+  min-height: 100dvh;
+}
+
+body.deltaTheme #learningWorkspace {
+  flex: 1 1 auto;
+  overflow: visible;
+}
+
+body.deltaTheme #interfaceWrapper {
+  flex: 1 1 auto;
+  overflow: visible;
+}
+
+@media (max-height: 920px) {
+  body.deltaTheme .moduleHeader {
+    padding: 18px 22px 14px;
+  }
+
+  body.deltaTheme .moduleBrandCopy h1 {
+    font-size: 2.2rem;
+  }
+
+  body.deltaTheme #learningWorkspace {
+    padding: 14px 18px 18px;
+  }
+
+  body.deltaTheme #controls,
+  body.deltaTheme #mainVisSpace,
+  body.deltaTheme #goalPlaceholder {
+    min-height: 360px;
+  }
+}
