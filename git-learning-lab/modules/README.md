@@ -8,7 +8,7 @@ This folder is the modular curriculum home for the static learning platform. The
 | --- | --- | --- |
 | `git/` | Git workflow, branch visualization, PR readiness, recovery, and handoff practice | Ticket-to-PR, Visual Branching, Recovery Drills, Project Capsule, Repo Review Handoff |
 | `tools/` | Setup and practical use of work tools | Codex, VS Code |
-| `languages/` | Language-specific practice where syntax and platform behavior matter | Oracle SQL |
+| `languages/` | Language-specific practice where syntax and platform behavior matter | SQL Basics, Oracle SQL |
 | `archive/` | Retired module descriptions, scripts, and reusable fragments kept out of the active learner path | Old or demoted concepts only |
 
 ## Module Contract

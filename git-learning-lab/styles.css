@@ -118,6 +118,21 @@ summary:focus-visible,
   gap: 18px;
 }
 
+.brand-home-button {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.brand-home-button:hover h1,
+.brand-home-button:focus-visible h1 {
+  color: var(--blue);
+}
+
 .brand-title img {
   width: clamp(154px, 16vw, 230px);
   height: auto;
@@ -621,6 +636,39 @@ button:active {
   border-top: 1px solid var(--line);
 }
 
+.path-section-group:not([open]) > summary .path-section-meta em::before {
+  content: "Show path";
+}
+
+.path-section-group[open] > summary .path-section-meta em::before {
+  content: "Hide path";
+}
+
+.git-module-shell {
+  border-top: 5px solid var(--blue);
+}
+
+.git-module-shell > .path-section-body {
+  gap: 14px;
+  padding: 14px;
+  background: rgba(111, 147, 255, 0.05);
+}
+
+.git-module-shell:not([open]) > summary .path-section-meta em::before {
+  content: "Show module";
+}
+
+.git-module-shell[open] > summary .path-section-meta em::before {
+  content: "Hide module";
+}
+
+.git-module-subsection {
+  box-shadow: none;
+}
+
+.git-module-subsection > .path-section-body {
+  background: transparent;
+}
 
 .path-section-header {
   display: flex;
@@ -5073,7 +5121,125 @@ button.repo-tree-file {
 
 .sql-lesson-content {
   display: grid;
+  gap: 12px;
+}
+
+.sql-practice-brief {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(112, 231, 196, 0.1), rgba(111, 147, 255, 0.08)),
+    var(--surface-alt);
+}
+
+.sql-practice-header {
+  display: flex;
   gap: 14px;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.sql-practice-header h3 {
+  margin: 2px 0 4px;
+  color: var(--ink);
+  font-family: Rubik, Arial, sans-serif;
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+}
+
+.sql-practice-header p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.sql-practice-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.sql-practice-actions .sql-fill-button {
+  color: #07111f;
+  background: var(--mint);
+}
+
+.sql-practice-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.6fr);
+  gap: 12px;
+  min-width: 0;
+}
+
+.sql-query-card,
+.sql-context-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.sql-query-preview {
+  max-height: 180px;
+  overflow: auto;
+  padding: 10px 0;
+  border: 1px solid rgba(91, 126, 184, 0.35);
+  border-radius: 10px;
+  background: #07111f;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.sql-query-preview .sql-editor-line {
+  min-width: 0;
+}
+
+.sql-query-preview .sql-editor-line:hover {
+  background: rgba(111, 147, 255, 0.1);
+}
+
+.sql-query-preview .sql-editor-line code {
+  color: #dce7f7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sql-context-card dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.sql-context-card div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sql-context-card dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sql-context-card dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .sql-ide {
@@ -5444,6 +5610,16 @@ button.repo-tree-file {
 .sql-editor-line code {
   color: #d4d4d4;
   white-space: pre;
+}
+
+.sql-query-preview .sql-editor-line {
+  min-width: 0;
+}
+
+.sql-query-preview .sql-editor-line code {
+  color: #dce7f7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .sql-token.keyword {
@@ -6679,6 +6855,19 @@ button.repo-tree-file {
   }
 
   .resume-work-actions {
+    justify-content: flex-start;
+  }
+
+  .sql-practice-header,
+  .sql-practice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sql-practice-header {
+    display: grid;
+  }
+
+  .sql-practice-actions {
     justify-content: flex-start;
   }
 

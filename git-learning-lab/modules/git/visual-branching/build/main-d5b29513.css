@@ -1817,6 +1817,17 @@ body.deltaTheme .moduleHeaderBrand {
   min-width: 0;
 }
 
+body.deltaTheme .moduleBrandHome {
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+body.deltaTheme .moduleBrandHome:hover h1,
+body.deltaTheme .moduleBrandHome:focus-visible h1 {
+  color: #8cf2d1;
+}
+
 body.deltaTheme .moduleBrandLogo {
   width: 238px;
   max-width: 32vw;

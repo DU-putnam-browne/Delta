@@ -61,7 +61,7 @@ The guided cards show what to type. The app does not run real shell commands for
 | `modules/` | Module-owned learning assets and future extracted lesson content |
 | `modules/git/` | Git workflow modules and embedded Git trainers |
 | `modules/tools/` | Codex and VS Code tool modules |
-| `modules/languages/` | Language modules such as Oracle SQL |
+| `modules/languages/` | Language modules such as SQL Basics and Oracle SQL |
 | `modules/MODULE_TEMPLATE.md` | Template for adding future modules without inventing a new structure |
 | `docs/` | Learner, facilitator, setup, troubleshooting, and release docs |
 | `scripts/` | Optional no-dependency local serve/check scripts |

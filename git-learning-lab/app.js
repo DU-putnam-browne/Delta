@@ -300,7 +300,7 @@ const modules = [
   },
   {
     id: "project-work",
-    title: "Project Capsule Workflow",
+    title: "Git Workflow 2: Project Capsule Workflow",
     level: "Beginner",
     time: "45 min",
     description:
@@ -1390,32 +1390,32 @@ const oracleSqlTables = {
   }
 };
 
-const oracleSqlLab = {
-  id: "oracle-sql-lab",
-  title: "Oracle SQL Lab",
+const sqlBasicsLab = {
+  id: "sql-basics-lab",
+  title: "SQL Basics",
   level: "Beginner",
-  time: "75 min",
+  time: "55 min",
   labTitle: "Interactive worksheet",
   description:
-    "A soup-to-nuts Oracle SQL module using repo-shaped CCS files: start with SELECT *, narrow columns, filter, aggregate, join, and build a review-ready query.",
+    "A no-assumptions SQL module: understand tables, rows, columns, SELECT, FROM, WHERE, ORDER BY, GROUP BY, JOIN, and a reviewable query.",
   repoRoot: ORACLE_REPO_ROOT,
   sections: [
     {
       id: "select-all",
-      title: "SELECT * From a File",
+      title: "What a Table Query Does",
       kicker: "Starting point",
       intro:
-        "In this lab, the repo file maps to a table-like object. Replace [file name] with the SQL file's table name, then inspect all rows.",
+        "SQL asks a table-shaped dataset for rows and columns. SELECT chooses columns; FROM names the table.",
       task: "Run the starter query and read the result grid before narrowing anything.",
       query: "SELECT *\nFROM ccs_emergency_response_activity_extract;",
-      objectives: ["Recognize the table/file target", "See every column", "Understand that SELECT * is inspection, not final output"]
+      objectives: ["Recognize rows and columns", "See every column", "Understand that SELECT * is inspection, not final output"]
     },
     {
       id: "select-columns",
-      title: "Choose Columns",
+      title: "Choose Specific Columns",
       kicker: "Projection",
       intro:
-        "Real reviewable SQL usually names the columns it needs. That keeps output stable and easier to validate.",
+        "A useful query usually names the columns it needs. That keeps output focused and easier to validate.",
       task: "Return only the identifiers, ZIP, status, and order date needed for the business question.",
       query:
         "SELECT activity_id, zip_code, activity_status, order_date\nFROM ccs_emergency_response_activity_extract;",
@@ -1434,10 +1434,10 @@ const oracleSqlLab = {
     },
     {
       id: "date-window",
-      title: "Add a Date Window",
-      kicker: "Oracle dates",
+      title: "Sort and Limit the Time Window",
+      kicker: "Dates and ORDER BY",
       intro:
-        "Oracle date filters should be explicit. In this lab, treat SYSDATE as 2026-05-12 so TRUNC(SYSDATE) - 7 means 2026-05-05.",
+        "Date filters answer a specific time-based question. In this lab, treat SYSDATE as 2026-05-12 so the last seven days starts on 2026-05-05.",
       task: "Limit the extract to the recent order window and sort newest first.",
       query:
         "SELECT activity_id, zip_code, activity_status, order_date\nFROM ccs_emergency_response_activity_extract\nWHERE order_date >= TRUNC(SYSDATE) - 7\nORDER BY order_date DESC;",
@@ -1478,6 +1478,115 @@ const oracleSqlLab = {
     }
   ]
 };
+
+const oracleSqlLab = {
+  id: "oracle-sql-lab",
+  title: "Oracle SQL Differences",
+  level: "Intermediate",
+  time: "60 min",
+  labTitle: "Oracle dialect worksheet",
+  description:
+    "For learners who know SQL basics: focus on Oracle-specific behavior, safer portable patterns, metadata, dates, NULLs, row limiting, hints, and hierarchy syntax.",
+  repoRoot: ORACLE_REPO_ROOT,
+  sections: [
+    {
+      id: "oracle-dictionary",
+      title: "Oracle Metadata Views",
+      kicker: "USER_ / ALL_ / DBA_",
+      intro:
+        "Oracle practitioners normally inspect metadata through data dictionary views such as USER_TABLES, ALL_TABLES, and DBA_TABLES. That differs from portability-first INFORMATION_SCHEMA workflows.",
+      task: "List visible Oracle-style table names from USER_TABLES.",
+      query: "SELECT table_name\nFROM user_tables\nORDER BY table_name\nFETCH FIRST 5 ROWS ONLY;",
+      objectives: ["Recognize Oracle dictionary views", "Separate SQL from client commands like DESC", "Know when metadata code is Oracle-specific"]
+    },
+    {
+      id: "oracle-empty-string-null",
+      title: "Empty String and NULL",
+      kicker: "NVL vs COALESCE",
+      intro:
+        "Oracle treats zero-length character strings as NULL. That makes NVL('', 'fallback') return fallback, while portable SQL engines often preserve the empty string.",
+      task: "Run the Oracle NULL example and explain why the result is fallback.",
+      query: "SELECT NVL('', 'fallback') AS nvl_result\nFROM dual;",
+      objectives: ["Know Oracle empty-string semantics", "Prefer COALESCE where portability matters", "Avoid hidden NULL assumptions"]
+    },
+    {
+      id: "oracle-date-nls",
+      title: "Explicit Date Formatting",
+      kicker: "NLS safety",
+      intro:
+        "Oracle DATE includes time to seconds, and implicit date parsing can depend on session NLS settings. Use explicit format models or ANSI literals.",
+      task: "Convert a known timestamp using TO_DATE and return it with TO_CHAR.",
+      query:
+        "SELECT TO_CHAR(TO_DATE('2026-05-13 14:30:00', 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS') AS d_txt\nFROM dual;",
+      objectives: ["Avoid NLS-sensitive parsing", "Remember Oracle DATE includes time", "Make date assumptions reviewable"]
+    },
+    {
+      id: "oracle-row-limit",
+      title: "Row Limiting",
+      kicker: "FETCH FIRST",
+      intro:
+        "ROWNUM is legacy Oracle row limiting. Modern Oracle supports OFFSET/FETCH, which is closer to standard SQL and clearer after ORDER BY.",
+      task: "Return the first three activity rows after sorting.",
+      query:
+        "SELECT activity_id, zip_code, order_date\nFROM ccs_emergency_response_activity_extract\nORDER BY order_date DESC\nFETCH FIRST 3 ROWS ONLY;",
+      objectives: ["Use FETCH FIRST for readable limits", "Avoid accidental ROWNUM-before-sort bugs", "Keep examples modern unless legacy code forces otherwise"]
+    },
+    {
+      id: "oracle-legacy-join",
+      title: "Legacy Join Syntax",
+      kicker: "Avoid (+)",
+      intro:
+        "Oracle still supports the legacy outer-join (+) operator, but new and reviewable SQL should use ANSI JOIN syntax.",
+      task: "Use ANSI JOIN rather than legacy (+) syntax for service agreement context.",
+      query:
+        "SELECT e.activity_id, e.zip_code, s.customer_class\nFROM ccs_emergency_response_activity_extract e\nJOIN ccs_device_service_agreement_extract s\n  ON e.service_point_id = s.service_point_id;",
+      objectives: ["Recognize (+) as legacy Oracle syntax", "Prefer ANSI JOIN", "Protect portability and readability"]
+    },
+    {
+      id: "oracle-hints",
+      title: "Optimizer Hints",
+      kicker: "Comment syntax",
+      intro:
+        "Oracle hints live inside comments such as /*+ INDEX(...) */ and can influence execution plans. They are not standard SQL and should be documented when used.",
+      task: "Inspect a hinted query and treat the hint as an Oracle-specific optimization decision.",
+      query:
+        "SELECT /*+ INDEX(e ccs_activity_ix) */ activity_id, zip_code\nFROM ccs_emergency_response_activity_extract e\nWHERE activity_status = 'OPEN';",
+      objectives: ["Recognize hint syntax", "Avoid using hints as a first resort", "Document optimizer-specific choices"]
+    },
+    {
+      id: "oracle-hierarchy",
+      title: "Hierarchies",
+      kicker: "CONNECT BY",
+      intro:
+        "CONNECT BY is Oracle-native hierarchy syntax. Recursive WITH is the standards-nearer pattern, but CONNECT BY still appears in older Oracle code.",
+      task: "Run a small CONNECT BY hierarchy and identify why it is Oracle-specific.",
+      query:
+        "WITH emp(id, parent_id, name) AS (\n  SELECT 1, NULL, 'CEO' FROM dual UNION ALL\n  SELECT 2, 1, 'VP' FROM dual UNION ALL\n  SELECT 3, 2, 'Mgr' FROM dual\n)\nSELECT LPAD(' ', 2*(LEVEL-1)) || name AS tree\nFROM emp\nSTART WITH parent_id IS NULL\nCONNECT BY PRIOR id = parent_id;",
+      objectives: ["Recognize CONNECT BY", "Know recursive WITH is the portable direction", "Flag hierarchy syntax during migration review"]
+    },
+    {
+      id: "oracle-portability-review",
+      title: "Oracle Portability Review",
+      kicker: "Review checklist",
+      intro:
+        "The highest-risk Oracle portability patterns are concentrated: packages/synonyms, NVL/DECODE, empty strings, implicit conversions, NLS-sensitive dates, (+), hints, Flashback, CONNECT BY, and ROWNUM.",
+      task: "Review a query for Oracle-only assumptions and explain what should be kept, replaced, or documented.",
+      query:
+        "SELECT COALESCE(activity_status, 'UNKNOWN') AS status_label, COUNT(*) AS order_count\nFROM ccs_emergency_response_activity_extract\nGROUP BY COALESCE(activity_status, 'UNKNOWN')\nORDER BY order_count DESC;",
+      objectives: ["Classify portable core vs Oracle-only surface area", "Prefer CASE/COALESCE in application SQL", "Document version- or platform-specific choices"]
+    }
+  ]
+};
+
+const sqlLabs = [sqlBasicsLab, oracleSqlLab];
+
+function getSqlLabById(labId) {
+  return sqlLabs.find((lab) => lab.id === labId) || sqlBasicsLab;
+}
+
+function getActiveSqlLab() {
+  return getSqlLabById(state?.activeModuleId);
+}
 
 const lessons = [
   {
@@ -2363,6 +2472,103 @@ const oracleSqlRoundThreeQuizzes = [
   }
 ];
 
+const oracleSqlDifferenceChoiceQuizzes = [
+  {
+    question: "Which Oracle metadata view lists tables owned by the current user?",
+    options: ["USER_TABLES", "information_schema.tables", "sys.objects", "SHOW TABLES"],
+    answer: "USER_TABLES",
+    feedback: "Oracle everyday metadata work uses USER_/ALL_/DBA_ dictionary views."
+  },
+  {
+    question: "How does Oracle treat a zero-length string?",
+    options: ["As NULL", "As a single space", "As false", "As a syntax error"],
+    answer: "As NULL",
+    feedback: "This is a major portability hazard when moving SQL between engines."
+  },
+  {
+    question: "Which join style should new Oracle SQL prefer?",
+    options: ["ANSI JOIN", "Legacy (+)", "Comma-only joins", "Implicit joins in WHERE only"],
+    answer: "ANSI JOIN",
+    feedback: "Oracle supports legacy (+), but ANSI JOIN is clearer and more portable."
+  },
+  {
+    question: "Why should Oracle date parsing use explicit format models?",
+    options: ["NLS/session settings can affect implicit parsing", "Dates cannot be filtered", "Oracle DATE has no time", "ORDER BY requires it"],
+    answer: "NLS/session settings can affect implicit parsing",
+    feedback: "Explicit TO_DATE/TO_CHAR format models make assumptions reviewable."
+  },
+  {
+    question: "What is an Oracle optimizer hint?",
+    options: ["A comment-positioned instruction such as /*+ INDEX(...) */", "A mandatory WHERE clause", "A Git commit message", "A portable SQL standard"],
+    answer: "A comment-positioned instruction such as /*+ INDEX(...) */",
+    feedback: "Hints are Oracle-specific optimizer control and should be documented."
+  }
+];
+
+const oracleSqlDifferenceRoundTwoQuizzes = [
+  {
+    question: "Fill in the Oracle data dictionary view for current user's tables.",
+    answer: "USER_TABLES",
+    placeholder: "USER_...",
+    feedback: "USER_TABLES is common Oracle metadata vocabulary."
+  },
+  {
+    question: "Fill in the Oracle-specific NULL replacement function shown in the lab.",
+    answer: "NVL",
+    placeholder: "Function name",
+    feedback: "NVL is Oracle-specific; COALESCE is the safer portable default."
+  },
+  {
+    question: "Fill in the modern row-limiting clause.",
+    answer: "FETCH FIRST 3 ROWS ONLY",
+    placeholder: "FETCH ...",
+    feedback: "FETCH FIRST is clearer than many legacy ROWNUM patterns."
+  },
+  {
+    question: "Fill in the Oracle-native hierarchy phrase.",
+    answer: "CONNECT BY",
+    placeholder: "CONNECT ...",
+    feedback: "CONNECT BY appears in Oracle hierarchy queries; recursive WITH is more portable."
+  },
+  {
+    question: "Fill in the safer portable alternative to NVL for application SQL.",
+    answer: "COALESCE",
+    placeholder: "Function name",
+    feedback: "COALESCE is standard-oriented and usually preferred when portability matters."
+  }
+];
+
+const oracleSqlDifferenceRoundThreeQuizzes = [
+  {
+    question: "Type the query that lists Oracle user-owned table metadata.",
+    acceptedAnswers: ["select table_name from user_tables", "select table_name from user_tables fetch first 5 rows only"],
+    answerLabel: "SELECT table_name FROM user_tables",
+    placeholder: "SELECT table_name FROM ...",
+    feedback: "USER_TABLES is Oracle-specific metadata vocabulary."
+  },
+  {
+    question: "Type the Oracle expression showing empty string behaves as NULL.",
+    acceptedAnswers: ["select nvl('', 'fallback') as nvl_result from dual", "select nvl('', 'fallback') from dual"],
+    answerLabel: "SELECT NVL('', 'fallback') AS nvl_result FROM dual",
+    placeholder: "SELECT NVL...",
+    feedback: "Oracle returns fallback because the empty string is treated as NULL."
+  },
+  {
+    question: "Type the preferred modern row limit clause.",
+    acceptedAnswers: ["fetch first 3 rows only"],
+    answerLabel: "FETCH FIRST 3 ROWS ONLY",
+    placeholder: "FETCH ...",
+    feedback: "Prefer this over legacy ROWNUM unless maintaining legacy Oracle code."
+  },
+  {
+    question: "Type the portable null-handling function preferred over NVL.",
+    acceptedAnswers: ["coalesce", "coalesce()"],
+    answerLabel: "COALESCE",
+    placeholder: "Function name",
+    feedback: "COALESCE is the better default when SQL may need to move."
+  }
+];
+
 const conflictScenarios = [
   {
     id: "ccs-source-view",
@@ -2752,20 +2958,21 @@ function createVSCodeState() {
   };
 }
 
-function createSqlState() {
+function createSqlState(labId = sqlBasicsLab.id) {
+  const sqlLab = getSqlLabById(labId);
   return {
     ...createTrainingState("git-basics"),
     viewMode: "sql",
-    activeModuleId: oracleSqlLab.id,
+    activeModuleId: sqlLab.id,
     guidedStep: 0,
-    cwd: oracleSqlLab.repoRoot,
+    cwd: sqlLab.repoRoot,
     sqlSection: 0,
     sqlWorksheet: createSqlWorksheetState(),
-    quizSession: createQuizSession(oracleSqlLab.id),
+    quizSession: createQuizSession(sqlLab.id),
     terminal: [
       {
         type: "note",
-        text: "Oracle SQL worksheet ready. Start with: SELECT * FROM ccs_emergency_response_activity_extract"
+        text: `${sqlLab.title} worksheet ready. Start with: ${singleLineSql(sqlLab.sections[0]?.query || "SELECT * FROM ccs_emergency_response_activity_extract")}`
       },
       {
         type: "note",
@@ -3383,6 +3590,20 @@ function openHowToModal() {
   }
 
   renderHowToModalContent();
+  openModalShell(modal);
+}
+
+function openCapstoneChecklistModal() {
+  const modal = document.getElementById("howToModal");
+  if (!modal) {
+    return;
+  }
+
+  renderCapstoneChecklistModalContent();
+  openModalShell(modal);
+}
+
+function openModalShell(modal) {
   const activeElement = document.activeElement;
   if (activeElement?.id) {
     modal.dataset.lastFocusSelector = `#${cssEscape(activeElement.id)}`;
@@ -3473,7 +3694,29 @@ function trapModalFocus(event) {
 }
 
 function renderHowToModalContent() {
-  const content = getHowToContent();
+  renderStructuredModalContent(getHowToContent());
+}
+
+function renderCapstoneChecklistModalContent() {
+  renderStructuredModalContent({
+    kicker: "Capstone milestones",
+    title: capstoneLab.title,
+    summary:
+      "Use these milestones when a learner needs a lightweight repo review and handoff checklist. This is a checklist, not a separate lab page.",
+    steps: capstoneLab.section.cards.map((card, index) => {
+      const deliverable = capstoneLab.deliverables[index] || "Review artifact";
+      return {
+        title: card.label,
+        body: `${deliverable}: ${capstoneDeliverableMeaning(deliverable)}`
+      };
+    }),
+    footerLabel: "Use when:",
+    footer:
+      "A learner has finished the applied Git workflow and needs to prove repo context, SQL lineage, data-quality thinking, and final review discipline."
+  });
+}
+
+function renderStructuredModalContent(content) {
   const kicker = document.getElementById("howToKicker");
   const title = document.getElementById("howToTitle");
   const summary = document.getElementById("howToSummary");
@@ -3782,11 +4025,12 @@ function getVSCodeHowToContent() {
 }
 
 function getSqlHowToContent() {
-  const section = oracleSqlLab.sections[state.sqlSection] || oracleSqlLab.sections[0];
+  const sqlLab = getActiveSqlLab();
+  const section = sqlLab.sections[state.sqlSection] || sqlLab.sections[0];
   const starter = section.query || "SELECT * FROM ccs_emergency_response_activity_extract;";
   return {
     kicker: "Active SQL lesson",
-    title: "How to use the Oracle SQL worksheet",
+    title: `How to use the ${sqlLab.title} worksheet`,
     summary: `${section.title}: ${section.intro || "Run SELECT queries against repo-shaped Oracle SQL files and inspect the result grid."}`,
     steps: [
       {
@@ -4144,9 +4388,7 @@ function handleAction(button) {
   }
 
   if (action === "open-capstone-lab") {
-    state = createCapstoneState();
-    saveState();
-    render();
+    openCapstoneChecklistModal();
     return;
   }
 
@@ -4158,8 +4400,16 @@ function handleAction(button) {
     return;
   }
 
-  if (action === "open-sql-lab") {
-    state = createSqlState();
+  if (action === "open-sql-basics-lab" || action === "open-sql-lab") {
+    state = createSqlState(sqlBasicsLab.id);
+    saveState();
+    render();
+    queuePrimaryInputFocus();
+    return;
+  }
+
+  if (action === "open-oracle-sql-lab") {
+    state = createSqlState(oracleSqlLab.id);
     saveState();
     render();
     queuePrimaryInputFocus();
@@ -4182,7 +4432,7 @@ function handleAction(button) {
         : isVSCodeMode()
           ? createVSCodeState()
           : isSqlMode()
-            ? createSqlState()
+            ? createSqlState(state.activeModuleId)
             : isPracticeMode()
               ? createAdvancedState()
               : state.inLesson
@@ -4372,7 +4622,7 @@ function handleAction(button) {
       action === "sql-section"
         ? Number(button.dataset.sqlSection)
         : current + (action === "sql-next" ? 1 : -1);
-    state.sqlSection = clampIndex(requested, oracleSqlLab.sections.length);
+    state.sqlSection = clampIndex(requested, getActiveSqlLab().sections.length);
     saveState();
     render();
     return;
@@ -5402,12 +5652,13 @@ function runVSCodeDevPlayback() {
 
 function runSqlDevPlayback() {
   ensureSqlWorksheetState();
-  const sectionIndex = clampIndex(state.sqlSection || 0, oracleSqlLab.sections.length);
-  const section = oracleSqlLab.sections[sectionIndex];
+  const sqlLab = getActiveSqlLab();
+  const sectionIndex = clampIndex(state.sqlSection || 0, sqlLab.sections.length);
+  const section = sqlLab.sections[sectionIndex];
   const steps = [];
 
-  for (let index = sectionIndex; index < oracleSqlLab.sections.length; index += 1) {
-    const command = singleLineSql(oracleSqlLab.sections[index].query);
+  for (let index = sectionIndex; index < sqlLab.sections.length; index += 1) {
+    const command = singleLineSql(sqlLab.sections[index].query);
     steps.push({
       command,
       run: () => {
@@ -5422,14 +5673,14 @@ function runSqlDevPlayback() {
           return false;
         }
         completeSqlSection(index, false);
-        state.sqlSection = clampIndex(index + 1, oracleSqlLab.sections.length);
+        state.sqlSection = clampIndex(index + 1, sqlLab.sections.length);
         return true;
       }
     });
   }
 
   startDevPlayback({
-    label: `Developer playback: running the Oracle SQL lab from ${section.title}.`,
+    label: `Developer playback: running the ${sqlLab.title} lab from ${section.title}.`,
     steps,
     onComplete: () => {
       appendTerminal("note", "Developer playback: SQL lab complete.");
@@ -5744,7 +5995,7 @@ function ensureSqlWorksheetState() {
   if (!state.sqlWorksheet.lastResult || typeof state.sqlWorksheet.lastResult !== "object") {
     state.sqlWorksheet.lastResult = createSqlWorksheetState().lastResult;
   }
-  state.sqlSection = clampIndex(state.sqlSection, oracleSqlLab.sections.length);
+  state.sqlSection = clampIndex(state.sqlSection, getActiveSqlLab().sections.length);
   return state.sqlWorksheet;
 }
 
@@ -5763,17 +6014,20 @@ function executeSqlCommand(command) {
   }
 
   if (normalized === "help" || normalized === "sql help") {
+    const sqlLab = getActiveSqlLab();
     return {
       type: "note",
       text:
         [
-          "Oracle SQL worksheet commands:",
+          `${sqlLab.title} worksheet commands:`,
           "  show files",
           "  show tables",
           "  describe ccs_emergency_response_activity_extract",
           "  SELECT * FROM ccs_emergency_response_activity_extract",
           "  SELECT activity_id, zip_code FROM ccs_emergency_response_activity_extract WHERE activity_status = 'OPEN'",
-          "  SELECT zip_code, COUNT(*) AS order_count FROM ccs_emergency_response_activity_extract GROUP BY zip_code"
+          "  SELECT zip_code, COUNT(*) AS order_count FROM ccs_emergency_response_activity_extract GROUP BY zip_code",
+          "  SELECT table_name FROM user_tables FETCH FIRST 5 ROWS ONLY",
+          "  SELECT NVL('', 'fallback') AS nvl_result FROM dual"
         ].join("\n")
     };
   }
@@ -5795,6 +6049,11 @@ function executeSqlCommand(command) {
     return describeSqlTable(text);
   }
 
+  const oracleSpecificResult = executeOracleSpecificTrainingQuery(text);
+  if (oracleSpecificResult) {
+    return oracleSpecificResult;
+  }
+
   if (normalized.includes("[file name]")) {
     return {
       type: "note",
@@ -5807,10 +6066,89 @@ function executeSqlCommand(command) {
   }
 
   if (normalized.startsWith("with ")) {
+    if (normalized.includes("connect by")) {
+      return executeOracleSpecificTrainingQuery(text);
+    }
     return executeSqlCteQuery(text);
   }
 
   return executeSqlSelectStatement(text);
+}
+
+function executeOracleSpecificTrainingQuery(command) {
+  const normalized = normalizeSqlStatement(command);
+
+  if (normalized.includes("from user_tables")) {
+    const result = createSqlResult(
+      ["TABLE_NAME"],
+      oracleSqlFiles.slice(0, 5).map((file) => ({ TABLE_NAME: file.table.toUpperCase() })),
+      "Oracle-style USER_TABLES metadata returned. INFORMATION_SCHEMA is the portability-oriented pattern in many other systems."
+    );
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  }
+
+  if (normalized.includes("nvl(") && normalized.includes("fallback")) {
+    const result = createSqlResult(
+      ["NVL_RESULT", "PORTABILITY_NOTE"],
+      [{ NVL_RESULT: "fallback", PORTABILITY_NOTE: "Oracle treats empty string as NULL." }],
+      "Oracle NULL behavior demonstrated: NVL('', 'fallback') returns fallback."
+    );
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  }
+
+  if (normalized.includes("to_date(") && normalized.includes("to_char(")) {
+    const result = createSqlResult(
+      ["D_TXT"],
+      [{ D_TXT: "2026-05-13 14:30:00" }],
+      "Explicit format model used. Avoid implicit NLS-sensitive date parsing in reviewable Oracle SQL."
+    );
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  }
+
+  if (normalized.includes("/*+")) {
+    const result = createSqlResult(
+      ["ACTIVITY_ID", "ZIP_CODE", "ORACLE_NOTE"],
+      oracleSqlTables.ccs_emergency_response_activity_extract.rows
+        .filter((row) => row.ACTIVITY_STATUS === "OPEN")
+        .slice(0, 3)
+        .map((row) => ({
+          ACTIVITY_ID: row.ACTIVITY_ID,
+          ZIP_CODE: row.ZIP_CODE,
+          ORACLE_NOTE: "Hint recognized as Oracle-specific optimizer control."
+        })),
+      "Hint syntax recognized. Hints should be documented and used after query shape, indexes, and stats are reviewed."
+    );
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  }
+
+  if (normalized.includes("connect by")) {
+    const result = createSqlResult(
+      ["TREE"],
+      [{ TREE: "CEO" }, { TREE: "  VP" }, { TREE: "    Mgr" }],
+      "CONNECT BY hierarchy returned. Recursive WITH is the standards-nearer direction when portability matters."
+    );
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  }
+
+  if (normalized.includes("coalesce(") && normalized.includes("group by")) {
+    const rows = oracleSqlTables.ccs_emergency_response_activity_extract.rows;
+    const counts = new Map();
+    rows.forEach((row) => {
+      const key = row.ACTIVITY_STATUS || "UNKNOWN";
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    const resultRows = [...counts.entries()]
+      .map(([status, count]) => ({ STATUS_LABEL: status, ORDER_COUNT: count }))
+      .sort((a, b) => b.ORDER_COUNT - a.ORDER_COUNT || a.STATUS_LABEL.localeCompare(b.STATUS_LABEL));
+    const result = createSqlResult(
+      ["STATUS_LABEL", "ORDER_COUNT"],
+      resultRows,
+      "Portable review pattern returned. COALESCE is preferred over Oracle-only NVL when portability matters."
+    );
+    return { type: "success", text: formatSqlResultForTerminal(result), result };
+  }
+
+  return null;
 }
 
 function describeSqlTable(command) {
@@ -5853,7 +6191,7 @@ function executeSqlSelectStatement(command) {
   const rows = applySqlWhere(table.rows, command);
   const columns = parseSqlSelectedColumns(command, table.columns);
   try {
-    const projected = projectSqlRows(applySqlOrder(rows, command), columns);
+    const projected = projectSqlRows(applySqlRowLimit(applySqlOrder(rows, command), command), columns);
     const result = createSqlResult(columns, projected, `${projected.length} row${projected.length === 1 ? "" : "s"} returned from ${tableName}.`);
     return { type: "success", text: formatSqlResultForTerminal(result), result };
   } catch (error) {
@@ -5942,7 +6280,7 @@ function recordSqlQuery(command, result) {
   state.sqlWorksheet.queryLog.push({
     command,
     ok: result?.type !== "error",
-    section: oracleSqlLab.sections[state.sqlSection]?.id || ""
+    section: getActiveSqlLab().sections[state.sqlSection]?.id || ""
   });
   if (state.sqlWorksheet.queryLog.length > 40) {
     state.sqlWorksheet.queryLog = state.sqlWorksheet.queryLog.slice(-40);
@@ -5952,8 +6290,9 @@ function recordSqlQuery(command, result) {
     return;
   }
 
-  const sectionIndex = clampIndex(state.sqlSection, oracleSqlLab.sections.length);
-  const section = oracleSqlLab.sections[sectionIndex];
+  const sqlLab = getActiveSqlLab();
+  const sectionIndex = clampIndex(state.sqlSection, sqlLab.sections.length);
+  const section = sqlLab.sections[sectionIndex];
   if (!isSqlSectionSatisfied(section, command, result)) {
     return;
   }
@@ -5963,7 +6302,8 @@ function recordSqlQuery(command, result) {
 
 function completeSqlSection(sectionIndex, announce = false) {
   ensureSqlWorksheetState();
-  const section = oracleSqlLab.sections[sectionIndex];
+  const sqlLab = getActiveSqlLab();
+  const section = sqlLab.sections[sectionIndex];
   if (!section) {
     return;
   }
@@ -5975,10 +6315,10 @@ function completeSqlSection(sectionIndex, announce = false) {
     }
   }
 
-  if (sectionIndex === state.sqlSection && sectionIndex < oracleSqlLab.sections.length - 1) {
+  if (sectionIndex === state.sqlSection && sectionIndex < sqlLab.sections.length - 1) {
     state.sqlSection = sectionIndex + 1;
     if (announce) {
-      appendTerminal("note", `Next SQL lesson: ${oracleSqlLab.sections[state.sqlSection].title}.`);
+      appendTerminal("note", `Next SQL lesson: ${sqlLab.sections[state.sqlSection].title}.`);
     }
   }
 }
@@ -6005,6 +6345,22 @@ function isSqlSectionSatisfied(section, command, result) {
       return normalized.includes(" join ") && normalized.includes("ccs_device_service_agreement_extract") && normalized.includes("service_point_id");
     case "cte-review":
       return normalized.startsWith("with ") && normalized.includes("prior_week") && normalized.includes("count(") && normalized.includes("group by zip_code");
+    case "oracle-dictionary":
+      return normalized.includes("from user_tables");
+    case "oracle-empty-string-null":
+      return normalized.includes("nvl(") && normalized.includes("fallback");
+    case "oracle-date-nls":
+      return normalized.includes("to_date(") && normalized.includes("to_char(");
+    case "oracle-row-limit":
+      return hasStarterTable && normalized.includes("fetch first 3 rows only");
+    case "oracle-legacy-join":
+      return normalized.includes(" join ") && normalized.includes("ccs_device_service_agreement_extract") && normalized.includes("service_point_id");
+    case "oracle-hints":
+      return normalized.includes("/*+") && hasStarterTable;
+    case "oracle-hierarchy":
+      return normalized.includes("connect by");
+    case "oracle-portability-review":
+      return hasStarterTable && normalized.includes("coalesce(") && normalized.includes("group by");
     default:
       return false;
   }
@@ -6145,6 +6501,21 @@ function applySqlOrder(rows, command) {
       ? String(right ?? "").localeCompare(String(left ?? ""))
       : String(left ?? "").localeCompare(String(right ?? ""));
   });
+}
+
+function applySqlRowLimit(rows, command) {
+  const normalized = normalizeSqlStatement(command);
+  const fetchMatch = normalized.match(/fetch first\s+(\d+)\s+rows?\s+only/);
+  if (fetchMatch) {
+    return rows.slice(0, Number(fetchMatch[1]));
+  }
+
+  const rownumMatch = normalized.match(/rownum\s*<=\s*(\d+)/);
+  if (rownumMatch) {
+    return rows.slice(0, Number(rownumMatch[1]));
+  }
+
+  return rows;
 }
 
 function projectSqlRows(rows, columns) {
@@ -8199,39 +8570,53 @@ function renderPortal() {
   document.getElementById("portalView").innerHTML = `
     ${renderResumeWorkItemPanel(gitModule)}
     <div class="course-stack primary-course-stack">
-      <details class="path-section path-section-group" open>
+      <details class="path-section path-section-group git-module-shell">
         <summary class="path-section-header">
           <div>
-            <span class="section-kicker">Primary path</span>
-            <h2>Git fundamentals</h2>
-            <p>Start with visual Git movement before applying Delta's ticket-to-branch-to-PR workflow.</p>
+            <span class="section-kicker">Primary module</span>
+            <h2>Git Module</h2>
+            <p>Build Git fundamentals first, then apply the Delta ticket-to-branch-to-PR workflow.</p>
           </div>
           <div class="path-section-meta">
-            <span class="path-count">1 core trainer</span>
+            <span class="path-count">2 paths + optional drills</span>
             <em aria-hidden="true"></em>
           </div>
         </summary>
         <div class="path-section-body">
-          ${renderVisualBranchingCourseCard()}
-        </div>
-      </details>
-      <details class="path-section path-section-group" open>
-        <summary class="path-section-header">
-          <div>
-            <span class="section-kicker">Applied Delta workflow</span>
-            <h2>Ticket, branch, PR, and project capsule</h2>
-            <p>Use this after fundamentals. Ticket-to-PR is the basic SOP; Project Capsule builds on it for longer work.</p>
-          </div>
-          <div class="path-section-meta">
-            <span class="path-count">2 required modules + optional drills</span>
-            <em aria-hidden="true"></em>
-          </div>
-        </summary>
-        <div class="path-section-body">
-          ${renderCourseCard(gitModule)}
-          ${projectModule ? renderCourseCard(projectModule) : ""}
-          ${renderPracticeCourseCard()}
-          ${renderCapstoneCourseCard()}
+          <details class="path-section path-section-group git-module-subsection">
+            <summary class="path-section-header">
+              <div>
+                <span class="section-kicker">Path 1</span>
+                <h2>Git fundamentals</h2>
+                <p>Start with visual Git movement before applying Delta's ticket-to-branch-to-PR workflow.</p>
+              </div>
+              <div class="path-section-meta">
+                <span class="path-count">1 core trainer</span>
+                <em aria-hidden="true"></em>
+              </div>
+            </summary>
+            <div class="path-section-body">
+              ${renderVisualBranchingCourseCard()}
+            </div>
+          </details>
+          <details class="path-section path-section-group git-module-subsection">
+            <summary class="path-section-header">
+              <div>
+                <span class="section-kicker">Path 2</span>
+                <h2>Applied Delta workflow</h2>
+                <p>Use this after fundamentals. Ticket-to-PR is the basic SOP; Project Capsule builds on it for longer work.</p>
+              </div>
+              <div class="path-section-meta">
+                <span class="path-count">2 modules + recovery button</span>
+                <em aria-hidden="true"></em>
+              </div>
+            </summary>
+            <div class="path-section-body">
+              ${renderCourseCard(gitModule)}
+              ${projectModule ? renderCourseCard(projectModule) : ""}
+              ${renderCapstoneCourseCard()}
+            </div>
+          </details>
         </div>
       </details>
     </div>
@@ -8280,17 +8665,25 @@ function renderGettingStartedCatalog(gitModule, projectModule) {
     <details class="catalog-group">
       <summary>
         <span>Languages</span>
-        <strong>Oracle SQL</strong>
-        <em>1 module</em>
+        <strong>SQL Basics and Oracle SQL</strong>
+        <em>2 modules</em>
       </summary>
       <div class="catalog-card-grid">
         ${renderCatalogCard({
-          label: "SQL",
+          label: "SQL Basics",
+          title: sqlBasicsLab.title,
+          description: "No prior SQL assumed: tables, rows, columns, SELECT, FROM, WHERE, GROUP BY, JOIN, and reviewable output.",
+          meta: `${sqlBasicsLab.time} · ${sqlBasicsLab.level}`,
+          action: "open-sql-basics-lab",
+          actionLabel: "Open basics"
+        })}
+        ${renderCatalogCard({
+          label: "Oracle",
           title: oracleSqlLab.title,
-          description: "Start with SELECT *, then filter, aggregate, join, and build a review-ready query.",
+          description: "For SQL-capable learners: Oracle metadata, NULLs, dates, row limiting, hints, hierarchy syntax, and portability hazards.",
           meta: `${oracleSqlLab.time} · ${oracleSqlLab.level}`,
-          action: "open-sql-lab",
-          actionLabel: "Open SQL Lab"
+          action: "open-oracle-sql-lab",
+          actionLabel: "Open Oracle SQL"
         })}
       </div>
     </details>
@@ -8495,6 +8888,8 @@ function renderPortalStepButton(step, primary = false) {
 
 function renderCourseCard(module) {
   const complete = isLabComplete(module.id);
+  const includeRecoveryDrills = module.id === "project-work";
+  const recoveryComplete = isLabComplete("practice");
   return `
     <article class="course-card ${complete ? "complete" : ""}">
       <span class="section-kicker">Training module</span>
@@ -8504,6 +8899,7 @@ function renderCourseCard(module) {
         <span class="pill blue">${escapeHtml(module.level)}</span>
         <span class="pill green">${escapeHtml(module.time)}</span>
         <span class="pill gray">${escapeHtml(module.labTitle)}</span>
+        ${includeRecoveryDrills ? '<span class="pill gray">Optional recovery drills</span>' : ""}
         ${complete ? '<span class="pill green">Complete</span>' : ""}
       </div>
       <div class="portal-actions">
@@ -8511,6 +8907,14 @@ function renderCourseCard(module) {
           <span aria-hidden="true">S</span>
           <span>${escapeHtml(complete ? "Review lesson" : module.startLabel || "Start Lesson")}</span>
         </button>
+        ${
+          includeRecoveryDrills
+            ? `<button class="icon-button secondary" type="button" data-action="open-simulator">
+                <span aria-hidden="true">P</span>
+                <span>${escapeHtml(recoveryComplete ? "Review recovery drills" : "Recovery drills")}</span>
+              </button>`
+            : ""
+        }
       </div>
     </article>
   `;
@@ -8537,7 +8941,7 @@ function renderCapstoneCourseCard() {
       <div class="portal-actions">
         <button class="icon-button primary-button" type="button" data-action="open-capstone-lab">
           <span aria-hidden="true">H</span>
-          <span>${escapeHtml(complete ? "Review checklist" : "Open checklist")}</span>
+          <span>${escapeHtml(complete ? "Review milestones" : "View milestones")}</span>
         </button>
       </div>
     </article>
@@ -8569,21 +8973,21 @@ function renderVSCodeCourseCard() {
   `;
 }
 
-function renderSqlCourseCard() {
+function renderSqlCourseCard(sqlLab = sqlBasicsLab) {
   return `
     <article class="course-card sql-course-card">
       <span class="section-kicker">Data module</span>
-      <h2>${escapeHtml(oracleSqlLab.title)}</h2>
-      <p>${escapeHtml(oracleSqlLab.description)}</p>
+      <h2>${escapeHtml(sqlLab.title)}</h2>
+      <p>${escapeHtml(sqlLab.description)}</p>
       <div class="course-meta">
-        <span class="pill blue">${escapeHtml(oracleSqlLab.level)}</span>
-        <span class="pill green">${escapeHtml(oracleSqlLab.time)}</span>
-        <span class="pill gray">${escapeHtml(oracleSqlLab.labTitle)}</span>
+        <span class="pill blue">${escapeHtml(sqlLab.level)}</span>
+        <span class="pill green">${escapeHtml(sqlLab.time)}</span>
+        <span class="pill gray">${escapeHtml(sqlLab.labTitle)}</span>
       </div>
       <div class="portal-actions">
-        <button class="icon-button primary-button" type="button" data-action="open-sql-lab">
+        <button class="icon-button primary-button" type="button" data-action="${escapeAttribute(sqlLab.id === oracleSqlLab.id ? "open-oracle-sql-lab" : "open-sql-basics-lab")}">
           <span aria-hidden="true">Q</span>
-          <span>Open SQL Lab</span>
+          <span>${escapeHtml(sqlLab.id === oracleSqlLab.id ? "Open Oracle SQL" : "Open SQL Basics")}</span>
         </button>
       </div>
     </article>
@@ -9562,12 +9966,13 @@ function renderVSCodeWorkspace() {
 function renderSqlWorkspace() {
   setGuidedPanelMode("sql", "Open SQL walkthrough and worked lesson guidance");
   ensureSqlWorksheetState();
-  const sectionIndex = clampIndex(state.sqlSection, oracleSqlLab.sections.length);
-  const section = oracleSqlLab.sections[sectionIndex];
-  const completedCount = oracleSqlLab.sections.filter((item) => state.sqlWorksheet.completedSections.includes(item.id)).length;
+  const sqlLab = getActiveSqlLab();
+  const sectionIndex = clampIndex(state.sqlSection, sqlLab.sections.length);
+  const section = sqlLab.sections[sectionIndex];
+  const completedCount = sqlLab.sections.filter((item) => state.sqlWorksheet.completedSections.includes(item.id)).length;
 
-  document.getElementById("lessonProgress").textContent = `${completedCount} of ${oracleSqlLab.sections.length} complete`;
-  document.getElementById("lessonList").innerHTML = oracleSqlLab.sections
+  document.getElementById("lessonProgress").textContent = `${completedCount} of ${sqlLab.sections.length} complete`;
+  document.getElementById("lessonList").innerHTML = sqlLab.sections
     .map((item, index) => {
       const complete = state.sqlWorksheet.completedSections.includes(item.id);
       return `
@@ -9581,7 +9986,7 @@ function renderSqlWorkspace() {
     .join("");
 
   document.getElementById("lessonDetail").innerHTML = `
-    <span class="section-kicker">Oracle SQL lab</span>
+    <span class="section-kicker">${escapeHtml(sqlLab.title)}</span>
     <h2>${escapeHtml(section.title)}</h2>
     <p>${escapeHtml(section.intro)}</p>
     <div class="lesson-task">
@@ -9592,13 +9997,13 @@ function renderSqlWorkspace() {
     <section class="lesson-glossary" aria-label="SQL terms">
       <div class="lesson-glossary-header">
         <span class="section-kicker">SQL glossary</span>
-        <strong>Plain-English Oracle SQL terms</strong>
+        <strong>${escapeHtml(sqlLab.id === oracleSqlLab.id ? "Oracle differences and review terms" : "Plain-English SQL terms")}</strong>
       </div>
       ${renderSqlGlossary()}
     </section>
     <div class="lesson-controls">
       <button class="text-button" type="button" data-action="sql-prev" ${sectionIndex === 0 ? "disabled" : ""}>Previous</button>
-      <button class="text-button" type="button" data-action="sql-next" ${sectionIndex === oracleSqlLab.sections.length - 1 ? "disabled" : ""}>Next</button>
+      <button class="text-button" type="button" data-action="sql-next" ${sectionIndex === sqlLab.sections.length - 1 ? "disabled" : ""}>Next</button>
     </div>
   `;
 
@@ -9606,8 +10011,8 @@ function renderSqlWorkspace() {
   document.getElementById("workingZone").innerHTML = "";
   document.getElementById("stagingZone").innerHTML = "";
   document.getElementById("repositoryZone").innerHTML = "";
-  document.getElementById("guidedTitle").textContent = "Oracle SQL Worksheet";
-  document.getElementById("guidedProgress").textContent = `Section ${sectionIndex + 1} of ${oracleSqlLab.sections.length}`;
+  document.getElementById("guidedTitle").textContent = `${sqlLab.title} Worksheet`;
+  document.getElementById("guidedProgress").textContent = `Section ${sectionIndex + 1} of ${sqlLab.sections.length}`;
   document.querySelector(".guided-panel .section-kicker").textContent = "Interactive SQL";
   document.getElementById("processMap").innerHTML = renderSqlLessonContent(sectionIndex);
   document.getElementById("guidedCommands").innerHTML = renderSqlCommandPalette(section);
@@ -9622,72 +10027,49 @@ function renderSqlWorkspace() {
 }
 
 function renderSqlLessonContent(sectionIndex) {
-  const section = oracleSqlLab.sections[sectionIndex] || oracleSqlLab.sections[0];
+  const sqlLab = getActiveSqlLab();
+  const section = sqlLab.sections[sectionIndex] || sqlLab.sections[0];
+  const tableName = resolveSqlTableName(section.query);
+  const activeFile = oracleSqlFiles.find((file) => file.table === tableName) || oracleSqlFiles[0];
   return `
     <div class="sql-lesson-content">
-      <section class="sql-ide" aria-label="Mock Oracle SQL IDE">
-        <div class="sql-ide-titlebar">
-          <span>Oracle SQL Developer for VS Code</span>
-          <div class="sql-title-meta">
-            <strong>ORACLE_DEV</strong>
-            <em>${escapeHtml(oracleSqlLab.repoRoot)}</em>
+      <section class="sql-practice-brief" aria-label="SQL lesson query brief">
+        <div class="sql-practice-header">
+          <div>
+            <span class="section-kicker">${escapeHtml(sqlLab.title)}</span>
+            <h3>${escapeHtml(section.title)}</h3>
+            <p>${escapeHtml(section.intro)}</p>
+          </div>
+          <div class="sql-practice-actions">
+            <button class="text-button sql-fill-button" type="button" data-command-fill="${escapeAttribute(singleLineSql(section.query))}">Type query</button>
+            <button class="text-button" type="button" data-command-fill="DESCRIBE ${escapeAttribute(tableName || oracleSqlFiles[0].table)}">Describe table</button>
           </div>
         </div>
-        <div class="sql-ide-menubar" aria-label="SQL IDE menu">
-          <span>File</span>
-          <span>Edit</span>
-          <span>Run</span>
-          <span>Explain Plan</span>
-          <span>Connections</span>
-          <span>Source Control</span>
-        </div>
-        <div class="sql-ide-body">
-          <nav class="sql-activity-bar" aria-label="IDE activity bar">
-            <span class="active" title="Explorer">EX</span>
-            <span title="Search">SR</span>
-            <span title="Source Control">SC</span>
-            <span title="SQL worksheet">SQL</span>
-          </nav>
-          <aside class="sql-file-tree" aria-label="Repository SQL files">
-            <div class="sql-file-tree-heading">
-              <span class="section-kicker">Connections</span>
-              <strong>ORACLE_DEV</strong>
-              <em>CCS / SQL / METERS</em>
-            </div>
-            <div class="sql-tree-node open"><span>v</span><strong>Oracle database</strong></div>
-            <div class="sql-tree-node indent open"><span>v</span><strong>CCS_METER</strong></div>
-            <div class="sql-tree-node indent-2"><span>></span><strong>Tables</strong></div>
-            <div class="sql-tree-node indent-2 open"><span>v</span><strong>Repository SQL files</strong></div>
-            ${oracleSqlFiles.map(renderSqlFileTreeItem).join("")}
-          </aside>
-          <section class="sql-editor-pane">
-            <div class="sql-editor-tabs">
-              <span class="active">${escapeHtml(sqlActiveFileName())}</span>
-              <span>Worksheet.sql</span>
-            </div>
-            <div class="sql-worksheet-toolbar" aria-label="Worksheet toolbar">
-              <button class="sql-run-button" type="button" data-command-fill="${escapeAttribute(singleLineSql(section.query))}">Run</button>
-              <button type="button" data-command-fill="DESCRIBE ${escapeAttribute(resolveSqlTableName(section.query) || oracleSqlFiles[0].table)}">Describe</button>
-              <button class="disabled" type="button" disabled>Explain</button>
-              <button class="disabled" type="button" disabled>Commit</button>
-              <button class="disabled" type="button" disabled>Rollback</button>
-              <span class="sql-connection-pill">ORACLE_DEV</span>
-              <span class="sql-connection-pill">CCS_METER</span>
-              <span class="sql-autocommit">Autocommit off</span>
-            </div>
-            <div class="sql-breadcrumbs">
-              <span>Oracle</span>
-              <span>CCS</span>
-              <span>sql</span>
-              <span>meters</span>
-              <strong>${escapeHtml(sqlActiveFileName())}</strong>
-            </div>
-            <div class="sql-code-editor" role="textbox" aria-label="SQL worksheet text">
+        <div class="sql-practice-grid">
+          <article class="sql-query-card">
+            <span class="section-kicker">Lesson query</span>
+            <div class="sql-query-preview" role="textbox" aria-label="SQL lesson query">
               ${renderSqlEditorLines(section.query)}
             </div>
-          </section>
+          </article>
+          <article class="sql-context-card">
+            <span class="section-kicker">Context</span>
+            <dl>
+              <div>
+                <dt>Connection</dt>
+                <dd>Read-only simulator</dd>
+              </div>
+              <div>
+                <dt>Table</dt>
+                <dd>${escapeHtml(tableName || "lesson expression")}</dd>
+              </div>
+              <div>
+                <dt>Source file</dt>
+                <dd>${escapeHtml(activeFile?.path || sqlActiveFileName())}</dd>
+              </div>
+            </dl>
+          </article>
         </div>
-        ${renderSqlResultPanel()}
       </section>
       <section class="sql-helper-grid">
         <article>
@@ -9782,10 +10164,16 @@ function highlightSqlLine(line) {
 }
 
 function renderSqlCommandPalette(section) {
+  const sqlLab = getActiveSqlLab();
   const helpers = [
     { label: "Lesson query", command: section.query },
     { label: "Show repo files", command: "show files" },
-    { label: "Describe starter table", command: "DESCRIBE ccs_emergency_response_activity_extract" }
+    {
+      label: sqlLab.id === oracleSqlLab.id ? "Oracle metadata" : "Describe starter table",
+      command: sqlLab.id === oracleSqlLab.id
+        ? "SELECT table_name FROM user_tables FETCH FIRST 5 ROWS ONLY"
+        : "DESCRIBE ccs_emergency_response_activity_extract"
+    }
   ];
   return `
     <section class="sql-command-palette" aria-label="SQL query shortcuts">
@@ -9808,6 +10196,7 @@ function renderSqlCommandPalette(section) {
 
 function renderSqlTerminal(section) {
   ensureSqlWorksheetState();
+  const sqlLab = getActiveSqlLab();
   const form = document.getElementById("commandForm");
   const output = document.getElementById("terminalOutput");
   const history = document.getElementById("terminalHistory");
@@ -9818,9 +10207,9 @@ function renderSqlTerminal(section) {
   }
   panel?.classList.add("sql-terminal-panel");
 
-  document.querySelector(".terminal-panel .section-kicker").textContent = "Oracle SQL worksheet";
+  document.querySelector(".terminal-panel .section-kicker").textContent = `${sqlLab.title} worksheet`;
   document.querySelector(".terminal-panel h2").textContent = "Edit and run SQL statements";
-  document.querySelector(".terminal-note").innerHTML = `Try <code>SELECT * FROM ${escapeHtml(oracleSqlFiles[0].table)}</code> or <code>show files</code>`;
+  document.querySelector(".terminal-note").innerHTML = `Try <code>${escapeHtml(singleLineSql(section.query))}</code> or <code>show files</code>`;
   document.getElementById("promptLabel").textContent = "SQL";
   const runButton = form?.querySelector('button[data-action="run-command"]');
   if (runButton) {
@@ -9895,15 +10284,27 @@ function summarizeSqlRunnerMessage(text) {
 }
 
 function renderSqlGlossary() {
-  const terms = [
-    ["SELECT", "Chooses which columns appear in the output"],
-    ["FROM", "Names the file/table the rows come from"],
-    ["WHERE", "Filters rows before they reach the result"],
-    ["ORDER BY", "Sorts the visible result"],
-    ["GROUP BY", "Changes the result grain into one row per group"],
-    ["JOIN", "Adds context from another file/table using a key"],
-    ["CTE", "A named query step that starts with WITH"]
-  ];
+  const terms =
+    getActiveSqlLab().id === oracleSqlLab.id
+      ? [
+          ["USER_TABLES", "Oracle data dictionary view for tables owned by the current user"],
+          ["DUAL", "Oracle's one-row helper table for scalar expressions"],
+          ["NVL", "Oracle-specific null replacement function; COALESCE is more portable"],
+          ["NLS", "Session locale settings that can affect implicit date and text conversion"],
+          ["FETCH FIRST", "Modern row-limiting syntax supported by Oracle and closer to standard SQL"],
+          ["(+)", "Legacy Oracle outer-join operator; prefer ANSI JOIN"],
+          ["CONNECT BY", "Oracle-native hierarchy syntax"],
+          ["Hint", "Optimizer instruction embedded in a comment such as /*+ INDEX(...) */"]
+        ]
+      : [
+          ["SELECT", "Chooses which columns appear in the output"],
+          ["FROM", "Names the file/table the rows come from"],
+          ["WHERE", "Filters rows before they reach the result"],
+          ["ORDER BY", "Sorts the visible result"],
+          ["GROUP BY", "Changes the result grain into one row per group"],
+          ["JOIN", "Adds context from another file/table using a key"],
+          ["CTE", "A named query step that starts with WITH"]
+        ];
   return `
     <div class="glossary-table" role="table" aria-label="SQL glossary">
       <div class="glossary-row glossary-head" role="row">
@@ -12340,6 +12741,16 @@ function getQuizBank(moduleId = state?.activeModuleId || "git-basics", round = s
   if (moduleId === oracleSqlLab.id) {
     const sqlRoundItems =
       quizRound === 1
+        ? oracleSqlDifferenceChoiceQuizzes
+        : quizRound === 2
+          ? oracleSqlDifferenceRoundTwoQuizzes.map((quiz) => ({ type: "fill", ...quiz }))
+          : oracleSqlDifferenceRoundThreeQuizzes.map((quiz) => ({ type: "freeform", ...quiz }));
+    return normalizeQuizItems(sqlRoundItems, quizRound);
+  }
+
+  if (moduleId === sqlBasicsLab.id) {
+    const sqlRoundItems =
+      quizRound === 1
         ? oracleSqlChoiceQuizzes
         : quizRound === 2
           ? oracleSqlRoundTwoQuizzes.map((quiz) => ({ type: "fill", ...quiz }))
@@ -13073,13 +13484,17 @@ function loadState() {
           ? parsed.vscodeCli.installedExtensions
           : [];
         parsed.vscodeCli.missionLog = Array.isArray(parsed.vscodeCli.missionLog) ? parsed.vscodeCli.missionLog : [];
-        parsed.sqlSection = clampIndex(parsed.sqlSection, oracleSqlLab.sections.length);
+        if (parsed.viewMode === "sql" && !sqlLabs.some((lab) => lab.id === parsed.activeModuleId)) {
+          parsed.activeModuleId = sqlBasicsLab.id;
+        }
+        const parsedSqlLab = getSqlLabById(parsed.activeModuleId);
+        parsed.sqlSection = clampIndex(parsed.sqlSection, parsedSqlLab.sections.length);
         parsed.sqlWorksheet = {
           ...createSqlWorksheetState(),
           ...(parsed.sqlWorksheet && typeof parsed.sqlWorksheet === "object" ? parsed.sqlWorksheet : {})
         };
         parsed.sqlWorksheet.completedSections = Array.isArray(parsed.sqlWorksheet.completedSections)
-          ? parsed.sqlWorksheet.completedSections.filter((id) => oracleSqlLab.sections.some((section) => section.id === id))
+          ? parsed.sqlWorksheet.completedSections.filter((id) => parsedSqlLab.sections.some((section) => section.id === id))
           : [];
         parsed.sqlWorksheet.queryLog = Array.isArray(parsed.sqlWorksheet.queryLog) ? parsed.sqlWorksheet.queryLog : [];
         parsed.repoExplorerOpen = Boolean(parsed.repoExplorerOpen);
